@@ -1,0 +1,8 @@
+# IntelliJ project files
+.idea
+*.iml
+
+tequilla/settings_local.py
+__pycache__
+/media/
+/static
