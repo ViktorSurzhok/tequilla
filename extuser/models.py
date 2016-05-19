@@ -1,31 +1,24 @@
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group, Permission
 from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, email, password=None):
+    def create_user(self, phone, password=None):
         if not self.phone:
             raise ValueError('Номер телефона должен быть указан')
 
-        user = self.model(
-            email=UserManager.normalize_email(email),
-        )
-
+        user = self.model(phone=phone)
         user.set_password(password)
+        group = Group.objects.get(name='employee')
+        user.groups.add(group)
         user.save(using=self._db)
         return user
 
 
 class ExtUser(AbstractBaseUser, PermissionsMixin):
-    LEVEL_CHOICES = (
-        (1, 'Сотрудник'),
-        (2, 'Руководитель'),
-        (3, 'Координатор'),
-        (4, 'Директор')
-    )
     email = models.EmailField(
         'Электронная почта',
         max_length=255,
@@ -63,8 +56,6 @@ class ExtUser(AbstractBaseUser, PermissionsMixin):
         'Активен',
         default=False
     )
-    #todo: погуглить на тему доступов
-    level = models.PositiveSmallIntegerField('Уровень доступа', choices=LEVEL_CHOICES)
 
     # Этот метод обязательно должен быть определён
     def get_full_name(self):
