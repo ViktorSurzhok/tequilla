@@ -4,20 +4,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
-class UserManager(BaseUserManager):
-
-    def create_user(self, phone, password=None):
-        if not self.phone:
-            raise ValueError('Номер телефона должен быть указан')
-
-        user = self.model(phone=phone)
-        user.set_password(password)
-        group = Group.objects.get(name='employee')
-        user.groups.add(group)
-        user.save(using=self._db)
-        return user
-
-
 class ExtUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         'Электронная почта',
@@ -29,16 +15,14 @@ class ExtUser(AbstractBaseUser, PermissionsMixin):
         'Аватар',
         blank=True,
         null=True,
-        upload_to="user/avatar"
+        upload_to="avatar"
     )
-    firstname = models.CharField(
-        'Фамилия',
-        max_length=40,
-        null=True,
-        blank=True
-    )
-    lastname = models.CharField(
+    name = models.CharField(
         'Имя',
+        max_length=40
+    )
+    surname = models.CharField(
+        'Фамилия',
         max_length=40
     )
     phone = models.CharField(
@@ -59,18 +43,16 @@ class ExtUser(AbstractBaseUser, PermissionsMixin):
 
     # Этот метод обязательно должен быть определён
     def get_full_name(self):
-        return self.firstname + ' ' + self.lastname
+        return self.surname + ' ' + self.name
 
     def get_short_name(self):
-        return self.lastname
+        return self.surname
 
     def __str__(self):
-        return self.firstname + ' ' + self.lastname
+        return self.surname + ' ' + self.name
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
-
-    objects = UserManager()
 
     class Meta:
         verbose_name = 'Пользователь'

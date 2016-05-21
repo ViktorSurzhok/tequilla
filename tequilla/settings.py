@@ -23,7 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'extuser'
+    'extuser',
+    'wall'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -78,7 +79,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_URL = '/auth/'
+LOGIN_URL = '/profile/auth/'
 
 AUTH_USER_MODEL = 'extuser.ExtUser'
 

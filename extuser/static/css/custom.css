@@ -104,8 +104,6 @@ body.nav-sm .profile {
 }
 .profile_info {
   padding: 25px 10px 10px;
-  width: 65%;
-  float: left;
 }
 .profile_info span {
   font-size: 13px;
@@ -2025,8 +2023,8 @@ input.parsley-error, textarea.parsley-error, select.parsley-error {
   display: none;
 }
 .bad input, .bad select, .bad textarea {
-  border: 1px solid #CE5454;
-  box-shadow: 0 0 4px -2px #CE5454;
+  border: 1px solid #CE5454 !important;
+  box-shadow: 0 0 4px -2px #CE5454 !important;
   position: relative;
   left: 0;
   -moz-animation: .7s 1 shake linear;

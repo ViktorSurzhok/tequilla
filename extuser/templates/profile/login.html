@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Авторизация{% endblock %}
+{% block content %}
+    <div class="">
+        <a class="hiddenanchor" id="toregister"></a>
+        <a class="hiddenanchor" id="tologin"></a>
+
+        <div id="wrapper">
+            <div id="login" class="animate form">
+                <section class="login_content">
+                    <form method="POST" action="{% url 'profile:login' %}" id="login-form">
+                        {% csrf_token %}
+                        <h1>Авторизация</h1>
+                        {% if error %}
+                            <p class="parsley-error">Неверный номер телефона или пароль</p>
+                        {% endif %}
+                        <div>
+                            {{ login_form.phone }}
+                        </div>
+                        <div>
+                            {{ login_form.password }}
+                        </div>
+
+                        <div>
+                            <a class="btn btn-default submit" onclick="document.getElementById('login-form').submit()">Войти</a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="separator">
+
+                            <p class="change_link">
+                                <a href="#toregister" class="to_register"> Зарегистрироваться </a>
+                            </p>
+                            <div class="clearfix"></div>
+                        </div>
+                    </form>
+                    <!-- form -->
+                </section>
+                <!-- content -->
+            </div>
+            <div id="register" class="animate form">
+                <section class="login_content">
+                    {% if not registered %}
+                        <form method="POST" action="{% url 'profile:register' %}#toregister" id="register-form">
+                            {% csrf_token %}
+                            <h1>Регистрация</h1>
+                            {% for field in register_form %}
+                                <div{% if field.errors %} class="bad"{% endif %}>
+                                    {% if field.errors %}
+                                        <p class="parsley-error">
+                                            {% for error in field.errors %}
+                                                <strong>{{ error|escape }}</strong><br>
+                                            {% endfor %}
+                                        </p>
+                                    {% endif %}
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+
+                            <div>
+                                <a class="btn btn-default submit" onclick="document.getElementById('register-form').submit()">Зарегистрироваться</a>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="separator">
+
+                                <p class="change_link">Уже зарегистрированы?
+                                    <a href="#tologin" class="to_register"> Войти </a>
+                                </p>
+                                <div class="clearfix"></div>
+                            </div>
+                        </form>
+                        <!-- form -->
+                    {% else %}
+                        Вы успешно зарегистрировались, ожидайте когда вашу заявку подтвердят.
+                    {% endif %}
+                </section>
+                <!-- content -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
