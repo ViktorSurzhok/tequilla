@@ -1,13 +1,23 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from extuser.forms import LoginForm, UserCreationForm
+from extuser.forms import LoginForm, UserCreationForm, UserChangeForm
 from extuser.models import ExtUser
 from django.contrib.auth.models import Group
 
 
+@login_required
 def profile_edit(request):
-    return render(request, 'profile/edit.html', {})
+    if request.method == 'POST':
+        form = UserChangeForm(data=request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.INFO, 'Изменения сохранены.')
+    else:
+        form = UserChangeForm(instance=request.user)
+    return render(request, 'profile/edit.html', {'form': form})
 
 
 def auth_login(request):

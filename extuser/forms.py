@@ -55,23 +55,38 @@ class UserChangeForm(forms.ModelForm):
     видеть постоянных ошибок "Не заполнено поле password" при обновлении данных
     пользователя.
     """
-    password = ReadOnlyPasswordHashField(
-        widget=forms.PasswordInput,
-        required=False
-    )
 
     def save(self, commit=True):
         user = super(UserChangeForm, self).save(commit=False)
-        password = self.cleaned_data["password"]
-        if password:
-            user.set_password(password)
         if commit:
             user.save()
         return user
 
     class Meta:
         model = get_user_model()
-        fields = ['email', ]
+        fields = ('surname', 'name', 'gender', 'email', 'phone', 'vkontakte')
+
+        classes = 'form-control col-md-7 col-xs-12'
+        widgets = {
+            'surname': forms.TextInput(
+                attrs={'class': classes, 'required': True, 'data-parsley-id': '1'}
+            ),
+            'name': forms.TextInput(
+                attrs={'class': classes, 'required': True, 'data-parsley-id': '2'}
+            ),
+            'gender': forms.Select(
+                attrs={'class': classes, 'required': True, 'data-parsley-id': '3'}
+            ),
+            'email': forms.EmailInput(
+                attrs={'class': classes, 'data-parsley-id': '4'}
+            ),
+            'phone': forms.TextInput(
+                attrs={'class': classes, 'required': True, 'data-parsley-id': '5'}
+            ),
+            'vkontakte': forms.TextInput(
+                attrs={'class': classes, 'data-parsley-id': '6'}
+            ),
+        }
 
 
 class LoginForm(forms.Form):
