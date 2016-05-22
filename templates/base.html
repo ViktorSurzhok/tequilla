@@ -202,14 +202,6 @@
   <!-- chart js -->
   <script src="{% static 'js/chartjs/chart.min.js' %}"></script>
   <script src="{% static 'js/jquery.colorbox-min.js' %}"></script>
-  <script type="text/javascript">
-        $(document).ready(function(){
-            $('.thumbnails').each(function() {
-                var group = $(this).data('post-id');
-               $(".group-" + group).colorbox({rel:'group-' + group});
-            });
-        });
-    </script>
 
   <script src="{% static 'js/custom.js' %}"></script>
 

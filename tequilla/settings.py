@@ -108,6 +108,8 @@ MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
 
+DEFAULT_AVATAR = STATIC_URL + 'img/default_avatar.png'
+
 STATIC_DIR = os.path.join(BASE_DIR, 'static/')
 
 STATIC_ROOT = STATIC_DIR

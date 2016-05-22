@@ -46,9 +46,9 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
-                                <button type="submit" class="btn btn-success">Отправить</button>
+                                <button type="submit" class="btn btn-primary">Отправить</button>
                                 <input style="display: inline;" type="file" name="images[]" multiple
-                                       class="btn btn-primary" value="Отправить файлы">
+                                       class="btn btn-warning" value="Отправить файлы">
                             </div>
                         </div>
 
@@ -60,9 +60,13 @@
                                 <li>
                                     <div class="block">
                                         <div class="tags">
-                                            <a href="" class="tag">
-                                                <span>Entertainment</span>
-                                            </a>
+                                            {% if post.user.avatar %}
+                                                {% thumbnail post.user.avatar "85x85" as av %}
+                                                    <img src="{{ av.url }}">
+                                                {% endthumbnail %}
+                                            {% else %}
+                                                <img src="{{ post.user.get_default_avatar }}" style="width: 85px;">
+                                            {% endif %}
                                         </div>
                                         <div class="block_content">
                                             <h2 class="title">
@@ -86,6 +90,71 @@
                                                         </div>
                                                     {% endfor %}
                                                 </div>
+                                            {% endif %}
+                                            <button type="submit" data-post-id="{{ post.id }}" class="btn btn-success response-post">Ответить</button>
+                                            <div class="col-md-offset-1 response-post-form-{{ post.id }} response-post-form">
+                                                <form action="{% url 'wall:send_post' %}" data-parsley-validate="" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+                                                    {% csrf_token %}
+                                                    <div class="form-group">
+                                                        <input type="hidden" value="{{ post.id }}" name="parent_id">
+                                                        <div class="col-md-10 col-sm-10 col-xs-12">
+                                                            <textarea name="message" class="form-control" rows="3"
+                                                                      placeholder="Ваш ответ"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ln_solid"></div>
+                                                    <div class="form-group">
+                                                        <div class="col-md-10 col-sm-10 col-xs-12">
+                                                            <button type="submit" class="btn btn-primary">Отправить</button>
+                                                            <input style="display: inline;" type="file" name="images[]" multiple
+                                                                   class="btn btn-warning" value="Отправить файлы">
+                                                        </div>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                            {% if post.childrens %}
+                                                <ul class="list-unstyled timeline">
+                                                    {% for ch_post in post.childrens.all %}
+                                                        <li>
+                                                            <div class="block">
+                                                                <div class="tags">
+                                                                    {% if ch_post.user.avatar %}
+                                                                        {% thumbnail ch_post.user.avatar "85x85" as av %}
+                                                                            <img src="{{ av.url }}">
+                                                                        {% endthumbnail %}
+                                                                    {% else %}
+                                                                        <img src="{{ ch_post.user.get_default_avatar }}" style="width: 85px;">
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="block_content">
+                                                                    <h2 class="title">
+                                                                        <a>{{ ch_post.user.surname }} {{ ch_post.user.name }}</a>
+                                                                    </h2>
+                                                                    <div class="byline">
+                                                                        <span>{{ ch_post.created }}</span>
+                                                                    </div>
+                                                                    <p class="excerpt">{{ ch_post.text|linebreaks }}</p>
+                                                                    {% if ch_post.images %}
+                                                                        <div class="thumbnails" data-post-id="{{ ch_post.id }}">
+                                                                            {% for image in ch_post.images.all %}
+                                                                                <div class="thumbnail">
+                                                                                    <div class="image">
+                                                                                        {% thumbnail image.file "150x120" as im %}
+                                                                                            <a class="group-{{ ch_post.id }}" href="{{ image.file.url }}">
+                                                                                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                                                                            </a>
+                                                                                        {% endthumbnail %}
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
                                             {% endif %}
                                         </div>
                                     </div>

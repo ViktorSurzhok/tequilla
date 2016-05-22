@@ -2914,7 +2914,9 @@ a:focus {
 
 /* *********  /tabs  **************************** */
 
-
+.response-post-form {
+  display: none;
+}
 /* *********  timeline  **************************** */
 
 ul.timeline li {
@@ -2928,6 +2930,7 @@ ul.timeline li {
   overflow: visible;
   padding: 10px 15px;
   margin-left: 105px;
+  min-height: 110px;
 }
 .timeline.widget {
   min-width: 0;

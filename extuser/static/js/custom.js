@@ -322,3 +322,20 @@ if (typeof NProgress != 'undefined') {
         NProgress.done();
     });
 }
+
+// buttons response
+$(function() {
+    $('.response-post').on('click', function() {
+        $(this).hide();
+        var post_id = $(this).data('post-id');
+        $('.response-post-form-' + post_id).show();
+    });
+});
+
+// show images in colorbox
+$(function() {
+    $('.thumbnails').each(function() {
+        var group = $(this).data('post-id');
+        $(".group-" + group).colorbox({rel:'group-' + group, maxWidth:'850px', maxHeight:'700px'});
+    });
+});

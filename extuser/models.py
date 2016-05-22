@@ -4,6 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from model_utils.models import TimeStampedModel
 
+from tequilla import settings
+
 
 class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     GENDER_CHOICES = (
@@ -61,6 +63,9 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     def __str__(self):
         return self.surname + ' ' + self.name
+
+    def get_default_avatar(self):
+        return settings.DEFAULT_AVATAR
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['surname', 'name']
