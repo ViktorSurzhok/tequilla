@@ -172,6 +172,9 @@ body.nav-md .container.body .col-md-3.left_col {
 body .container.body .right_col {
   background: #F7F7F7;
 }
+.main_container .right_col {
+  min-height: 915px !important;
+}
 body.nav-md .container.body .right_col {
   padding: 10px 20px 0;
   margin-left: 230px;
@@ -3782,6 +3785,8 @@ ul.project_files li a i {
 .thumbnail .image {
   height: 120px;
   overflow: hidden;
+  display: table-cell;
+  vertical-align: middle;
 }
 .caption {
   padding: 9px 5px;
@@ -3791,7 +3796,7 @@ ul.project_files li a i {
   margin-bottom: 5px;
 }
 .thumbnail {
-  height: 190px;
+  display: inline-block;
   overflow: hidden;
 }
 .view {

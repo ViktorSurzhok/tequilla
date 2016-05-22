@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-
+{% load thumbnail %}
+{% block title %}Стена{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -34,23 +35,64 @@
                 </div>
                 <div class="x_content">
                     <br>
-                    <form id="demo-form2" data-parsley-validate="" class="form-horizontal form-label-left"
-                          novalidate="">
-
+                    <form action="{% url 'wall:send_post' %}" data-parsley-validate="" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
-                                <textarea class="form-control" rows="3" placeholder="Ваше сообщение"></textarea>
+                                <textarea name="message" class="form-control" rows="3"
+                                          placeholder="Ваше сообщение"></textarea>
                             </div>
                         </div>
                         <div class="ln_solid"></div>
                         <div class="form-group">
-                            <div class="col-md-10 col-sm-10 col-xs-12 col-md-offset-3">
+                            <div class="col-md-10 col-sm-10 col-xs-12">
                                 <button type="submit" class="btn btn-success">Отправить</button>
-                                <button type="submit" class="btn btn-primary">Отправить файлы</button>
+                                <input style="display: inline;" type="file" name="images[]" multiple
+                                       class="btn btn-primary" value="Отправить файлы">
                             </div>
                         </div>
 
                     </form>
+                    {% if posts %}
+                        <hr>
+                        <ul class="list-unstyled timeline">
+                            {% for post in posts %}
+                                <li>
+                                    <div class="block">
+                                        <div class="tags">
+                                            <a href="" class="tag">
+                                                <span>Entertainment</span>
+                                            </a>
+                                        </div>
+                                        <div class="block_content">
+                                            <h2 class="title">
+                                                <a>{{ post.user.surname }} {{ post.user.name }}</a>
+                                            </h2>
+                                            <div class="byline">
+                                                <span>{{ post.created }}</span>
+                                            </div>
+                                            <p class="excerpt">{{ post.text|linebreaks }}</p>
+                                            {% if post.images %}
+                                                <div class="thumbnails" data-post-id="{{ post.id }}">
+                                                    {% for image in post.images.all %}
+                                                        <div class="thumbnail">
+                                                            <div class="image">
+                                                                {% thumbnail image.file "150x120" as im %}
+                                                                    <a class="group-{{ post.id }}" href="{{ image.file.url }}">
+                                                                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                                                    </a>
+                                                                {% endthumbnail %}
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
         </div>

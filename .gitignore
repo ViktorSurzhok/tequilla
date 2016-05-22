@@ -6,3 +6,4 @@ tequilla/settings_local.py
 __pycache__
 /media/
 /static
+dump.rdb

@@ -10,7 +10,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>{% block title %}{% endblock %}</title>
+  <title>{% block title %}{% endblock %} | Tequilla Girls!</title>
 
   <!-- Bootstrap core CSS -->
 
@@ -18,6 +18,7 @@
 
   <link href="{% static 'fonts/css/font-awesome.min.css' %}" rel="stylesheet">
   <link href="{% static 'css/animate.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/colorbox.css' %}" rel="stylesheet">
 
   <!-- Custom styling plus plugins -->
   <link href="{% static 'css/custom.css' %}" rel="stylesheet">
@@ -200,6 +201,15 @@
   <script type="text/javascript" src="{% static 'js/datepicker/daterangepicker.js' %}"></script>
   <!-- chart js -->
   <script src="{% static 'js/chartjs/chart.min.js' %}"></script>
+  <script src="{% static 'js/jquery.colorbox-min.js' %}"></script>
+  <script type="text/javascript">
+        $(document).ready(function(){
+            $('.thumbnails').each(function() {
+                var group = $(this).data('post-id');
+               $(".group-" + group).colorbox({rel:'group-' + group});
+            });
+        });
+    </script>
 
   <script src="{% static 'js/custom.js' %}"></script>
 
