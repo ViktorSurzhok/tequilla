@@ -161,6 +161,8 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                        <!-- end posts -->
+                        {% include 'pagination.html' with page=posts %}
                     {% endif %}
                 </div>
             </div>

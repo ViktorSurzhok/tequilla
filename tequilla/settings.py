@@ -101,6 +101,8 @@ USE_TZ = True
 THUMBNAIL_DEBUG = True
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
 
+POST_COUNT_ON_WALL = 10
+
 
 # Static files (CSS, JavaScript, Images)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

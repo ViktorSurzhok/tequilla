@@ -1,12 +1,22 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from tequilla import settings
 from wall.models import Post, Photo
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 @login_required
 def index(request):
-    posts = Post.objects.filter(parent=None)
+    object_list = Post.objects.filter(parent=None)
+    paginator = Paginator(object_list, settings.POST_COUNT_ON_WALL)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
     return render(request, 'wall/index.html', {'posts': posts})
 
 
