@@ -1,9 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from extuser.forms import LoginForm, UserCreationForm, UserChangeForm
+from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm
 from extuser.models import ExtUser
 from django.contrib.auth.models import Group
 
@@ -21,7 +21,7 @@ def profile_edit(request):
 
 
 def auth_login(request):
-    if request.user is not None:
+    if request.user.is_authenticated():
         return redirect('wall_index')
     error = False
     if request.method == 'POST':
@@ -49,7 +49,7 @@ def auth_login(request):
 
 
 def register(request):
-    if request.user is not None:
+    if request.user.is_authenticated():
         return redirect('wall_index')
 
     registered = False
@@ -70,4 +70,34 @@ def register(request):
         request,
         'profile/login.html',
         {'register_form': register_form, 'login_form': LoginForm(), 'registered': registered}
+    )
+
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(data=request.POST, user=request.user)
+        if form.is_valid():
+            user = request.user
+            user.set_password(form.cleaned_data['new_password'])
+            user.save()
+            update_session_auth_hash(request, user)
+            form = ChangePasswordForm()
+            messages.add_message(request, messages.INFO, 'Пароль успешно изменен.')
+    else:
+        form = ChangePasswordForm()
+
+    return render(
+        request,
+        'profile/change_password.html',
+        {'form': form}
+    )
+
+
+@login_required
+def change_avatar(request):
+    return render(
+        request,
+        'profile/change_avatar.html',
+        {'user': request.user}
     )

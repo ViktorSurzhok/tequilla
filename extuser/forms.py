@@ -101,3 +101,39 @@ class LoginForm(forms.Form):
         label='Пароль',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Пароль'})
     )
+
+
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(
+        label='Текущий пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Текущий пароль', 'required': True})
+    )
+    new_password = forms.CharField(
+        label='Новый пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Новый пароль', 'required': True})
+    )
+    confirm_password = forms.CharField(
+        label='Повторите пароль',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Повторите пароль', 'required': True})
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        valid = self.user.check_password(self.cleaned_data['current_password'])
+        if not valid:
+            self.add_error('current_password', "Неверный текущий пароль.")
+        return valid
+
+    def clean(self):
+        if 'new_password' in self.cleaned_data:
+            if 'confirm_password' in self.cleaned_data:
+                if self.cleaned_data['new_password'] != self.cleaned_data['confirm_password']:
+                    self.add_error('confirm_password', 'Введённые пароли не совпадают')
+            else:
+                self.add_error('confirm_password', 'Обязательное поле')
+        else:
+            self.add_error('new_password', 'Обязательное поле')
+        return super().clean()

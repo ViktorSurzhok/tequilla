@@ -1,4 +1,5 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group, Permission
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group, Permission, \
+    UserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -53,6 +54,8 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     # true - мужской пол, false - женский
     gender = models.CharField('Пол', max_length=10, default='female', choices=GENDER_CHOICES)
+
+    objects = UserManager()
 
     # Этот метод обязательно должен быть определён
     def get_full_name(self):
