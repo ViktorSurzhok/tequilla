@@ -15,7 +15,7 @@
                     <a href="{% url 'profile:change_password' %}"><i class="fa fa-edit"></i> Смена пароля </a>
                 </li>
                 <li>
-                    <a href=""><i class="fa fa-edit"></i> Аватар </a>
+                    <a href="{% url 'profile:avatar' %}"><i class="fa fa-edit"></i> Аватар </a>
                 </li>
                 <li>
                     <a href=""><i class="fa fa-edit"></i> Мои фотоотчеты </a>
@@ -36,7 +36,7 @@
                     <a href=""><i class="fa fa-edit"></i> Штрафы </a>
                 </li>
                 <li>
-                    <a href=""><i class="fa fa-edit"></i> Сотрудники </a>
+                    <a href="{% url 'user_list' %}"><i class="fa fa-edit"></i> Сотрудники </a>
                 </li>
 
                 <li><a><i class="fa fa-home"></i> Отзывы и забавные случаи на работе <span class="fa fa-chevron-down"></span></a>

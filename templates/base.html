@@ -216,7 +216,8 @@
   <script type="text/javascript" src="{% static 'js/flot/curvedLines.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/flot/jquery.flot.resize.js' %}"></script>
 
-
+    {% block additional_js %}
+    {% endblock %}
   <!-- pace -->
   <script src="{% static 'js/pace/pace.min.js' %}"></script>
   <!-- /footer content -->

@@ -101,3 +101,13 @@ def change_avatar(request):
         'profile/change_avatar.html',
         {'user': request.user}
     )
+
+
+@login_required
+def user_list(request):
+    users = ExtUser.objects.all()
+    return render(
+        request,
+        'profile/user_list.html',
+        {'users': users}
+    )

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Сотрудники{% endblock %}
+{% block content %}
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Сотрудники
+                    <small>Всего сотрудников: {{ users.count }}</small>
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>
+                            <div>
+                                Аватар
+                            </div>
+                            <div class="col-md-7">
+                                  <select class="form-control">
+                                    <option></option>
+                                    <option>Есть</option>
+                                    <option>Нет</option>
+                                  </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Фамилия
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control" placeholder="">
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Имя
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control" placeholder="">
+                            </div>
+                        </th>
+                        <th>Операции</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for usr in users %}
+                        <tr>
+                            <td class="vert-align" scope="row">{{ forloop.counter }}</td>
+                            <td>
+                                <img src="{% if usr.avatar %}{{ usr.avatar.url }}{% else %}{{ usr.get_default_avatar }}{% endif %}" style="width: 80px;">
+                            </td>
+                            <td class="vert-align">{{ usr.surname }}</td>
+                            <td class="vert-align">{{ usr.name }}</td>
+                            <td class="vert-align"><a href=""><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
