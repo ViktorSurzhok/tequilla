@@ -1,0 +1,17 @@
+ {% for usr in users %}
+    <tr>
+        <td class="vert-align" scope="row">{{ forloop.counter }}</td>
+        <td>
+            <img src="{% if usr.avatar %}{{ usr.avatar.url }}{% else %}{{ usr.get_default_avatar }}{% endif %}" style="width: 80px;">
+        </td>
+        <td class="vert-align">{{ usr.surname }}</td>
+        <td class="vert-align">{{ usr.name }}</td>
+        <td class="vert-align"><a href=""><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
+    </tr>
+{% empty %}
+    <tr>
+        <td colspan="3">
+            Пользователи не найдены.
+        </td>
+    </tr>
+{% endfor %}

@@ -1,5 +1,36 @@
 {% extends 'base.html' %}
 {% block title %}Сотрудники{% endblock %}
+{% block additional_js %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            function getNewContent() {
+                // сбор данных фильтров
+                var avatar = $('#filter-avatar').val(),
+                    surname = $('#filter-surname').val(),
+                    name = $('#filter-name').val();
+
+                 var filters = '?avatar=' + avatar + '&surname=' + surname + '&name=' + name;
+                // запрос нового контента
+                $.ajax({
+                    url: '{{ filter_user_link }}' + filters,
+                    type: 'GET',
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function (data) {
+                        $('#user-list').html(data['users']);
+                    }
+                });
+            }
+
+            $('#filter-avatar').on('change', function() {
+                getNewContent();
+            });
+            $('#filter-surname, #filter-name').on('keyup', function() {
+                getNewContent();
+            });
+        });
+    </script>
+{% endblock %}
 {% block content %}
     <div class="col-md-12">
         <div class="x_panel">
@@ -23,10 +54,10 @@
                                 Аватар
                             </div>
                             <div class="col-md-7">
-                                  <select class="form-control">
-                                    <option></option>
-                                    <option>Есть</option>
-                                    <option>Нет</option>
+                                  <select class="form-control" id="filter-avatar">
+                                    <option value=""></option>
+                                    <option value="1">Есть</option>
+                                    <option value="0">Нет</option>
                                   </select>
                             </div>
                         </th>
@@ -35,7 +66,7 @@
                                 Фамилия
                             </div>
                             <div class="col-md-12">
-                              <input type="text" class="form-control" placeholder="">
+                              <input type="text" class="form-control" id="filter-surname">
                             </div>
                         </th>
                         <th>
@@ -43,24 +74,14 @@
                                 Имя
                             </div>
                             <div class="col-md-12">
-                              <input type="text" class="form-control" placeholder="">
+                              <input type="text" class="form-control" id="filter-name">
                             </div>
                         </th>
                         <th>Операции</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    {% for usr in users %}
-                        <tr>
-                            <td class="vert-align" scope="row">{{ forloop.counter }}</td>
-                            <td>
-                                <img src="{% if usr.avatar %}{{ usr.avatar.url }}{% else %}{{ usr.get_default_avatar }}{% endif %}" style="width: 80px;">
-                            </td>
-                            <td class="vert-align">{{ usr.surname }}</td>
-                            <td class="vert-align">{{ usr.name }}</td>
-                            <td class="vert-align"><a href=""><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
-                        </tr>
-                    {% endfor %}
+                    <tbody id="user-list">
+                        {% include 'users/_user_list.html' %}
                     </tbody>
                 </table>
 

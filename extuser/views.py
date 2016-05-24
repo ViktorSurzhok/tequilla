@@ -1,11 +1,18 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 
 from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm
 from extuser.models import ExtUser
 from django.contrib.auth.models import Group
+
+from django.db.models import Q
 
 
 @login_required
@@ -108,6 +115,34 @@ def user_list(request):
     users = ExtUser.objects.all()
     return render(
         request,
-        'profile/user_list.html',
-        {'users': users}
+        'users/user_list.html',
+        {'users': users, 'filter_user_link': 'http://' + request.get_host() + reverse('profile:user_filter')}
     )
+
+
+def user_filter(request):
+    if 'callback' in request.GET:
+        object_list = ExtUser.objects
+        filters = ['surname', 'name']
+        was_filtered = False
+        for filter_name in filters:
+            filter_value = request.GET.get(filter_name, '')
+            if filter_value:
+                filter_pack = {filter_name + '__icontains': filter_value}
+                object_list = object_list.filter(**filter_pack)
+                was_filtered = True
+        avatar = request.GET.get('avatar', '')
+        if avatar != '':
+            if avatar == '0':
+                object_list = object_list.filter(Q(avatar__isnull=True) | Q(avatar=''))
+            else:
+                object_list = object_list.filter(avatar__isnull=False).exclude(avatar__exact='')
+            was_filtered = True
+        if not was_filtered:
+            object_list = object_list.all()
+
+        rendered_blocks = {
+            'users': render_to_string('users/_user_list.html', {'users': object_list}),
+        }
+        data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
+        return HttpResponse(data, "text/javascript")
