@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Просмотр информации о сотруднике {{ user_info.get_full_name }}{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Просмотр информации о сотруднике {{ user_info.get_full_name }}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="row">
+                        <div class="col-md6 pull-left">
+                            <img src="{% if user_info.avatar %}{{ user_info.avatar.url }}{% else %}{{ user_info.get_default_avatar }}{% endif %}" style="max-width: 500px;">
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-striped">
+                              <tbody>
+                                <tr>
+                                  <td>Фамилия</td>
+                                  <td>{{ user_info.surname }}</td>
+                                </tr>
+                                <tr>
+                                  <td>Имя</td>
+                                  <td>{{ user_info.name }}</td>
+                                </tr>
+                                <tr>
+                                  <td>Пол</td>
+                                  <td>{{ user_info.get_gender_display }}</td>
+                                </tr>
+                              <tr>
+                                  <td>Действия</td>
+                                  <td><a href="#"><button><i class="fa fa-envelope"></i> Написать сообщение</button></a></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

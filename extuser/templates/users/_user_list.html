@@ -6,7 +6,7 @@
         </td>
         <td class="vert-align">{{ usr.surname }}</td>
         <td class="vert-align">{{ usr.name }}</td>
-        <td class="vert-align"><a href=""><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
+        <td class="vert-align"><a href="{% url 'user_detail' usr.id %}"><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
     </tr>
 {% empty %}
     <tr>

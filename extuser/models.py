@@ -26,6 +26,7 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     #avatar width
     #avatar crop data
+    #avatar_cropped
     name = models.CharField(
         'Имя',
         max_length=40

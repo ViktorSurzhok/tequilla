@@ -146,3 +146,13 @@ def user_filter(request):
         }
         data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
         return HttpResponse(data, "text/javascript")
+
+
+@login_required
+def user_detail(request, user_id):
+    user = ExtUser.objects.get(id=user_id)
+    return render(
+        request,
+        'users/user_detail.html',
+        {'user_info': user}
+    )
