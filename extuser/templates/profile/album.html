@@ -1,10 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %}Мои фотоотчеты{% endblock %}
+{% block content %}
+    <div class="row">
+        <a href="{% url 'profile:album_add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новый фотоотчет</button></a>
+        {% for album in user.albums.all %}
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>{{ album.name }}
+                            <small>Дата создания фотоотчета: {{ album.created }}</small>
+                        </h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li><a style="font-size: 17px;" href="{% url 'profile:album_edit' album.id %}"><i class="fa fa-edit"></i></a></li>
+                            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
 
-</body>
-</html>
+                        <div class="thumbnails"  data-post-id="{{ album.id }}">
+                            {% for photo in album.photos.all %}
+                                <div class="thumbnail margin-right">
+                                    <div class="image">
+                                         {% thumbnail photo.file "140x100" as im %}
+                                            <a class="group-{{ album.id }}" href="{{ photo.file.url }}">
+                                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                            </a>
+                                        {% endthumbnail %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                В этот фотоотчет еще не были загружены фотографии.
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

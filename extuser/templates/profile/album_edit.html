@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load staticfiles %}
+{% block title %}Мои фотоотчеты{% endblock %}
+{% block additional_js %}
+    <script src="{% static 'js/vendor/jquery.ui.widget.js' %}"></script>
+    <script src="{% static 'js/jquery.iframe-transport.js' %}"></script>
+    <script src="{% static 'js/jquery.fileupload.js' %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // клик по кнопке сохранения отправляет ajax-post запрос на сервер
+            $('#save-button').on('click', function () {
+                var album_name = $('#album-name').val();
+                // id новых фотографий
+                var new_photos = [];
+                $('.new-image').each(function () {
+                    new_photos.push($(this).data('image-id'));
+                });
+                $.ajax({
+                    url: {% if album.id %}"{% url 'profile:album_edit' album.id %}"
+                        {% else %}"{% url 'profile:album_add' %}"{% endif %},
+                    type: 'POST',
+                    data: {name: album_name, csrfmiddlewaretoken: '{{ csrf_token }}', new_photos: new_photos},
+                    success: function (data) {
+                        location = data['link'];
+                    }
+                });
+            });
+
+            //картинки удаляются через ajax
+            $('.thumbnails').on('click', '.remove-photo-link', function (e) {
+                e.preventDefault();
+                var href = $(this).attr('href'),
+                    that = $(this);
+                $.ajax({
+                    url: href,
+                    type: 'POST',
+                    success: function (data) {
+                        var dom = $('.photo-item-' + that.data('photo-item'));
+                        dom.hide('slow', function(){ dom.remove(); });
+                    }
+                });
+            });
+            $('#fileupload').fileupload({
+                dataType: 'json',
+                done: function (e, data) {
+                    $.each(data.result.images, function (index, file) {
+                        var html = '<div class="thumbnail-wrap photo-item-' + file['id'] + '"><div class="thumbnail new-image" data-image-id=' + file['id'] +
+                                '><div class="image"><img src="' + file['url'] + '" style="max-width:140px; max-height:100px;"></div></div>' +
+                                '<a data-photo-item="' + file['id'] + '" class="remove-photo-link" href="' + file['remove_link'] + '">Удалить</a></div>';
+                        $(html).appendTo('.thumbnails');
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>{% if album.id %}Редактирование фотоотчета {{ album.name }}{% else %}Добавление нового фотоотчета{% endif %}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form>
+                        <div class="form-group" style="margin-bottom: 50px;">
+                            <label class="control-label col-md-1" for="album-name">Название <span
+                                    class="required">*</span>
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="text" id="album-name" required="required"
+                                       class="form-control col-md-7 col-xs-12" value="{{ album.name }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input id="fileupload" type="file" name="files[]"
+                                       data-url="{% url 'profile:album_photoupload' %}" multiple>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="thumbnails" style="margin-top: 20px;">
+                                {% for photo in album.photos.all %}
+                                    <div class="thumbnail-wrap photo-item-{{ photo.id }}">
+                                        <div class="thumbnail">
+                                            <div class="image">
+                                                {% thumbnail photo.file "140x100" as im %}
+                                                    <a class="group-{{ album.id }}" href="{{ photo.file.url }}">
+                                                        <img src="{{ im.url }}" width="{{ im.width }}"
+                                                             height="{{ im.height }}">
+                                                    </a>
+                                                {% endthumbnail %}
+                                            </div>
+                                        </div>
+                                        <a data-photo-item="{{ photo.id }}" class="remove-photo-link"
+                                           href="{% url 'profile:album_photoremove' photo.id %}">Удалить</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 40px;">
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-success" id="save-button">Сохранить</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+{% endblock %}

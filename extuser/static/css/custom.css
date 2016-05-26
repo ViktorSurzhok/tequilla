@@ -5129,7 +5129,12 @@ body {
     vertical-align: middle;
 }
 /* Content */
-
+.thumbnails .margin-right {
+  margin-right: 10px;
+}
+.thumbnails .thumbnail-wrap {
+  display: table-cell;
+}
 .img-container, .img-preview {
   background-color: #f7f7f7;
   overflow: hidden;

@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'extuser',
     'wall',
     'sorl.thumbnail',
+    'django_cleanup',
 ]
 
 MIDDLEWARE_CLASSES = [
