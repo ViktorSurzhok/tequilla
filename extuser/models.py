@@ -1,10 +1,12 @@
 import os
 import random
+import urllib
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, Group, Permission, \
     UserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
+from django.core.files import File
 from django.db import models
 from model_utils.models import TimeStampedModel
 
@@ -16,49 +18,21 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
         ('female', 'Женский'),
         ('male', 'Мужской')
     )
-    email = models.EmailField(
-        'Электронная почта',
-        max_length=255,
-        blank=True
-    )
-    avatar = models.ImageField(
-        'Аватар',
-        blank=True,
-        null=True,
-        upload_to="avatar"
-    )
+    email = models.EmailField('Электронная почта', max_length=255, blank=True)
+    avatar = models.ImageField('Аватар', blank=True, null=True, upload_to="avatar")
     #avatar width
     #avatar crop data
     #avatar_cropped
-    name = models.CharField(
-        'Имя',
-        max_length=40
-    )
-    surname = models.CharField(
-        'Фамилия',
-        max_length=40
-    )
-    phone = models.CharField(
-        'Номер телефона',
-        max_length=30,
-        unique=True,
-        db_index=True
-    )
-    additional_phone = models.CharField(
-        'Доп. телефон',
-        max_length=30,
-        blank=True
-    )
-    vkontakte = models.CharField(
-        'ID вконтакте',
-        max_length=200,
-        blank=True
-    )
-    is_active = models.BooleanField(
-        'Активен',
-        default=False
-    )
-    # true - мужской пол, false - женский
+    name = models.CharField('Имя', max_length=40)
+    surname = models.CharField('Фамилия', max_length=40)
+    phone = models.CharField('Номер телефона', max_length=30, unique=True, db_index=True)
+    additional_phone = models.CharField('Доп. телефон', max_length=30, blank=True)
+    vkontakte = models.CharField('ID вконтакте', max_length=200, blank=True)
+    is_active = models.BooleanField('Активен', default=False)
+    pledge = models.CharField('Залог', blank=True, null=True, max_length=100)
+    coordinator = models.ForeignKey('self', blank=True, null=True)
+    pay_to_coord = models.BooleanField('Платить координатору', default=False)
+    old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
     gender = models.CharField('Пол', max_length=10, default='female', choices=GENDER_CHOICES)
 
     objects = UserManager()
@@ -90,6 +64,11 @@ class Album(TimeStampedModel):
     """
     name = models.CharField(max_length=255, verbose_name='Название')
     user = models.ForeignKey(ExtUser, related_name='albums')
+    old_id = models.PositiveIntegerField(
+        'ID из старой системы',
+        blank=True,
+        null=True
+    )
 
 
 class Photo(TimeStampedModel):
@@ -104,3 +83,9 @@ class Photo(TimeStampedModel):
     file = models.ImageField(upload_to=get_upload_path, verbose_name='Изображение')
     album = models.ForeignKey(Album, related_name='photos', blank=True, null=True)
     user = models.ForeignKey(ExtUser, related_name='photos')
+    url = models.CharField(max_length=255, blank=True, null=True)
+    old_id = models.PositiveIntegerField(
+        'ID из старой системы',
+        blank=True,
+        null=True
+    )

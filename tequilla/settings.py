@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'extuser',
     'wall',
+    'club',
     'sorl.thumbnail',
     'django_cleanup',
 ]

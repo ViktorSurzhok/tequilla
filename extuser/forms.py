@@ -5,8 +5,28 @@ from django.contrib.auth import get_user_model
 from extuser.models import ExtUser
 
 
-class UserCreationForm(forms.ModelForm):
+class UserImportForm(forms.ModelForm):
+    """
+    Форма добавления пользователя
+    """
 
+    def save(self, commit=True):
+        user = super(UserImportForm, self).save(commit=False)
+        user.set_password('secret' + str(self.cleaned_data['old_id']))
+        if commit:
+            user.save()
+
+        return user
+
+    class Meta:
+        model = ExtUser
+        exclude = ('avatar', 'password')
+
+
+class UserCreationForm(forms.ModelForm):
+    """
+    Форма добавления пользователя которая используется на странице регистрации
+    """
     password = forms.CharField(
         label='Пароль',
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Пароль'})
@@ -29,7 +49,9 @@ class UserCreationForm(forms.ModelForm):
             'surname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилия', 'required': True}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя', 'required': True}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Мобильный телефон (Без +7 и 8)', 'required': True}),
+            'phone': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Мобильный телефон (Без +7 и 8)', 'required': True}
+            ),
             'vkontakte': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'id Вконтакте'}),
         }
 
