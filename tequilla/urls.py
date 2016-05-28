@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^profile/', include('extuser.urls', namespace='profile')),
     url(r'^wall/', include('wall.urls', namespace='wall')),
     url(r'^clubs/', include('club.urls', namespace='club')),
+    url(r'^album/', include('album.urls', namespace='album')),
     url(r'^employee/(?P<user_id>\d+)/', user_detail, name='user_detail'),
     url(r'^employee/', user_list, name='user_list'),
     url(r'^clubs/', club_list, name='club_list'),

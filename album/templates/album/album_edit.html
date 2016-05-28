@@ -17,8 +17,7 @@
                     new_photos.push($(this).data('image-id'));
                 });
                 $.ajax({
-                    url: {% if album.id %}"{% url 'profile:album_edit' album.id %}"
-                        {% else %}"{% url 'profile:album_add' %}"{% endif %},
+                    url: {% if album.id %}"{% url 'album:edit' album.id %}" {% else %}"{% url 'album:add' %}"{% endif %},
                     type: 'POST',
                     data: {name: album_name, csrfmiddlewaretoken: '{{ csrf_token }}', new_photos: new_photos},
                     success: function (data) {
@@ -82,7 +81,7 @@
                         <div class="form-group">
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input id="fileupload" type="file" name="files[]"
-                                       data-url="{% url 'profile:album_photoupload' %}" multiple>
+                                       data-url="{% url 'album:photoupload' %}" multiple>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -100,7 +99,7 @@
                                             </div>
                                         </div>
                                         <a data-photo-item="{{ photo.id }}" class="remove-photo-link"
-                                           href="{% url 'profile:album_photoremove' photo.id %}">Удалить</a>
+                                           href="{% url 'album:photoremove' photo.id %}">Удалить</a>
                                     </div>
                                 {% endfor %}
                             </div>

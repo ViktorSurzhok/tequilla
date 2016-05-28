@@ -5,7 +5,8 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand, CommandError
 
 from extuser.forms import UserImportForm
-from extuser.models import ExtUser, Album, Photo
+from extuser.models import ExtUser
+from album.models import Album, Photo
 
 from tequilla import settings
 

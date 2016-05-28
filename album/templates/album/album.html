@@ -3,7 +3,7 @@
 {% block title %}Мои фотоотчеты{% endblock %}
 {% block content %}
     <div class="row">
-        <a href="{% url 'profile:album_add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новый фотоотчет</button></a>
+        <a href="{% url 'album:add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новый фотоотчет</button></a>
         {% for album in user.albums.all %}
             <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
@@ -12,7 +12,7 @@
                             <small>Дата создания фотоотчета: {{ album.created }}</small>
                         </h2>
                         <ul class="nav navbar-right panel_toolbox">
-                            <li><a style="font-size: 17px;" href="{% url 'profile:album_edit' album.id %}"><i class="fa fa-edit"></i></a></li>
+                            <li><a style="font-size: 17px;" href="{% url 'album:edit' album.id %}"><i class="fa fa-edit"></i></a></li>
                             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
                         </ul>
                         <div class="clearfix"></div>

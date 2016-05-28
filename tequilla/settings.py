@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'extuser',
     'wall',
     'club',
+    'album',
     'sorl.thumbnail',
     'django_cleanup',
 ]
