@@ -5,6 +5,7 @@ from django.db import models
 from model_utils.models import TimeStampedModel
 
 from extuser.models import ExtUser
+from tequilla import settings
 
 
 class Metro(TimeStampedModel):
@@ -19,6 +20,9 @@ class Metro(TimeStampedModel):
         null=True
     )
 
+    def __str__(self):
+        return self.name
+
 
 class City(TimeStampedModel):
     """
@@ -26,6 +30,9 @@ class City(TimeStampedModel):
     Клубы привязываются к городу.
     """
     name = models.CharField('Название', max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 class ClubType(TimeStampedModel):
@@ -49,25 +56,6 @@ class DayOfWeek(TimeStampedModel):
     name = models.CharField('Название', max_length=30)
     short_name = models.CharField('Короткое название', max_length=3)
     num = models.PositiveSmallIntegerField('Номер')
-
-
-class Photo(TimeStampedModel):
-    """
-    Класс фотографий.
-    Фотографии привязываются к клубу
-    """
-    def get_upload_path(self, filename):
-        club = str(self.club.id)
-        return os.path.join('clubs', '%s' % club, str(random.randint(1, 100000)) + '_' + filename)
-
-    file = models.ImageField(upload_to=get_upload_path, verbose_name='Изображение')
-    club = models.ForeignKey('Club', related_name='photos', blank=True, null=True)
-    url = models.CharField(max_length=255, blank=True, null=True)
-    old_id = models.PositiveIntegerField(
-        'ID из старой системы',
-        blank=True,
-        null=True
-    )
 
 
 class Club(TimeStampedModel):
@@ -94,3 +82,7 @@ class Club(TimeStampedModel):
     coordinator = models.ForeignKey(ExtUser, verbose_name='Координатор', related_name='coordinate_clubs')
     rate = models.CharField('Рейтинг', default='0', max_length=5)
     employee = models.ManyToManyField(ExtUser, verbose_name='Сотрудники', blank=True, related_name='clubs')
+    photo = models.ImageField('Фотография', blank=True, null=True, upload_to="club")
+
+    def get_default_photo(self):
+        return settings.DEFAULT_CLUB_PHOTO

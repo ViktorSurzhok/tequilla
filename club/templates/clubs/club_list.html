@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Заведения{% endblock %}
+{% block additional_js %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            function getNewContent() {
+                // сбор данных фильтров
+                var photo = $('#filter-photo').val(),
+                    city = $('#filter-city').val(),
+                    metro = $('#filter-metro').val(),
+                    street = $('#filter-street').val(),
+                    house = $('#filter-house').val(),
+                    name = $('#filter-name').val();
+
+                 var filters = '?photo=' + photo + '&city=' + city + '&metro=' + metro + '&street=' + street +
+                         '&house=' + house + '&name=' + name;
+                // запрос нового контента
+                $.ajax({
+                    url: '{{ filter_club_link }}' + filters,
+                    type: 'GET',
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function (data) {
+                        $('#club-list').html(data['clubs']);
+                    }
+                });
+            }
+
+            $('#filter-avatar').on('change', function() {
+                getNewContent();
+            });
+            $('#filter-surname, #filter-name').on('keyup', function() {
+                getNewContent();
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <a href="#"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новое заведение</button></a>
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Заведения
+                    <small>Всего активных клубов: {{ count }}</small>
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>
+                            <div>
+                                Фото
+                            </div>
+                            <div class="col-md-7">
+                                  <select class="form-control" id="filter-photo">
+                                    <option value=""></option>
+                                    <option value="1">Есть</option>
+                                    <option value="0">Нет</option>
+                                  </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Название
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control" id="filter-name">
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Город
+                            </div>
+                            <div class="col-md-12">
+                              <select class="form-control" id="filter-city">
+                                    <option value=""></option>
+                                    {% for item in city %}
+                                        <option value="{{ item.id }}">{{ item.name }}</option>
+                                    {% endfor %}
+                                  </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Метро
+                            </div>
+                            <div class="col-md-12">
+                              <select class="form-control" id="filter-metro">
+                                    <option value=""></option>
+                                    {% for item in metro %}
+                                        <option value="{{ item.id }}">{{ item.name }}</option>
+                                    {% endfor %}
+                                  </select>
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Улица
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control" id="filter-street">
+                            </div>
+                        </th>
+                        <th>
+                            <div>
+                                Дом
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control" id="filter-house">
+                            </div>
+                        </th>
+                        <th>
+                            <div>Сайт</div>
+                        </th>
+                        <th>
+                            <div>Рейтинг</div>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody id="club-list">
+                        {% include 'clubs/_club_list.html' %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

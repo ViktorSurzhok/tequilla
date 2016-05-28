@@ -1,7 +1,7 @@
 import json
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, update_session_auth_hash
+from django.contrib.auth import authenticate, login, update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, JsonResponse
@@ -54,6 +54,11 @@ def auth_login(request):
         'profile/login.html',
         {'login_form': login_form, 'error': error, 'register_form': UserCreationForm()}
     )
+
+
+@login_required
+def auth_logout(request):
+    logout(request)
 
 
 def register(request):
@@ -121,6 +126,7 @@ def user_list(request):
     )
 
 
+@login_required
 def user_filter(request):
     if 'callback' in request.GET:
         object_list = ExtUser.objects

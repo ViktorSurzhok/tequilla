@@ -1,0 +1,25 @@
+{% for club in clubs %}
+    <tr>
+        <td class="vert-align" scope="row">
+            {% if not club.is_active %}
+                <span style="color: red;">{{ forloop.counter }}</span>
+            {% endif %}
+        </td>
+        <td>
+            <img src="{% if club.photo %}{{ club.photo.url }}{% else %}{{ club.get_default_photo }}{% endif %}" style="width: 80px;">
+        </td>
+        <td class="vert-align">{{ club.name }}</td>
+        <td class="vert-align">{{ club.city }}</td>
+        <td class="vert-align">{{ club.metro }}</td>
+        <td class="vert-align">{{ club.street }}</td>
+        <td class="vert-align">{{ club.house }}</td>
+        <td class="vert-align">{% if club.site %}<a href="{{ club.site }}" target="_blank">{{ club.site }}</a>{% endif %}</td>
+        <td class="vert-align">{{ club.rate }}</td>
+    </tr>
+{% empty %}
+    <tr>
+        <td colspan="3">
+            Клубы не найдены.
+        </td>
+    </tr>
+{% endfor %}

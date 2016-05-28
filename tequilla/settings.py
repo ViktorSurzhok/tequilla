@@ -113,6 +113,7 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
 DEFAULT_AVATAR = STATIC_URL + 'img/default_avatar.png'
+DEFAULT_CLUB_PHOTO = STATIC_URL + 'img/default_club.png'
 
 STATIC_DIR = os.path.join(BASE_DIR, 'static/')
 

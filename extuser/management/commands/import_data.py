@@ -25,7 +25,7 @@ class Command(BaseCommand):
         parser.add_argument('--last_page', default=274, help='last photos page')
         parser.add_argument('--count_page', default=2, help='pages count for download photos')
 
-    # добавляет неактивного сотрудника найденного при загрузке фоток
+    # добавляет сотрудника
     def get_employee_info(self, employee_id, session):
         r = session.get('http://tequilla.gosnomer.info/employee/update/id/' + employee_id)
         html = r.text
