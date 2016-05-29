@@ -12,8 +12,8 @@
                     house = $('#filter-house').val(),
                     name = $('#filter-name').val();
 
-                 var filters = '?photo=' + photo + '&city=' + city + '&metro=' + metro + '&street=' + street +
-                         '&house=' + house + '&name=' + name;
+                 var filters = '?photo=' + photo + '&city=' + city + '&metro=' + metro + '&street__icontains=' +
+                         street + '&house__icontains=' + house + '&name__icontains=' + name;
                 // запрос нового контента
                 $.ajax({
                     url: '{{ filter_club_link }}' + filters,
@@ -26,10 +26,10 @@
                 });
             }
 
-            $('#filter-avatar').on('change', function() {
+            $('#filter-photo, #filter-city, #filter-metro').on('change', function() {
                 getNewContent();
             });
-            $('#filter-surname, #filter-name').on('keyup', function() {
+            $('#filter-street, #filter-name, #filter-house').on('keyup', function() {
                 getNewContent();
             });
         });

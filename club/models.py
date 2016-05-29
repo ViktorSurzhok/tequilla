@@ -47,7 +47,7 @@ class ClubType(TimeStampedModel):
         null=True
     )
 
-# @todo: сделать миграцию которая загружает данные в эту модель
+
 class DayOfWeek(TimeStampedModel):
     """
     Дни недели.
@@ -79,7 +79,9 @@ class Club(TimeStampedModel):
     w_start_time = models.CharField('Время начала работы на выходных', max_length=6, default='00:00')
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
-    coordinator = models.ForeignKey(ExtUser, verbose_name='Координатор', related_name='coordinate_clubs')
+    coordinator = models.ForeignKey(
+        ExtUser, verbose_name='Координатор', related_name='coordinate_clubs', blank=True, null=True
+    )
     rate = models.CharField('Рейтинг', default='0', max_length=5)
     employee = models.ManyToManyField(ExtUser, verbose_name='Сотрудники', blank=True, related_name='clubs')
     photo = models.ImageField('Фотография', blank=True, null=True, upload_to="club")
