@@ -36,6 +36,7 @@ def club_filter(request):
                 filter_pack = {filter_name + '__icontains': filter_value}
                 object_list = object_list.filter(**filter_pack)
                 was_filtered = True
+        #todo переделать фильтры типо как в альбомах. Добавить фильтр по photo
         metro = request.GET.get('metro', '')
         if metro != '':
             metro = int(metro)

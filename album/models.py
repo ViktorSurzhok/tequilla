@@ -1,3 +1,6 @@
+import os
+import random
+
 from model_utils.models import TimeStampedModel
 from django.db import models
 from extuser.models import ExtUser
@@ -14,6 +17,9 @@ class Album(TimeStampedModel):
         blank=True,
         null=True
     )
+
+    class Meta:
+        ordering = ('-created',)
 
 
 class Photo(TimeStampedModel):

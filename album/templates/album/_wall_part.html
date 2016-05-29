@@ -1,0 +1,37 @@
+{% load thumbnail %}
+{% for album in albums %}
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>
+                    <a style="text-decoration: underline;" href="{% url 'user_detail' album.user.id %}">{{ album.user.get_full_name }}</a>: {{ album.name }}
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    {% comment %}<li><a style="font-size: 17px;" href="{% url 'album:edit' album.id %}"><i class="fa fa-edit"></i></a></li>{% endcomment %}
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+
+                <div class="thumbnails" data-post-id="{{ album.id }}">
+                    {% for photo in album.photos.all %}
+                        <div class="thumbnail margin-right">
+                            <div class="image">
+                                {% thumbnail photo.file "140x100" as im %}
+                                    <a class="group-{{ album.id }}" href="{{ photo.file.url }}">
+                                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                    </a>
+                                {% endthumbnail %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        В этот фотоотчет еще не были загружены фотографии.
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    Албомы не найдены
+{% endfor %}

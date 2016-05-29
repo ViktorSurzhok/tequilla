@@ -1,8 +1,15 @@
+import json
+
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+
+from extuser.models import ExtUser
+from tequilla import settings
 from .models import Album, Photo
 
 
@@ -62,3 +69,49 @@ def album_photoremove(request, photo_id):
         return JsonResponse({'complete': 1})
     except Photo.DoesNotExist:
         return JsonResponse({'complete': 0})
+
+
+@login_required
+def wall(request):
+    if 'callback' in request.GET:
+        object_list = Album.objects
+        filters = ['user', 'created__lte', 'created__gte']
+        was_filtered = False
+        for filter_name in filters:
+            filter_value = request.GET.get(filter_name, 0)
+            if filter_value:
+                filter_pack = {filter_name: filter_value}
+                object_list = object_list.filter(**filter_pack)
+                was_filtered = True
+        if not was_filtered:
+            object_list = object_list.all()
+    else:
+        object_list = Album.objects.all()
+
+    paginator = Paginator(object_list, settings.ALBUMS_COUNT_ON_WALL)
+    page = request.GET.get('page')
+    try:
+        albums = paginator.page(page)
+    except PageNotAnInteger:
+        albums = paginator.page(1)
+    except EmptyPage:
+        albums = paginator.page(paginator.num_pages)
+
+    # если ajax запрос отрендерить блоки с навигацией и новые пагинаторы
+    if 'callback' in request.GET:
+        rendered_blocks = {
+            'albums': render_to_string('album/_wall_part.html', {'albums': albums}),
+            'paginator': render_to_string('pagination.html', {'page': albums})
+        }
+        data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
+        return HttpResponse(data, "text/javascript")
+
+    return render(
+        request,
+        'album/wall.html',
+        {
+            'albums': albums,
+            'users': ExtUser.objects.filter(is_active=True).order_by('surname'),
+            'filter_link': reverse('album:wall')
+        }
+    )

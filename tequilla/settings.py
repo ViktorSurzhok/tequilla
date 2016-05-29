@@ -105,6 +105,7 @@ THUMBNAIL_DEBUG = True
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
 
 POST_COUNT_ON_WALL = 10
+ALBUMS_COUNT_ON_WALL = 5
 
 
 # Static files (CSS, JavaScript, Images)

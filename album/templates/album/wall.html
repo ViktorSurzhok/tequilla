@@ -1,10 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block title %}Фотолента{% endblock %}
+{% block additional_js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var calendar_options = {
+                singleDatePicker: true,
+                showWeekNumbers: true,
+                format: 'DD.MM.YYYY',
+                locale: {
+                    customRangeLabel: 'Custom',
+                    daysOfWeek: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+                    monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+                    firstDay: 1
+                }
+            };
+            $('#calendar_from').daterangepicker(calendar_options);
+            $('#calendar_to').daterangepicker(calendar_options);
+
+
+            function getNewContent() {
+                // сбор данных фильтров
+                var user = $('#filter-user').val(),
+                    calendar_from = $('#calendar_from').val(),
+                    calendar_to = $('#calendar_to').val();
+                function reformat_date(date) {
+                    if (date) {
+                        date = date.split('.');
+                        date = date[2] + '-' + date[1] + '-' + date[0];
+                    }
+                    return date;
+                }
+
+
+
+                 var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +
+                         reformat_date(calendar_from);
+                // запрос нового контента
+                $.ajax({
+                    url: '{{ filter_link }}' + filters,
+                    type: 'GET',
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function (data) {
+                        $('#albums-container').html(data['albums']);
+                        $('#paginator-container').html(data['paginator']);
+                    }
+                });
+            }
+
+            $('#get-new-content').on('click', function(e) {
+                e.preventDefault();
+                getNewContent();
+            });
+
+        });
+    </script>
+
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Фильтры</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li  class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="filter-user">Пользователь</label>
+                            <select class="form-control" id="filter-user">
+                                <option value=""></option>
+                                {% for usr in users %}
+                                    <option value="{{ usr.id }}">{{ usr.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="col-md-11 xdisplay_inputx form-group has-feedback">
+                                    <input type="text" class="form-control has-feedback-left active"
+                                           id="calendar_from"
+                                           placeholder="Дата от"
+                                           aria-describedby="inputSuccess2Status4">
+                                    <span class="fa fa-calendar-o form-control-feedback left"
+                                          aria-hidden="true"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="col-md-11 xdisplay_inputx form-group has-feedback">
+                                    <input type="text" class="form-control has-feedback-left active"
+                                           id="calendar_to"
+                                           placeholder="Дата до"
+                                           aria-describedby="inputSuccess2Status4">
+                                    <span class="fa fa-calendar-o form-control-feedback left"
+                                          aria-hidden="true"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <button style="margin-bottom: 0px;" type="submit" class="btn btn-default" id="get-new-content">Показать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="albums-container">
+            {% include 'album/_wall_part.html' with albums=albums %}
+        </div>
+        <div id="paginator-container">
+            {% include 'pagination.html' with page=albums %}
+        </div>
+    </div>
+{% endblock %}
