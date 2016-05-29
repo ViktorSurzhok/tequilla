@@ -67,11 +67,12 @@ class Command(BaseCommand):
         coordinator = None
         if coordinator_id is not None:
             coordinator_id = coordinator_id['value']
-            try:
-                coordinator = ExtUser.objects.get(old_id=coordinator_id)
-            except ExtUser.DoesNotExist:
-                # рекурсивное создание координатора
-                coordinator = self.get_employee_info(coordinator_id, session)
+            if coordinator_id != employee_id:
+                try:
+                    coordinator = ExtUser.objects.get(old_id=coordinator_id)
+                except ExtUser.DoesNotExist:
+                    # рекурсивное создание координатора
+                    coordinator = self.get_employee_info(coordinator_id, session)
 
         form = UserImportForm(data=data)
         if form.is_valid():
