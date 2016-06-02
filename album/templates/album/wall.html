@@ -24,14 +24,6 @@
                 var user = $('#filter-user').val(),
                     calendar_from = $('#calendar_from').val(),
                     calendar_to = $('#calendar_to').val();
-                function reformat_date(date) {
-                    if (date) {
-                        date = date.split('.');
-                        date = date[2] + '-' + date[1] + '-' + date[0];
-                    }
-                    return date;
-                }
-
 
 
                  var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +

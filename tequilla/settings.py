@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'wall',
     'club',
     'album',
+    'schedule',
     'sorl.thumbnail',
     'django_cleanup',
 ]

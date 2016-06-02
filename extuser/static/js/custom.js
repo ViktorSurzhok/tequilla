@@ -3,7 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
+function reformat_date(date) {
+    if (date) {
+        date = date.split('.');
+        date = date[2] + '-' + date[1] + '-' + date[0];
+    }
+    return date;
+}
 // Sidebar
 $(function () {
     var URL = window.location,
@@ -61,7 +67,10 @@ $(function () {
     $SIDEBAR_MENU.find('a[href="' + URL + '"]').parent('li').addClass('current-page');
 
     $SIDEBAR_MENU.find('a').filter(function () {
-        return this.href == URL;
+        if (URL.pathname == '/') {
+            return this.href == URL.origin + URL.pathname;
+        }
+        return this.href.indexOf(URL.pathname) != -1;
     }).parent('li').addClass('current-page').parent('ul').slideDown().parent().addClass('active');
 });
 
