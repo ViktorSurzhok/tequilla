@@ -14,30 +14,91 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
+                {% if perms.extuser.can_edit_users %}
+                    {% include '_user_admin_navigation.html' with active='info' %}
+                {% endif %}
                     <div class="row">
                         <div class="col-md6 pull-left">
-                            <img src="{% if user_info.avatar %}{{ user_info.avatar.url }}{% else %}{{ user_info.get_default_avatar }}{% endif %}" style="max-width: 500px;">
+                            <img src="
+
+                                    {% if user_info.avatar %}{{ user_info.avatar.url }}{% else %}{{ user_info.get_default_avatar }}{% endif %}"
+                                 style="max-width: 500px;">
                         </div>
                         <div class="col-md-6">
                             <table class="table table-striped">
-                              <tbody>
+                                <tbody>
                                 <tr>
-                                  <td>Фамилия</td>
-                                  <td>{{ user_info.surname }}</td>
-                                </tr>
-                                <tr>
-                                  <td>Имя</td>
-                                  <td>{{ user_info.name }}</td>
+                                    <td>Фамилия</td>
+                                    <td>{{ user_info.surname }}</td>
                                 </tr>
                                 <tr>
-                                  <td>Пол</td>
-                                  <td>{{ user_info.get_gender_display }}</td>
+                                    <td>Имя</td>
+                                    <td>{{ user_info.name }}</td>
                                 </tr>
-                              <tr>
-                                  <td>Действия</td>
-                                  <td><a href="#"><button><i class="fa fa-envelope"></i> Написать сообщение</button></a></td>
+                                <tr>
+                                    <td>Пол</td>
+                                    <td>{{ user_info.get_gender_display }}</td>
                                 </tr>
-                              </tbody>
+                                {% if perms.extuser.can_edit_users %}
+                                    <tr>
+                                        <td>Мобильный телефон:</td>
+                                        <td>{{ user_info.phone }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Доп. телефон:</td>
+                                        <td>{{ user_info.additional_phone|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Вконтакте:</td>
+                                        <td>
+                                            {% if user_info.vkontakte %}
+                                                <a target="_blank" href="{{ user_info.get_vkontakte_link }}">{{ user_info.get_vkontakte_link }}</a>
+                                            {% else %}
+                                                -
+                                            {% endif %}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Всего продано:</td>
+                                        <td>Шотов: (руб.)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Всего штрафов:</td>
+                                        <td>0 на 0 руб.</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                            <table style="width: 100%;">
+                                <tbody>
+                                <tr>
+                                    <td style="vertical-align: top; text-align: right; padding-right: 15px;">Действия</td>
+                                    <td>
+                                        <table class="">
+                                            <tbody>
+                                            <tr>
+                                                <td>
+                                                    <a href="" data-toggle="modal">
+                                                        <button><i class="fa fa-envelope"></i> Написать сообщение
+                                                        </button>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% if perms.extuser.can_edit_users %}
+                                                <tr>
+                                                    <td>
+                                                        <a href="#">
+                                                            <button><i class="fa fa-edit"></i> Редактировать</button>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                            </tbody>
+                                        </table>
+
+
+                                    </td>
+                                </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>

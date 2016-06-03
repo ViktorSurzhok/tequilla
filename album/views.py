@@ -3,13 +3,14 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 
 from extuser.models import ExtUser
 from tequilla import settings
+from tequilla.decorators import group_required
 from .models import Album, Photo
 
 
@@ -114,4 +115,16 @@ def wall(request):
             'users': ExtUser.objects.filter(is_active=True).order_by('surname'),
             'filter_link': reverse('album:wall')
         }
+    )
+
+
+# просмотр альбома руководством
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def user_albums(request, user_id):
+    user = get_object_or_404(ExtUser, id=user_id)
+    return render(
+        request,
+        'album/user_albums.html',
+        {'user_info': user}
     )

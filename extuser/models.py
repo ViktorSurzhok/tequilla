@@ -45,9 +45,20 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     def get_default_avatar(self):
         return settings.DEFAULT_AVATAR
 
+    def get_vkontakte_link(self):
+        return self.vkontakte if self.vkontakte.startswith('http://') else 'http://vk.com/' + self.vkontakte
+
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['surname', 'name']
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class UserActivityLog(TimeStampedModel):
+    """
+    Хранит время входа пользователя в систему.
+    Статистику по времени входа каждого пользователя может просматривать руководство в профиле сотрудника.
+    """
+    user = models.ForeignKey(ExtUser, related_name='activity_logs')

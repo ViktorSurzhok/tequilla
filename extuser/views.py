@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, update_session_auth_hash, l
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 
 
@@ -14,6 +14,8 @@ from extuser.models import ExtUser
 from django.contrib.auth.models import Group
 
 from django.db.models import Q
+
+from tequilla.decorators import group_required
 
 
 @login_required
@@ -158,9 +160,21 @@ def user_filter(request):
 
 @login_required
 def user_detail(request, user_id):
-    user = ExtUser.objects.get(id=user_id)
+    user = get_object_or_404(ExtUser, id=user_id)
     return render(
         request,
         'users/user_detail.html',
+        {'user_info': user}
+    )
+
+
+# просмотр активности сотрудника руководством
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def user_activity(request, user_id):
+    user = get_object_or_404(ExtUser, id=user_id)
+    return render(
+        request,
+        'users/user_auth_log.html',
         {'user_info': user}
     )

@@ -1,10 +1,10 @@
 <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
-    {% if 'employee' in user_groups %}
-        <div class="menu_section">
-            <ul class="nav side-menu">
-                <li>
-                    <a href="{% url 'wall_index' %}"><i class="fa fa-home"></i> Главная </a>
-                </li>
+    <div class="menu_section">
+        <ul class="nav side-menu">
+            <li>
+                <a href="{% url 'wall_index' %}"><i class="fa fa-home"></i> Главная </a>
+            </li>
+            {% if 'employee' in user_groups %}
                 <li>
                     <a href="{% url 'schedule_by_week' %}"><i class="fa fa-line-chart"></i> График </a>
                 </li>
@@ -38,25 +38,16 @@
                 <li>
                     <a href="{% url 'user_list' %}"><i class="fa fa-female"></i> Сотрудники </a>
                 </li>
-
-                <li><a>Отзывы и забавные случаи на работе <span class="fa fa-chevron-down"></span></a>
-                  <ul class="nav child_menu">
-                    <li><a href="">Конфликты, отзывы и предложения</a>
-                    </li>
-                    <li><a href="">Забавные случаи на работе</a>
-                    </li>
-                  </ul>
-                </li>
                 <li><a>Информация по напиткам <span class="fa fa-chevron-down"></span></a>
-                  <ul class="nav child_menu">
-                    <li><a href="">Информация по текиле</a>
-                    </li>
-                    <li><a href="">Информация по виски</a>
-                    </li>
-                      <li><a href="">Информация по рому</a>
-                    </li>
+                    <ul class="nav child_menu">
+                        <li><a href="">Информация по текиле</a>
+                        </li>
+                        <li><a href="">Информация по виски</a>
+                        </li>
+                        <li><a href="">Информация по рому</a>
+                        </li>
 
-                  </ul>
+                    </ul>
                 </li>
                 <li>
                     <a href="">Организационные моменты </a>
@@ -64,8 +55,49 @@
                 <li>
                     <a href="">Штрафные санкции </a>
                 </li>
-            </ul>
-        </div>
-    {% endif %}
+            {% endif %}
+            {% if 'director' in user_groups %}
+                <li>
+                    <a href=""><i class="fa fa-commenting-o"></i> Личные сообщения </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-flag-checkered"></i> Отчеты </a>
+                </li>
+                <li>
+                    <a href="{% url 'schedule_by_week' %}"><i class="fa fa-calendar"></i> Расписание </a>
+                </li>
+                <li>
+                    <a href="{% url 'schedule_by_week' %}"><i class="fa fa-line-chart"></i> График </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-calendar"></i> Недельный план </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-calendar"></i> Остатки формы </a>
+                </li>
+                <li>
+                    <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-frown-o"></i> Штрафы </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-calendar"></i> Статистика </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-calendar"></i> Заведения </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-calendar"></i> Ведомость </a>
+                </li>
+                <li>
+                    <a href="{% url 'user_list' %}"><i class="fa fa-female"></i> Сотрудники </a>
+                </li>
+                <li>
+                    <a href=""><i class="fa fa-edit"></i> Редактирование информации </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
 
 </div>

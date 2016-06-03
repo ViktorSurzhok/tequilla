@@ -1,0 +1,7 @@
+<table style="margin-bottom:10px;">
+    <tbody><tr>
+        <td><a href="{% url 'user_detail' user_info.id %}" class="btn view_control btn-info{% if active == 'info' %} active{% endif %}">Информация</a></td>
+        <td><a href="{% url 'user_albums' user_info.id %}" class="btn view_control btn-info{% if active == 'album' %} active{% endif %}">Фотоотчеты</a></td>
+        <td><a href="{% url 'user_activity' user_info.id %}" class="btn view_control btn-info{% if active == 'auth' %} active{% endif %}">История посещений</a></td>
+    </tr>
+</tbody></table>

@@ -1,0 +1,16 @@
+{% load thumbnail %}
+<div class="thumbnails"  data-post-id="{{ album.id }}">
+    {% for photo in album.photos.all %}
+        <div class="thumbnail margin-right">
+            <div class="image">
+                {% thumbnail photo.file "140x100" as im %}
+                    <a class="group-{{ album.id }}" href="{{ photo.file.url }}">
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    </a>
+                {% endthumbnail %}
+            </div>
+        </div>
+    {% empty %}
+        В этот фотоотчет еще не были загружены фотографии.
+    {% endfor %}
+</div>
