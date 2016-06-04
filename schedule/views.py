@@ -5,6 +5,7 @@ from django.http import JsonResponse, Http404
 from django.shortcuts import render
 from django.utils import formats
 from django.views.decorators.http import require_POST
+from django.utils.dateparse import parse_date
 
 from schedule.forms import WorkDayForm
 from schedule.models import WorkDay
@@ -13,7 +14,8 @@ from schedule.models import WorkDay
 @login_required
 def schedule_by_week(request):
     week_offset = int(request.GET.get('week', 0))
-    date = datetime.date.today() + datetime.timedelta(week_offset * 7)
+    start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
+    date = start_date + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
     work_days = WorkDay.objects.filter(date__range=[start_week, end_week])
@@ -47,7 +49,8 @@ def schedule_by_week(request):
             'start_week': start_week,
             'end_week': end_week,
             'grid': grid,
-            'week_offset': week_offset
+            'week_offset': week_offset,
+            'start_date': formats.date_format(start_date, 'Y-m-d')
         }
     )
 

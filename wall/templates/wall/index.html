@@ -1,6 +1,41 @@
 {% extends 'base.html' %}
+
 {% load thumbnail %}
+{% load staticfiles %}
+
 {% block title %}Стена{% endblock %}
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block additional_js %}
+    {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
+        <!-- include summernote css/js-->
+        <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
+        <script src="{% static 'js/summernote-ru-RU.js' %}"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+              $('.summernote').summernote({
+                  height: 200,
+                  lang: 'ru-RU',
+                  dialogsInBody: false,
+                    dialogsFade: false,
+                  iframe: true,
+                  'toolbar': [
+                        ['style', ['bold', 'italic', 'underline', 'clear']],
+                        ['para', ['ul', 'ol']],
+                        ['fontsize', ['fontsize']],
+                        ['color', ['color']],
+                  ],
+
+              });
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -39,7 +74,7 @@
                         {% csrf_token %}
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
-                                <textarea name="message" class="form-control" rows="3"
+                                <textarea name="message" class="form-control summernote" rows="3"
                                           placeholder="Ваше сообщение"></textarea>
                             </div>
                         </div>
@@ -75,7 +110,9 @@
                                             <div class="byline">
                                                 <span>{{ post.created }}</span>
                                             </div>
-                                            <p class="excerpt">{{ post.text|linebreaks }}</p>
+                                            {% autoescape off %}
+                                                <p class="excerpt">{{ post.text|linebreaks }}</p>
+                                            {% endautoescape %}
                                             {% if post.images %}
                                                 <div class="thumbnails" data-post-id="{{ post.id }}">
                                                     {% for image in post.images.all %}
@@ -98,7 +135,7 @@
                                                     <div class="form-group">
                                                         <input type="hidden" value="{{ post.id }}" name="parent_id">
                                                         <div class="col-md-10 col-sm-10 col-xs-12">
-                                                            <textarea name="message" class="form-control" rows="3"
+                                                            <textarea name="message" class="form-control summernote" rows="3"
                                                                       placeholder="Ваш ответ"></textarea>
                                                         </div>
                                                     </div>
@@ -134,7 +171,9 @@
                                                                     <div class="byline">
                                                                         <span>{{ ch_post.created }}</span>
                                                                     </div>
-                                                                    <p class="excerpt">{{ ch_post.text|linebreaks }}</p>
+                                                                    {% autoescape off %}
+                                                                        <p class="excerpt">{{ ch_post.text|linebreaks }}</p>
+                                                                    {% endautoescape %}
                                                                     {% if ch_post.images %}
                                                                         <div class="thumbnails" data-post-id="{{ ch_post.id }}">
                                                                             {% for image in ch_post.images.all %}

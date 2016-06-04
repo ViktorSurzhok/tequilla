@@ -17,7 +17,11 @@ def index(request):
         posts = paginator.page(1)
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
-    return render(request, 'wall/index.html', {'posts': posts})
+    return render(
+        request,
+        'wall/index.html',
+        {'posts': posts, 'user_groups': request.user.groups.all().values_list('name', flat=True)}
+    )
 
 
 @login_required

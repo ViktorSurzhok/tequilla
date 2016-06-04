@@ -239,9 +239,6 @@ var __slice = [].slice;
     });
 })(window.jQuery, window);
 
-$(function () {
-    return $(".starrr").starrr();
-});
 
 $(document).ready(function () {
 
