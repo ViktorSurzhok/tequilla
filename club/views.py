@@ -8,9 +8,11 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 
 from club.models import Club, City, Metro
+from tequilla.decorators import group_required
 
-# todo: проставить доступы
+
 @login_required
+@group_required('director', 'chief', 'coordinator')
 def club_list(request):
     return render(
         request,
@@ -24,8 +26,9 @@ def club_list(request):
         }
     )
 
-# todo: проставить доступы
+
 @login_required
+@group_required('director', 'chief', 'coordinator')
 def club_filter(request):
     if 'callback' in request.GET:
         object_list = Club.objects

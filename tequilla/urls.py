@@ -16,7 +16,6 @@ urlpatterns = [
     url(r'^employee/album/(?P<user_id>\d+)/', user_albums, name='user_albums'),
     url(r'^employee/auth/(?P<user_id>\d+)/', user_activity, name='user_activity'),
     url(r'^employee/', user_list, name='user_list'),
-    url(r'^clubs/', club_list, name='club_list'),
     url(r'^schedule/edit_work_day', edit_work_day, name='edit_work_day'),
     url(r'^schedule/', schedule_by_week, name='schedule_by_week'),
     url(r'^$', index, name='wall_index'),

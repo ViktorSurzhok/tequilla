@@ -51,6 +51,8 @@ class Command(BaseCommand):
             # создание координатора
             parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/employee/update/id/' + employee_id)
             info = parsed_html.body.find('form', attrs={'id': 'employee-form'})
+            if info is None:
+                return None
             data = {
                 'surname': info.find('input', attrs={'id': 'Employee_l_name'})['value'],
                 'name': info.find('input', attrs={'id': 'Employee_f_name'})['value'],
@@ -111,7 +113,6 @@ class Command(BaseCommand):
         data = {
             'order': info.find('input', attrs={'id': 'Club_pos'})['value'],
             'name': info.find('input', attrs={'id': 'Club_title'})['value'],
-            'is_active': info.find('input', attrs={'id': 'Club_active'})['value'] == '1',
             'street': info.find('input', attrs={'id': 'Club_street'})['value'],
             'house': info.find('input', attrs={'id': 'Club_house'})['value'],
             'site': info.find('input', attrs={'id': 'Club_url'})['value'],
@@ -124,6 +125,9 @@ class Command(BaseCommand):
             'drinks': info.find('textarea', attrs={'id': 'Club_drinks'}).text,
             'contact_person': info.find('textarea', attrs={'id': 'Club_contact_data'}).text,
         }
+        is_active_container = info.find(
+            'div', attrs={'class': 'control-group'}).find('input', attrs={'checked': 'checked'})
+        data['is_active'] = is_active_container is not None
         # метро
         metro_id = info.find('select', attrs={'id': 'Club_metro_station'}).find(
             'option', attrs={'selected': 'selected'})
@@ -163,7 +167,9 @@ class Command(BaseCommand):
         for tag in employee_tags:
             usr_id = tag['value']
             if usr_id != 1:
-                employee_objs.append(self.get_employee_info(usr_id, session))
+                employee_obj = self.get_employee_info(usr_id, session)
+                if employee_obj is not None:
+                    employee_objs.append(employee_obj)
 
         # время начала работы
         start_time_hour = info.find('select', attrs={'id': 'Club_start_time_hour'}).find(

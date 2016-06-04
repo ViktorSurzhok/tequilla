@@ -1,7 +1,9 @@
 {% for club in clubs %}
     <tr>
         <td class="vert-align" scope="row">
-            {% if not club.is_active %}
+            {% if club.is_active %}
+                {{ forloop.counter }}
+            {% else %}
                 <span style="color: red;">{{ forloop.counter }}</span>
             {% endif %}
         </td>
