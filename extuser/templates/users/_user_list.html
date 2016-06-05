@@ -6,7 +6,19 @@
         </td>
         <td class="vert-align">{{ usr.surname }}</td>
         <td class="vert-align">{{ usr.name }}</td>
-        <td class="vert-align"><a href="{% url 'user_detail' usr.id %}"><button title="Посмотреть"><i class="fa fa-search"></i></button></a></td>
+        <td class="vert-align">
+            <a href="{% url 'user_detail' usr.id %}">
+                <button title="Посмотреть" class="btn btn-info"><i class="fa fa-search"></i></button>
+            </a>
+            {% if perms.extuser.can_edit_users %}
+                <a href="{% url 'user_edit' usr.id %}">
+                    <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
+                </a>
+                <a href="{% url 'profile:user_delete' usr.id %}" class="remove-link">
+                    <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+                </a>
+            {% endif %}
+        </td>
     </tr>
 {% empty %}
     <tr>

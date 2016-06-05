@@ -28,6 +28,10 @@
             $('#filter-surname, #filter-name').on('keyup', function() {
                 getNewContent();
             });
+
+            $('#user-list').on('click', '.remove-link', function() {
+                return confirm('Вы действительно хотите удалить пользователя?');
+            });
         });
     </script>
 {% endblock %}

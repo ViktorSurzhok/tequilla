@@ -4,12 +4,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 
 
-from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm
+from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm, UserEditAdminForm
 from extuser.models import ExtUser
 from django.contrib.auth.models import Group
 
@@ -178,3 +178,42 @@ def user_activity(request, user_id):
         'users/user_auth_log.html',
         {'user_info': user}
     )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def user_edit(request, user_id):
+    user = get_object_or_404(ExtUser, id=user_id)
+    if request.method == 'POST':
+        form = UserEditAdminForm(instance=user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.INFO, 'Информация о пользователе успешно обновлена')
+    else:
+        form = UserEditAdminForm(instance=user)
+    return render(
+        request,
+        'users/user_edit.html',
+        {'user_info': user, 'form': form}
+    )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def reset_password(request, user_id):
+    user = get_object_or_404(ExtUser, id=user_id)
+    if user.groups.filter(name='director').exists():
+        return JsonResponse({'complete': 0})
+    user.set_password('12345')
+    user.save()
+    return JsonResponse({'complete': 1})
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def user_delete(request, user_id):
+    user = get_object_or_404(ExtUser, id=user_id)
+    if not user.groups.filter(name='director').exists():
+        user.is_active = False
+        user.save()
+    return redirect('user_list')

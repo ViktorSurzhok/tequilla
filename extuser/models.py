@@ -25,7 +25,7 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     vkontakte = models.CharField('ID вконтакте', max_length=200, blank=True)
     is_active = models.BooleanField('Активен', default=False)
     pledge = models.CharField('Залог', blank=True, null=True, max_length=100)
-    coordinator = models.ForeignKey('self', blank=True, null=True)
+    coordinator = models.ForeignKey('self', blank=True, null=True, verbose_name='Координатор')
     pay_to_coord = models.BooleanField('Платить координатору', default=False)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
     gender = models.CharField('Пол', max_length=10, default='female', choices=GENDER_CHOICES)

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    Редактирование пользователя {{ user_info.get_full_name }}
+{% endblock %}
+
+{% block additional_css %}
+    <link src="{% static 'css/vendors/pnotify/dist/pnotify.css' %}" rel="stylesheet">
+    <style type="text/css">
+        #id_clubs {
+            min-height: 300px;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript" src="{% static 'js/vendors/pnotify/dist/pnotify.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            // перевод текста с группами пользователей
+            var translate = {
+                'chief': 'Руководитель',
+                'coordinator': 'Координатор',
+                'employee': 'Сотрудник'
+            };
+
+            // удаление роли директора из селекта и перевод ролей
+            $('#id_group option').each(function () {
+                var text = $(this).text();
+                if (text == '---------' || text == 'director') {
+                    $(this).hide();
+                }
+                $(this).text(translate[text]);
+            });
+
+            // добавление классов для инпутов формы
+            $('#edit-user-form input').not(':checkbox').addClass('form-control')
+            $('#edit-user-form select').addClass('form-control')
+
+
+
+            $('#reset-password').on('click', function(e) {
+                e.preventDefault();
+                if (confirm('Сменить пароль пользователя на "12345"?')) {
+                    $.ajax({
+                        url: '{% url 'profile:reset_password' user_info.id %}',
+                        type: 'POST',
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Выполнено',
+                                    text: 'Пароль пользователя был успешно изменен.',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+
+                            } else {
+                                new PNotify({
+                                    title: 'Ошибка',
+                                    text: 'Пароль пользователя не был изменен.',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Просмотр информации о сотруднике {{ user_info.get_full_name }}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    {% if messages %}
+                        <p class="alert alert-success fade in">
+                            {% for message in messages %}
+                                <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span><br>
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    <form method="POST" id="edit-user-form" data-parsley-validate="" class="form-horizontal form-label-left" action="{% url 'user_edit' user_info.id %}">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group{% if field.errors %} bad{% endif %}">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                    {{ field.label }} {% if field.field.required %}
+                                    <span class="required">*</span>{% endif %}
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <ul class="parsley-errors-list" id="parsley-id-{{ forloop.counter }}">
+                                            {% for error in field.errors %}
+                                                <li>{{ error|escape }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="ln_solid"></div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                                <button type="submit" class="btn btn-warning" id="reset-password">Сбросить пароль</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

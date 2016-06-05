@@ -9,4 +9,6 @@ urlpatterns = [
     url(r'^change_password/$', views.change_password, name='change_password'),
     url(r'^avatar/$', views.change_avatar, name='avatar'),
     url(r'^user_filter/$', views.user_filter, name='user_filter'),
+    url(r'^reset_password/(?P<user_id>\d+)/$', views.reset_password, name='reset_password'),
+    url(r'^user_delete/(?P<user_id>\d+)/$', views.user_delete, name='user_delete'),
 ]

@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
+from club.models import Club
 from extuser.models import ExtUser
 
 
@@ -70,11 +72,51 @@ class UserCreationForm(forms.ModelForm):
         return user
 
 
+class UserEditAdminForm(forms.ModelForm):
+    """
+    Форма для редактирования данных пользователей.
+    Используется РУКОВОДСТВОМ для редактирования данных сотрудников.
+    """
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True, label='Роль')
+    clubs = forms.ModelMultipleChoiceField(
+        queryset=Club.objects.filter(is_active=True), label='Заведения', required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(UserEditAdminForm, self).__init__(*args, **kwargs)
+        # запретить возможность выбора директора
+        if self.instance and self.instance.pk:
+            current_group = self.instance.groups.get()
+            self.fields['group'].initial = current_group.pk
+            self.fields['clubs'].initial = [t.pk for t in self.instance.clubs.all()]
+
+    def save(self, commit=True):
+        # сохранение новой группы
+        instance = forms.ModelForm.save(self, False)
+        self.instance.groups.clear()
+        self.instance.groups.add(self['group'].value())
+
+        # Prepare a 'save_m2m' method for the form
+        old_save_m2m = self.save_m2m
+
+        def save_m2m():
+            old_save_m2m()
+            instance.clubs.clear()
+            for club in self['clubs'].value():
+                instance.clubs.add(club)
+
+        self.save_m2m = save_m2m
+
+    class Meta:
+        model = get_user_model()
+        fields = ('surname', 'name', 'gender', 'email', 'phone', 'additional_phone', 'group',
+                  'vkontakte', 'pledge', 'coordinator', 'pay_to_coord', 'is_active', 'clubs')
+
+
 class UserChangeForm(forms.ModelForm):
     """
-    Форма для обновления данных пользователей. Нужна только для того, чтобы не
-    видеть постоянных ошибок "Не заполнено поле password" при обновлении данных
-    пользователя.
+    Форма для обновления данных пользователей.
+    Форма используется для редактирования собственных данных.
     """
 
     def save(self, commit=True):

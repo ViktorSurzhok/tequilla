@@ -14,9 +14,9 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                {% if perms.extuser.can_edit_users %}
-                    {% include '_user_admin_navigation.html' with active='info' %}
-                {% endif %}
+                    {% if perms.extuser.can_edit_users %}
+                        {% include '_user_admin_navigation.html' with active='info' %}
+                    {% endif %}
                     <div class="row">
                         <div class="col-md6 pull-left">
                             <img src="
@@ -86,7 +86,7 @@
                                             {% if perms.extuser.can_edit_users %}
                                                 <tr>
                                                     <td>
-                                                        <a href="#">
+                                                        <a href="{% url 'user_edit' user_info.id %}">
                                                             <button><i class="fa fa-edit"></i> Редактировать</button>
                                                         </a>
                                                     </td>

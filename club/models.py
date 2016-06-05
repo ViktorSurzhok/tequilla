@@ -88,3 +88,6 @@ class Club(TimeStampedModel):
 
     def get_default_photo(self):
         return settings.DEFAULT_CLUB_PHOTO
+
+    def __str__(self):
+        return self.name + ' (м.' + self.metro.name + ', ' + self.street + ', ' + self.house + ')'
