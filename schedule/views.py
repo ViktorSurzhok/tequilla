@@ -2,7 +2,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import formats
 from django.views.decorators.http import require_POST
 from django.utils.dateparse import parse_date
@@ -18,7 +18,7 @@ def schedule_by_week(request):
     date = start_date + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
-    work_days = WorkDay.objects.filter(date__range=[start_week, end_week])
+    work_days = WorkDay.objects.filter(date__range=[start_week, end_week], employee=request.user)
     work_days_struct = {formats.date_format(work_day.date, "d.m.Y"): work_day for work_day in work_days}
 
     # заполнение недельной сетки рабочих дней
@@ -82,3 +82,10 @@ def edit_work_day(request):
             return JsonResponse({'complete': 1})
         else:
             return JsonResponse({'complete': 0})
+
+
+@login_required
+def workday_delete(request, workday_id):
+    workday = get_object_or_404(WorkDay, id=workday_id)
+    workday.delete()
+    return redirect('schedule:schedule_by_week')

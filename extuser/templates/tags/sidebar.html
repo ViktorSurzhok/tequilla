@@ -6,7 +6,7 @@
             </li>
             {% if 'employee' in user_groups %}
                 <li>
-                    <a href="{% url 'schedule_by_week' %}"><i class="fa fa-line-chart"></i> График </a>
+                    <a href="{% url 'schedule:schedule_by_week' %}"><i class="fa fa-line-chart"></i> График </a>
                 </li>
                 <li>
                     <a href="{% url 'profile:profile_edit' %}"><i class="fa fa-university"></i> Личный кабинет </a>
@@ -24,7 +24,7 @@
                     <a href=""><i class="fa fa-commenting-o"></i> Личные сообщения </a>
                 </li>
                 <li>
-                    <a href="{% url 'schedule_by_week' %}"><i class="fa fa-calendar"></i> Расписание </a>
+                    <a href=""><i class="fa fa-calendar"></i> Расписание </a>
                 </li>
                 <li>
                     <a href=""><i class="fa fa-flag-checkered"></i> Отчеты и перевод </a>
@@ -64,7 +64,7 @@
                     <a href=""><i class="fa fa-flag-checkered"></i> Отчеты </a>
                 </li>
                 <li>
-                    <a href="{% url 'schedule_by_week' %}"><i class="fa fa-calendar"></i> Расписание </a>
+                    <a href=""><i class="fa fa-calendar"></i> Расписание </a>
                 </li>
                 <li>
                     <a href="{% url 'schedule_by_week' %}"><i class="fa fa-line-chart"></i> График </a>

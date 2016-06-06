@@ -56,7 +56,6 @@
                                     type: 'success',
                                     styling: 'bootstrap3'
                                 });
-                                $('.ui-pnotify').fadeIn('slow');
 
                             } else {
                                 new PNotify({
@@ -65,8 +64,11 @@
                                     type: 'error',
                                     styling: 'bootstrap3'
                                 });
-                                $('.ui-pnotify').fadeIn('slow');
                             }
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function() {
+                                $('.ui-pnotify').fadeOut('slow');
+                            }, 5000);
                         }
                     });
                 }
