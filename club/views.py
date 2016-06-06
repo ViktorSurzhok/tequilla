@@ -55,7 +55,7 @@ def club_filter(request):
             object_list = object_list.all()
 
         rendered_blocks = {
-            'clubs': render_to_string('clubs/_club_list.html', {'clubs': object_list}),
+            'clubs': render_to_string('clubs/_club_list.html', {'clubs': object_list, 'edit_drinks_perm': request.user.has_perm('extuser.can_edit_drinks')}),
         }
         data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
         return HttpResponse(data, "text/javascript")

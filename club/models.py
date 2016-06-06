@@ -73,6 +73,7 @@ class Club(TimeStampedModel):
     street = models.CharField('Улица', max_length=255)
     house = models.CharField('Дом', max_length=255)
     site = models.CharField('Сайт', max_length=255, blank=True)
+    city = models.ForeignKey(City, verbose_name='Город', blank=True, null=True)
     type = models.ManyToManyField(ClubType, verbose_name='Тип заведения', blank=True)
     days_of_week = models.ManyToManyField(DayOfWeek, blank=True, verbose_name='Дни недели')
     description = models.TextField('Описание', blank=True, null=True)

@@ -21,7 +21,7 @@
             <a href="{% url 'club:club_edit' club.id %}">
                 <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
             </a>
-            {% if perms.extuser.can_edit_drinks %}
+            {% if perms.extuser.can_edit_drinks or edit_drinks_perm %}
                 <a href="{% url 'club:drinks_edit' club.id %}">
                     <button title="Напитки" class="btn btn-dark"><i class="glyphicon glyphicon-glass"></i></button>
                 </a>
