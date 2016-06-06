@@ -47,6 +47,9 @@ class ClubType(TimeStampedModel):
         null=True
     )
 
+    def __str__(self):
+        return self.name
+
 
 class DayOfWeek(TimeStampedModel):
     """
@@ -57,16 +60,19 @@ class DayOfWeek(TimeStampedModel):
     short_name = models.CharField('Короткое название', max_length=3)
     num = models.PositiveSmallIntegerField('Номер')
 
+    def __str__(self):
+        return self.name
+
 
 class Club(TimeStampedModel):
     is_active = models.BooleanField('Активен', default=False)
     name = models.CharField('Название', max_length=255)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
     order = models.PositiveIntegerField('Позиция', default=0)
-    metro = models.ForeignKey(Metro, blank=True, null=True)
+    metro = models.ForeignKey(Metro, blank=True, null=True, verbose_name='Станция метро')
     street = models.CharField('Улица', max_length=255)
     house = models.CharField('Дом', max_length=255)
-    site = models.CharField('Сайт', max_length=255)
+    site = models.CharField('Сайт', max_length=255, blank=True)
     type = models.ManyToManyField(ClubType, verbose_name='Тип заведения', blank=True)
     days_of_week = models.ManyToManyField(DayOfWeek, blank=True, verbose_name='Дни недели')
     description = models.TextField('Описание', blank=True, null=True)
@@ -91,3 +97,19 @@ class Club(TimeStampedModel):
 
     def __str__(self):
         return self.name + ' (м.' + self.metro.name + ', ' + self.street + ', ' + self.house + ')'
+
+    class Meta:
+        ordering = ('order',)
+
+
+class Drink(TimeStampedModel):
+    """
+    Напитки в заведении
+    """
+    name = models.CharField(max_length=255, verbose_name='Название')
+    price_in_bar = models.IntegerField(verbose_name='Цена в баре')
+    price_for_sale = models.IntegerField(verbose_name='Цена продажи')
+    club = models.ForeignKey(Club, verbose_name='Заведение')
+
+    def __str__(self):
+        return self.name

@@ -17,6 +17,19 @@
         <td class="vert-align">{{ club.house }}</td>
         <td class="vert-align">{% if club.site %}<a href="{{ club.site }}" target="_blank">{{ club.site }}</a>{% else %}-{% endif %}</td>
         <td class="vert-align">{{ club.rate }}</td>
+        <td class="vert-align buttons-control">
+            <a href="{% url 'club:club_edit' club.id %}">
+                <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
+            </a>
+            {% if perms.extuser.can_edit_drinks %}
+                <a href="{% url 'club:drinks_edit' club.id %}">
+                    <button title="Напитки" class="btn btn-dark"><i class="glyphicon glyphicon-glass"></i></button>
+                </a>
+            {% endif %}
+            <a href="" class="remove-link">
+                <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+            </a>
+        </td>
     </tr>
 {% empty %}
     <tr>

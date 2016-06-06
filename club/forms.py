@@ -1,6 +1,8 @@
 from django import forms
+from django.forms.models import inlineformset_factory
 
-from club.models import Club
+from club.models import Club, ClubType, DayOfWeek, Drink
+from extuser.models import ExtUser
 
 
 class ClubImportForm(forms.ModelForm):
@@ -11,3 +13,35 @@ class ClubImportForm(forms.ModelForm):
     class Meta:
         model = Club
         exclude = ('photo',)
+
+
+class ClubEditAdminForm(forms.ModelForm):
+    """
+    Форма для редактирования данных клубов.
+    Используется РУКОВОДСТВОМ.
+    """
+    employee = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=ExtUser.objects.filter(is_active=True),
+        label='Сотрудники',
+        required=False
+    )
+    type = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=ClubType.objects.all(),
+        label='Тип заведения',
+        required=False
+    )
+    days_of_week = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=DayOfWeek.objects.all(),
+        label='Дни недели',
+        required=False
+    )
+
+    class Meta:
+        model = Club
+        exclude = ('old_id',)
+
+
+DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0)

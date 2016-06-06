@@ -79,7 +79,9 @@ class UserEditAdminForm(forms.ModelForm):
     """
     group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True, label='Роль')
     clubs = forms.ModelMultipleChoiceField(
-        queryset=Club.objects.filter(is_active=True), label='Заведения', required=False
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=Club.objects.filter(is_active=True),
+        label='Заведения'
     )
 
     def __init__(self, *args, **kwargs):

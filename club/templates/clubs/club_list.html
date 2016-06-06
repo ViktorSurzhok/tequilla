@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Заведения{% endblock %}
+
+{% block additional_css %}
+<style type="text/css">
+    .buttons-control {
+        width: 157px;
+    }
+</style>
+{% endblock %}
+
 {% block additional_js %}
     <script type="text/javascript">
         $(document).ready(function() {
@@ -36,7 +45,7 @@
     </script>
 {% endblock %}
 {% block content %}
-    <a href="#"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новое заведение</button></a>
+    <a href="{% url 'club:club_add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новое заведение</button></a>
     <div class="col-md-12">
         <div class="x_panel">
             <div class="x_title">
@@ -58,7 +67,7 @@
                             <div>
                                 Фото
                             </div>
-                            <div class="col-md-7">
+                            <div class="col-md-7 row">
                                   <select class="form-control" id="filter-photo">
                                     <option value=""></option>
                                     <option value="1">Есть</option>
@@ -70,7 +79,7 @@
                             <div>
                                 Название
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-12 row">
                               <input type="text" class="form-control" id="filter-name">
                             </div>
                         </th>
@@ -78,7 +87,7 @@
                             <div>
                                 Город
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-12 row">
                               <select class="form-control" id="filter-city">
                                     <option value=""></option>
                                     {% for item in city %}
@@ -91,7 +100,7 @@
                             <div>
                                 Метро
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-12 row">
                               <select class="form-control" id="filter-metro">
                                     <option value=""></option>
                                     {% for item in metro %}
@@ -104,7 +113,7 @@
                             <div>
                                 Улица
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-12 row">
                               <input type="text" class="form-control" id="filter-street">
                             </div>
                         </th>
@@ -112,7 +121,7 @@
                             <div>
                                 Дом
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-12 row">
                               <input type="text" class="form-control" id="filter-house">
                             </div>
                         </th>
@@ -121,6 +130,9 @@
                         </th>
                         <th>
                             <div>Рейтинг</div>
+                        </th>
+                        <th>
+                            <div>Операции</div>
                         </th>
                     </tr>
                     </thead>

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'schedule',
     'sorl.thumbnail',
     'django_cleanup',
+    'djangoformsetjs',
 ]
 
 MIDDLEWARE_CLASSES = [

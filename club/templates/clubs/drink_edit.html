@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load formset_tags %}
+
+{% block additional_js %}
+    <script src="{% static 'js/jquery.formset.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{% url 'club:drinks_edit' club.id %}">
+    {% csrf_token %}
+    <div id="formset" data-formset-prefix="{{ formset.prefix }}">
+    {{ formset.management_form }}
+
+    <div data-formset-body>
+        <!-- New forms will be inserted in here -->
+        {% for form in formset %}
+            <div data-formset-form>
+                {{ form }}
+                <button type="button" data-formset-delete-button>Удалить</button>
+            </div>
+        {% endfor %}
+    </div>
+
+
+    <script type="form-template" data-formset-empty-form>
+        {% escapescript %}
+            <div data-formset-form>
+                {{ formset.empty_form }}
+                <button type="button" data-formset-delete-button>Удалить</button>
+            </div>
+        {% endescapescript %}
+    </script>
+
+    <!-- This button will add a new form when clicked -->
+    <input type="button" value="Добавить еще один напиток" data-formset-add>
+    <input type="submit" value="Сохранить изменения">
+</div>
+</form>
+    <script>jQuery(function($) {
+        $("#formset").formset({
+            animateForms: true
+        });
+    });</script>
+
+
+{% endblock %}

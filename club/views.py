@@ -1,12 +1,15 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
+from django.views.generic import UpdateView
 
+from club.forms import ClubEditAdminForm, DrinkFormSet
 from club.models import Club, City, Metro
 from tequilla.decorators import group_required
 
@@ -56,3 +59,47 @@ def club_filter(request):
         }
         data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
         return HttpResponse(data, "text/javascript")
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def club_edit(request, club_id=0):
+    try:
+        club = Club.objects.get(id=club_id)
+    except Club.DoesNotExist:
+        club = Club()
+    if request.method == 'POST':
+        form = ClubEditAdminForm(instance=club, data=request.POST)
+        if form.is_valid():
+            club_obj = form.save(commit=False)
+            photo = request.FILES.get('photo', None)
+            if photo:
+                club_obj.photo = photo
+            club_obj.save()
+            messages.add_message(request, messages.INFO, 'Информация о заведении успешно обновлена')
+            return redirect('club:club_edit', club_id=club_obj.id)
+    else:
+        form = ClubEditAdminForm(instance=club)
+    return render(
+        request,
+        'clubs/club_edit.html',
+        {'club': club, 'form': form}
+    )
+
+
+@login_required
+@group_required('chief')
+def drinks_edit(request, club_id):
+    club = get_object_or_404(Club, id=club_id)
+    if request.method == "POST":
+        formset = DrinkFormSet(request.POST, request.FILES, instance=club)
+        if formset.is_valid():
+            formset.save()
+            return redirect('club:drinks_edit', club_id=club_id)
+    else:
+        formset = DrinkFormSet(instance=club)
+    return render(
+        request,
+        'clubs/drink_edit.html',
+        {'club': club, 'formset': formset}
+    )
