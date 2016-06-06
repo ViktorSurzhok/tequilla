@@ -119,7 +119,7 @@
                                         <button class="btn btn-dark btn-xs" id="check-all-{{ field.name }}">Выбрать все заведения</button>
                                         <button class="btn btn-dark btn-xs" id="uncheck-all-{{ field.name }}">Очистить выбор заведений</button>
                                     {% endif %}
-                                   
+                                    {{ field }}
                                     {% if field.errors %}
                                         <ul class="parsley-errors-list" id="parsley-id-{{ forloop.counter }}">
                                             {% for error in field.errors %}
