@@ -2976,6 +2976,9 @@ ul.timeline li {
   border-bottom: 14px solid transparent;
   border-left: 11px solid #1ABB9C;
 }
+.block_content ul li {
+    border-bottom: 0;
+}
 .timeline h2.title {
   position: relative;
   font-size: 16px;

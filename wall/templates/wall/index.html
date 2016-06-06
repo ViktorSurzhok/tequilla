@@ -6,34 +6,143 @@
 {% block title %}Стена{% endblock %}
 
 {% block additional_css %}
+    <link src="{% static 'css/vendors/pnotify/dist/pnotify.css' %}" rel="stylesheet">
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
+    <style type="text/css">
+        .wall-panel {
+            list-style: none;
+        }
 
+        ul.wall-panel li {
+            border-bottom: none;
+        }
+
+        ul.wall-panel li a {
+            font-size: 18px;
+        }
+    </style>
 {% endblock %}
 
 {% block additional_js %}
     {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
-        <!-- include summernote css/js-->
-        <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
+        <!-- include summernote js-->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
         <script src="{% static 'js/summernote-ru-RU.js' %}"></script>
+    {% endif %}
+    <script type="text/javascript" src="{% static 'js/vendors/pnotify/dist/pnotify.js' %}"></script>
         <script type="text/javascript">
-            $(document).ready(function() {
-              $('.summernote').summernote({
-                  height: 200,
-                  lang: 'ru-RU',
-                  dialogsInBody: false,
-                    dialogsFade: false,
-                  iframe: true,
-                  'toolbar': [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['para', ['ul', 'ol']],
-                        ['fontsize', ['fontsize']],
-                        ['color', ['color']],
-                  ],
+            $(document).ready(function () {
 
-              });
+                // вывод уведомлений
+                {% if messages %}
+                    var text = '';
+                    {% for message in messages %}
+                         text += '{{ message }} ';
+                    {% endfor %}
+                    new PNotify({
+                        title: 'Выполнено',
+                        text: text,
+                        type: 'success',
+                        styling: 'bootstrap3'
+                    });
+
+                    $('.ui-pnotify').fadeIn('slow');
+                    setTimeout(function() {
+                        $('.ui-pnotify').fadeOut('slow');
+                    }, 5000);
+                {% endif %}
+
+                // редактирование текста записи
+                function openTestModal(options){
+                    $('#edit-wall-text').modal({
+                        keyboard: false,
+                        backdrop: 'static'
+                    });
+                    $('#edit-wall-text').one('shown.bs.modal', function (e) {
+                        $('#edit-wall-text textarea').text('');
+                        var post_id = options.id;
+                        $.ajax({
+                            url: '{% url 'wall:get_post_text' %}',
+                            data: {id: post_id},
+                            type: 'GET',
+                            success: function (response) {
+                                if (response && typeof response['text'] != 'undefined') {
+                                    {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
+                                        $("#edit-wall-text .summernote").summernote("code", response.text);
+                                    {% else %}
+                                        $('#edit-wall-text textarea').val(response.text);
+                                    {% endif %}
+                                    $('#edit-wall-text input').val(post_id);
+                                }
+                            }
+                        });
+                    });
+                }
+
+                $('.edit-link').on('click', function(){
+                    openTestModal({ id: $(this).data('post-id')});
+                });
+
+                $('#edit-wall-post').on('click', function() {
+                    console.log($(this).find('form'));
+                    $('#update-post-form').submit();
+                });
+
+                {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
+                    // для админов включается summernote
+                    $('.summernote').summernote({
+                        height: 200,
+                        lang: 'ru-RU',
+                        dialogsInBody: false,
+                        dialogsFade: false,
+                        iframe: true,
+                        'toolbar': [
+                            ['style', ['bold', 'italic', 'underline', 'clear']],
+                            ['para', ['ul', 'ol']],
+                            ['fontsize', ['fontsize']],
+                            ['color', ['color']],
+                        ],
+
+                    });
+                {% endif %}
+                $('.remove-link').on('click', function() {
+                    if (confirm('Вы действительно хотите удалить запись со стены?')) {
+                        var post_id = $(this).data('post-id');
+                        $.ajax({
+                            url: '{% url 'wall:remove_post' %}',
+                            type: 'POST',
+                            data: {csrfmiddlewaretoken: '{{ csrf_token }}', id: post_id},
+                            success: function (response) {
+                                if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                    new PNotify({
+                                        title: 'Выполнено',
+                                        text: 'Запись была успешно удалена.',
+                                        type: 'success',
+                                        styling: 'bootstrap3'
+                                    });
+
+                                } else {
+                                    new PNotify({
+                                        title: 'Ошибка',
+                                        text: 'Не удалось удалить запись',
+                                        type: 'error',
+                                        styling: 'bootstrap3'
+                                    });
+                                }
+                                $('.ui-pnotify').fadeIn('slow');
+                                $('.wall-post-container-' + post_id).fadeOut('slow', function() {
+                                    $(this).remove();
+                                });
+                                setTimeout(function() {
+                                    $('.ui-pnotify').fadeOut('slow');
+                                }, 5000);
+                            }
+                        });
+                    }
+                });
+
             });
         </script>
-    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -70,7 +179,8 @@
                 </div>
                 <div class="x_content">
                     <br>
-                    <form action="{% url 'wall:send_post' %}" data-parsley-validate="" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+                    <form action="{% url 'wall:send_post' %}" data-parsley-validate=""
+                          class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
                         {% csrf_token %}
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
@@ -92,7 +202,7 @@
                         <hr>
                         <ul class="list-unstyled timeline">
                             {% for post in posts %}
-                                <li>
+                                <li class="wall-post-container-{{ post.id }}">
                                     <div class="block">
                                         <div class="tags">
                                             {% if post.user.avatar %}
@@ -110,6 +220,17 @@
                                             <div class="byline">
                                                 <span>{{ post.created }}</span>
                                             </div>
+                                            {% if perms.extuser.can_edit_posts or post.user == user %}
+                                                <ul class="panel_toolbox wall-panel">
+                                                     <li>
+                                                        <a class="edit-link" data-post-id="{{ post.id }}">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li><a class="remove-link" data-post-id="{{ post.id }}"><i
+                                                            class="fa fa-remove"></i></a></li>
+                                                </ul>
+                                            {% endif %}
                                             {% autoescape off %}
                                                 <p class="excerpt">{{ post.text|linebreaks }}</p>
                                             {% endautoescape %}
@@ -119,8 +240,10 @@
                                                         <div class="thumbnail">
                                                             <div class="image">
                                                                 {% thumbnail image.file "150x120" as im %}
-                                                                    <a class="group-{{ post.id }}" href="{{ image.file.url }}">
-                                                                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                                                    <a class="group-{{ post.id }}"
+                                                                       href="{{ image.file.url }}">
+                                                                        <img src="{{ im.url }}" width="{{ im.width }}"
+                                                                             height="{{ im.height }}">
                                                                     </a>
                                                                 {% endthumbnail %}
                                                             </div>
@@ -128,22 +251,29 @@
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-                                            <button type="submit" data-post-id="{{ post.id }}" class="btn btn-success response-post">Ответить</button>
+                                            <button type="submit" data-post-id="{{ post.id }}"
+                                                    class="btn btn-success response-post">Ответить
+                                            </button>
                                             <div class="col-md-offset-1 response-post-form-{{ post.id }} response-post-form">
-                                                <form action="{% url 'wall:send_post' %}" data-parsley-validate="" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+                                                <form action="{% url 'wall:send_post' %}" data-parsley-validate=""
+                                                      class="form-horizontal form-label-left"
+                                                      enctype="multipart/form-data" method="post">
                                                     {% csrf_token %}
                                                     <div class="form-group">
                                                         <input type="hidden" value="{{ post.id }}" name="parent_id">
                                                         <div class="col-md-10 col-sm-10 col-xs-12">
-                                                            <textarea name="message" class="form-control summernote" rows="3"
+                                                            <textarea name="message" class="form-control summernote"
+                                                                      rows="3"
                                                                       placeholder="Ваш ответ"></textarea>
                                                         </div>
                                                     </div>
                                                     <div class="ln_solid"></div>
                                                     <div class="form-group">
                                                         <div class="col-md-10 col-sm-10 col-xs-12">
-                                                            <button type="submit" class="btn btn-primary">Отправить</button>
-                                                            <input style="display: inline;" type="file" name="images[]" multiple
+                                                            <button type="submit" class="btn btn-primary">Отправить
+                                                            </button>
+                                                            <input style="display: inline;" type="file" name="images[]"
+                                                                   multiple
                                                                    class="btn btn-warning" value="Отправить файлы">
                                                         </div>
                                                     </div>
@@ -153,7 +283,7 @@
                                             {% if post.childrens %}
                                                 <ul class="list-unstyled timeline">
                                                     {% for ch_post in post.childrens.all %}
-                                                        <li>
+                                                        <li class="wall-post-container-{{ ch_post.id }}">
                                                             <div class="block">
                                                                 <div class="tags">
                                                                     {% if ch_post.user.avatar %}
@@ -161,7 +291,8 @@
                                                                             <img src="{{ av.url }}">
                                                                         {% endthumbnail %}
                                                                     {% else %}
-                                                                        <img src="{{ ch_post.user.get_default_avatar }}" style="width: 85px;">
+                                                                        <img src="{{ ch_post.user.get_default_avatar }}"
+                                                                             style="width: 85px;">
                                                                     {% endif %}
                                                                 </div>
                                                                 <div class="block_content">
@@ -171,17 +302,32 @@
                                                                     <div class="byline">
                                                                         <span>{{ ch_post.created }}</span>
                                                                     </div>
+                                                                    {% if perms.extuser.can_edit_posts or ch_post.user == user %}
+                                                                        <ul class="panel_toolbox wall-panel">
+                                                                            <li>
+                                                                                <a class="edit-link" data-post-id="{{ ch_post.id }}">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </a>
+                                                                            </li>
+                                                                            <li><a class="remove-link" data-post-id="{{ ch_post.id }}"><i
+                                                                                    class="fa fa-remove"></i></a></li>
+                                                                        </ul>
+                                                                    {% endif %}
                                                                     {% autoescape off %}
                                                                         <p class="excerpt">{{ ch_post.text|linebreaks }}</p>
                                                                     {% endautoescape %}
                                                                     {% if ch_post.images %}
-                                                                        <div class="thumbnails" data-post-id="{{ ch_post.id }}">
+                                                                        <div class="thumbnails"
+                                                                             data-post-id="{{ ch_post.id }}">
                                                                             {% for image in ch_post.images.all %}
                                                                                 <div class="thumbnail">
                                                                                     <div class="image">
                                                                                         {% thumbnail image.file "150x120" as im %}
-                                                                                            <a class="group-{{ ch_post.id }}" href="{{ image.file.url }}">
-                                                                                                <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                                                                            <a class="group-{{ ch_post.id }}"
+                                                                                               href="{{ image.file.url }}">
+                                                                                                <img src="{{ im.url }}"
+                                                                                                     width="{{ im.width }}"
+                                                                                                     height="{{ im.height }}">
                                                                                             </a>
                                                                                         {% endthumbnail %}
                                                                                     </div>
@@ -204,6 +350,38 @@
                         {% include 'pagination.html' with page=posts %}
                     {% endif %}
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="edit-wall-text" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">Редактирование сообщения</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal form-label-left" method="POST" action="{% url 'wall:update_post' %}" id="update-post-form">
+                        <input type="hidden" name="id">
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Текст</label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <textarea class="form-control summernote" cols="40" name="text"
+                                          rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="edit-wall-post">
+                        <i class="fa fa-check"></i> Сохранить
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>

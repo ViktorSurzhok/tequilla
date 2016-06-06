@@ -1,5 +1,9 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.http import JsonResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from tequilla import settings
 from wall.models import Post, Photo
@@ -43,4 +47,34 @@ def send_post(request):
                 photo_object = Photo(file=image, post=post)
                 photo_object.save()
 
+    return redirect('wall_index')
+
+
+@login_required
+@require_POST
+def remove_post(request):
+    post = get_object_or_404(Post, id=request.POST.get('id', 0))
+    if post.user == request.user or request.user.groups.filter(name='director').exists():
+        post.delete()
+        return JsonResponse({'complete': 1})
+    return JsonResponse({'complete': 0})
+
+
+@login_required
+def get_post_text(request):
+    post = get_object_or_404(Post, id=request.GET.get('id', 0))
+    return JsonResponse({'text': post.text})
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def update_post(request):
+    post = get_object_or_404(Post, id=request.POST.get('id', 0))
+    if post.user == request.user or request.user.groups.filter(name='director').exists():
+        post.text = request.POST.get('text', '')
+        post.save()
+        messages.add_message(request, messages.INFO, 'Запись на стене успешно обновлена.')
+    else:
+        messages.add_message(request, messages.ERROR, 'Произошла ошибка при обновлении записи на стене.')
     return redirect('wall_index')

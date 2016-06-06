@@ -121,7 +121,7 @@ def change_avatar(request):
 
 @login_required
 def user_list(request):
-    users = ExtUser.objects.all()
+    users = ExtUser.objects.filter(is_active=True)
     return render(
         request,
         'users/user_list.html',
