@@ -93,6 +93,10 @@
                 var data = 'week_offset=' + {{ week_offset }} + '&comment=' + comment + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
                 send_request(data);
             });
+
+            $('.remove-work-day').on('click', function() {
+                return confirm('Подтвердите удаление');
+            });
         });
     </script>
 {% endblock %}
