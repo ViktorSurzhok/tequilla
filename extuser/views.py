@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 
@@ -184,6 +184,9 @@ def user_activity(request, user_id):
 @group_required('director', 'chief', 'coordinator')
 def user_edit(request, user_id):
     user = get_object_or_404(ExtUser, id=user_id)
+    # директора может редактировать только он сам
+    if user.groups.filter(name='director').exists() and user != request.user:
+        return Http404
     if request.method == 'POST':
         form = UserEditAdminForm(instance=user, data=request.POST)
         if form.is_valid():
