@@ -26,7 +26,7 @@
                     <button title="Напитки" class="btn btn-dark"><i class="glyphicon glyphicon-glass"></i></button>
                 </a>
             {% endif %}
-            <a href="" class="remove-link">
+            <a href="{% url 'club:club_delete' club.id %}" class="remove-link">
                 <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
             </a>
         </td>

@@ -41,6 +41,10 @@
             $('#filter-street, #filter-name, #filter-house').on('keyup', function() {
                 getNewContent();
             });
+
+            $('#club-list').on('click', '.remove-link', function() {
+                return confirm('Вы действительно хотите удалить заведение?');
+            });
         });
     </script>
 {% endblock %}

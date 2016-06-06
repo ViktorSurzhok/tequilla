@@ -103,3 +103,12 @@ def drinks_edit(request, club_id):
         'clubs/drink_edit.html',
         {'club': club, 'formset': formset}
     )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def club_delete(request, club_id):
+    club = get_object_or_404(Club, id=club_id)
+    club.is_active = False
+    club.save()
+    return redirect('club:club_list')

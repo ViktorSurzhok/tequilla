@@ -56,7 +56,7 @@
                     <a href="">Штрафные санкции </a>
                 </li>
             {% endif %}
-            {% if 'director' in user_groups %}
+            {% if 'director' in user_groups or 'chief' in user_groups %}
                 <li>
                     <a href=""><i class="fa fa-commenting-o"></i> Личные сообщения </a>
                 </li>
@@ -87,9 +87,11 @@
                 <li>
                     <a href="{% url 'club:club_list' %}"><i class="fa fa-building"></i> Заведения </a>
                 </li>
-                <li>
-                    <a href=""><i class="fa fa-book"></i> Ведомость </a>
-                </li>
+                {% if 'director' in user_groups %}
+                    <li>
+                        <a href=""><i class="fa fa-book"></i> Ведомость </a>
+                    </li>
+                {% endif %}
                 <li>
                     <a href="{% url 'user_list' %}"><i class="fa fa-female"></i> Сотрудники </a>
                 </li>
