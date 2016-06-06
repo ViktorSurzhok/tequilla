@@ -96,7 +96,8 @@ class Club(TimeStampedModel):
         return settings.DEFAULT_CLUB_PHOTO
 
     def __str__(self):
-        return self.name + ' (м.' + self.metro.name + ', ' + self.street + ', ' + self.house + ')'
+        return self.name + (' (м.' + self.metro.name + ', ' if self.metro is not None else ' (') + \
+               self.street + ', ' + self.house + ')'
 
     class Meta:
         ordering = ('order',)
