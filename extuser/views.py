@@ -152,7 +152,10 @@ def user_filter(request):
             object_list = object_list.all()
 
         rendered_blocks = {
-            'users': render_to_string('users/_user_list.html', {'users': object_list}),
+            'users': render_to_string(
+                'users/_user_list.html',
+                {'users': object_list, 'edit_users_perm': request.user.has_perm('extuser.can_edit_users')}
+            ),
         }
         data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
         return HttpResponse(data, "text/javascript")

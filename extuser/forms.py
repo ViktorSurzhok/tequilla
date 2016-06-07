@@ -81,7 +81,8 @@ class UserEditAdminForm(forms.ModelForm):
     clubs = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(),
         queryset=Club.objects.filter(is_active=True),
-        label='Заведения'
+        label='Заведения',
+        required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -94,20 +95,15 @@ class UserEditAdminForm(forms.ModelForm):
 
     def save(self, commit=True):
         # сохранение новой группы
-        instance = forms.ModelForm.save(self, False)
         self.instance.groups.clear()
         self.instance.groups.add(self['group'].value())
 
-        # Prepare a 'save_m2m' method for the form
-        old_save_m2m = self.save_m2m
+        # клубы
+        self.instance.clubs.clear()
+        for club in self['clubs'].value():
+            self.instance.clubs.add(club)
 
-        def save_m2m():
-            old_save_m2m()
-            instance.clubs.clear()
-            for club in self['clubs'].value():
-                instance.clubs.add(club)
-
-        self.save_m2m = save_m2m
+        return super(UserEditAdminForm, self).save(commit)
 
     class Meta:
         model = get_user_model()
