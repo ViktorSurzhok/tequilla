@@ -10,6 +10,18 @@ function reformat_date(date) {
     }
     return date;
 }
+
+var calendar_options = {
+    singleDatePicker: true,
+    showWeekNumbers: true,
+    format: 'DD.MM.YYYY',
+    locale: {
+        customRangeLabel: 'Custom',
+        daysOfWeek: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+        monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+        firstDay: 1
+    }
+};
 // Sidebar
 $(function () {
     var URL = window.location,

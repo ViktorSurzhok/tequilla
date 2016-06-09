@@ -17,21 +17,10 @@
         $(function () {
 
             // выбор недели по дате
-            var calendar_options = {
-                singleDatePicker: true,
-                showWeekNumbers: true,
-                format: 'DD.MM.YYYY',
-                locale: {
-                    customRangeLabel: 'Custom',
-                    daysOfWeek: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
-                    monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
-                    firstDay: 1
-                }
-            };
             $('#calendar').daterangepicker(calendar_options);
             $('#calendar').on('apply.daterangepicker', function(e, picker) {
                 var date = picker.startDate.format('YYYY-MM-DD');
-                location = '{% url 'schedule:schedule_by_week' %}?start_date=' + date;
+                location = '{{ base_url_for_navigation }}?start_date=' + date;
             });
 
             // отправка запроса на сервер для сохранения данных с формы
@@ -50,7 +39,7 @@
                             });
                             $('.ui-pnotify').fadeIn('slow');
                             setTimeout(function () {
-                                location = '{% url 'schedule:schedule_by_week' %}' + window.location.search;
+                                location = '{{ base_url_for_navigation }}' + window.location.search;
                             }, 1000);
 
                         } else {
@@ -88,14 +77,47 @@
                 var form = $(this).closest('.modal-dialog').find('form'),
                         comment = form.find('textarea[name="comment"]').val(),
                         start_week = form.find('input[name="start_week"]').val(),
-                        end_week = form.find('input[name="end_week"]').val();
+                        end_week = form.find('input[name="end_week"]').val(),
+                        employee = $('#id_employee').val();
 
-                var data = 'week_offset=' + {{ week_offset }} + '&comment=' + comment + '&csrfmiddlewaretoken=' + '{{ csrf_token }}';
+                var data = 'week_offset=' + {{ week_offset }} + '&comment=' + comment + '&csrfmiddlewaretoken=' +
+                        '{{ csrf_token }}' + '&user_id=' + employee;
                 send_request(data);
             });
 
             $('.remove-work-day').on('click', function() {
-                return confirm('Подтвердите удаление');
+                var url = $(this).data('item-remove-url');
+                if (confirm('Подтвердите удаление')) {
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Рабочий день успешно удален',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    location = '{{ base_url_for_navigation }}' + window.location.search;
+                                }, 1000);
+
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при удалении.',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                            }
+                        }
+                    });
+
+                }
             });
         });
     </script>
@@ -106,7 +128,7 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>График
+                    <h2>График {% if user != employee %}(Сотрудника {{ employee.get_full_name }}){% endif %}
                         <small>{{ start_week }} - {{ end_week }}</small>
                     </h2>
                     <ul class="nav navbar-right panel_toolbox">
@@ -115,10 +137,10 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                    <a href="{% url 'schedule:schedule_by_week' %}?week={{ last_week }}{% if perms.extuser.can_edit_users %}&start_date={{ start_date }}{% endif %}">
+                    <a href="{{ base_url_for_navigation }}?week={{ prev_week }}{% if perms.extuser.can_edit_users %}&start_date={{ start_date }}{% endif %}">
                         <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
                     </a>
-                    <a href="{% url 'schedule:schedule_by_week' %}?week={{ next_week }}{% if perms.extuser.can_edit_users %}&start_date={{ start_date }}{% endif %}">
+                    <a href="{{ base_url_for_navigation }}?week={{ next_week }}{% if perms.extuser.can_edit_users %}&start_date={{ start_date }}{% endif %}">
                         <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
                     </a>
                     <div class="small-margin-top">
@@ -156,9 +178,9 @@
                                                     {{ item.val.get_time_display }}{% endif %}
                                             </button>
                                             <hr>
-                                            <a href="{% url 'schedule:workday_delete' item.val.id %}" class="remove-work-day">
-                                                <button class=" btn btn-danger btn-xs"><i class="fa fa-remove"></i></button>
-                                            </a>
+                                            <button data-item-remove-url="{% url 'schedule:workday_delete' item.val.id %}" class="remove-work-day btn btn-danger btn-xs">
+                                                <i class="fa fa-remove"></i>
+                                            </button>
                                         {% else %}
                                             <button type="button"
                                                     data-date="{{ item.date|date:"d.m.Y" }}"

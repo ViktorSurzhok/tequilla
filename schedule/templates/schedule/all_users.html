@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}График{% endblock %}
+{% load staticfiles %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .pic {
+            width: 85px;
+        }
+        h5 a {
+            text-decoration: underline;
+        }
+        h5 {
+            margin-bottom: 0px;
+        }
+        table td:first-child {
+            width: 100px;
+        }
+        .created-time {
+            color: #aaaaaa;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        // выбор недели по дате
+        $('#calendar').daterangepicker(calendar_options);
+        $('#calendar').on('apply.daterangepicker', function(e, picker) {
+            var date = picker.startDate.format('YYYY-MM-DD');
+            location = '{% url 'schedule:schedule_by_week_all_users' %}?start_date=' + date;
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>График
+                        <small>{{ start_week }} - {{ end_week }}</small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <a href="{% url 'schedule:schedule_by_week_all_users' %}?week={{ prev_week }}&start_date={{ start_date }}">
+                        <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                    </a>
+                    <a href="{% url 'schedule:schedule_by_week_all_users' %}?week={{ next_week }}&start_date={{ start_date }}">
+                        <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                    </a>
+                    <div class="small-margin-top">
+                        <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                    </div>
+                    {% if users_without_graph %}
+                        <div class="small-margin-top">
+                            <h2>Не заполнили:</h2>
+                            {% for employee in users_without_graph %}
+                                <a href="{% url 'schedule:edit_graph_for_user' employee.id %}?week={{ week_offset }}&start_date={{ start_date }}">{{ employee.get_full_name }}</a>
+                                {% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <table class="table small-margin-top">
+                        <tbody>
+
+                            {% for item in work_days_struct_by_user %}
+                                <tr>
+                                    <td>
+                                        <img class="pic" src="{% if item.employee.avatar %}{{ item.employee.avatar.url }}{% else %}{{ item.employee.get_default_avatar }}{% endif %}">
+                                    </td>
+                                <td>
+                                    <h5>
+                                        <a href="{% url 'user_detail' item.employee.id %}" target="_blank">{{ item.employee.get_full_name }}</a>
+                                    </h5>
+                                    {% for work_day in item.days %}
+                                        <div>
+                                            <strong>{{ work_day.date }}</strong>:
+                                            {% if work_day.cant_work %}<span class="red">Не работаю</span>{% else %}{{ work_day.get_time_display }}{% endif %}
+                                            {% if work_day.comment %}({{ work_day.comment }}){% endif %}
+                                            <span class="created-time">(Заполнил{% if item.employee.gender == 'female' %}а{% endif %}
+                                                {{ work_day.created }}, последнее изменение:
+                                                {{ work_day.modified }})</span>
+                                        </div>
+                                    {% endfor %}
+                                </td>
+                                <td class="center-button-container">
+                                    <a href="{% url 'schedule:edit_graph_for_user' item.employee.id %}?week={{ week_offset }}&start_date={{ start_date }}">
+                                        <button class="btn btn-xs btn-warning">Редактировать</button>
+                                    </a>
+                                </td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
