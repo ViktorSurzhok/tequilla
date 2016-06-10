@@ -2,7 +2,7 @@
     <tr>
         <td class="vert-align" scope="row">{{ forloop.counter }}</td>
         <td>
-            <img src="{% if usr.avatar %}{{ usr.avatar.url }}{% else %}{{ usr.get_default_avatar }}{% endif %}" style="width: 80px;">
+            <img src="{{ usr.get_small_avatar }}" style="width: 80px;">
         </td>
         <td class="vert-align">{{ usr.surname }}</td>
         <td class="vert-align">{{ usr.name }}</td>

@@ -3,6 +3,7 @@ import urllib
 from django.core.files import File
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
 
 from club.forms import ClubImportForm
 from club.models import Club, Metro, ClubType, DayOfWeek
@@ -91,6 +92,11 @@ class Command(BaseCommand):
                 if coordinator_id != employee_id:
                     coordinator = self.get_employee_info(coordinator_id, session)
 
+
+            # аватар
+            parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/employee/' + employee_id)
+            image_link = parsed_html.body.find('div', attrs={'class': 'thumbnail'}).find('img')['src']
+
             form = UserImportForm(data=data)
             if form.is_valid():
                 form.save()
@@ -99,6 +105,19 @@ class Command(BaseCommand):
                     user.coordinator = coordinator
                 group = Group.objects.get(name=data['role'])
                 user.groups.add(group)
+
+                # большой аватар
+                name = urllib.parse.urlparse(image_link).path.split('/')[-1]
+                content = urllib.request.urlretrieve('http://tequilla.gosnomer.info' + image_link)
+                user.avatar.save(name, File(open(content[0], 'rb')), save=True)
+
+                # обрезанный аватар
+                temp = image_link.split('/')
+                image_link = '/'.join(temp[:-1]) + '/tn_' + temp[-1]
+                name = urllib.parse.urlparse(image_link).path.split('/')[-1]
+                content = urllib.request.urlretrieve('http://tequilla.gosnomer.info' + image_link)
+                user.avatar_cropped.save(name, File(open(content[0], 'rb')), save=True)
+
                 user.save()
                 self.girls_count += 1
                 self.stdout.write(self.style.SUCCESS('Add new user: "%s"' % user.get_full_name()))
@@ -106,6 +125,26 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.SUCCESS('Error when add new user: "%s"' % form.errors))
                 return None
+
+    def get_avatar_for_exists_users(self):
+        session = self.get_session()
+        users = ExtUser.objects.filter(Q(avatar__isnull=True) | Q(avatar='')).filter(old_id__isnull=False)
+        for user in users:
+            parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/employee/' + str(user.old_id))
+            self.stdout.write(self.style.SUCCESS('Load avatar for: "%s"' % user.get_full_name()))
+            image_link = parsed_html.body.find('div', attrs={'class': 'thumbnail'}).find('img')['src']
+
+            # большой аватар
+            name = urllib.parse.urlparse(image_link).path.split('/')[-1]
+            content = urllib.request.urlretrieve('http://tequilla.gosnomer.info' + image_link)
+            user.avatar.save(name, File(open(content[0], 'rb')), save=True)
+
+            # обрезанный аватар
+            temp = image_link.split('/')
+            image_link = '/'.join(temp[:-1]) + '/tn_' + temp[-1]
+            name = urllib.parse.urlparse(image_link).path.split('/')[-1]
+            content = urllib.request.urlretrieve('http://tequilla.gosnomer.info' + image_link)
+            user.avatar_cropped.save(name, File(open(content[0], 'rb')), save=True)
 
     def get_club_info(self, club_id, session):
         parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/clubs/update/id/' + club_id)
@@ -283,7 +322,7 @@ class Command(BaseCommand):
         for row in rows:
             usr_link = row.find_all('td')[8].find('a')['href'].split('/')
             usr_id = usr_link[2]
-            # проверяем не был ли сотрудник добавлен ранее
+            # загрузка инфо о сотруднике
             self.get_employee_info(usr_id, s)
 
         self.stdout.write(self.style.SUCCESS('Imported "%s" girls' % self.girls_count))
@@ -307,6 +346,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['type'][0] == 'girls':
             self.get_girls()
+        elif options['type'][0] == 'avatars':
+            self.get_avatar_for_exists_users()
         elif options['type'][0] == 'clubs':
             self.get_clubs()
         elif options['type'][0] == 'photos':

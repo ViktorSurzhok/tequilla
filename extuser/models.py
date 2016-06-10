@@ -17,7 +17,7 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     avatar = models.ImageField('Аватар', blank=True, null=True, upload_to="avatar")
     #avatar width
     #avatar crop data
-    #avatar_cropped
+    avatar_cropped = models.ImageField('Обрезанный аватар', blank=True, null=True, upload_to="cr_avatar")
     name = models.CharField('Имя', max_length=40)
     surname = models.CharField('Фамилия', max_length=40)
     phone = models.CharField('Номер телефона', max_length=30, unique=True, db_index=True)
@@ -44,6 +44,9 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     def get_default_avatar(self):
         return settings.DEFAULT_AVATAR
+
+    def get_small_avatar(self):
+        return self.avatar_cropped.url if self.avatar_cropped else settings.DEFAULT_AVATAR_SMALL
 
     def get_vkontakte_link(self):
         return self.vkontakte if self.vkontakte.startswith('http://') else 'http://vk.com/' + self.vkontakte
