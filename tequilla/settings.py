@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'club',
     'album',
     'schedule',
+    'work_calendar',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
