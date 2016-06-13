@@ -1,5 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Сотрудники{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css" xmlns="http://www.w3.org/1999/html">
+        .unactive-user-counter {
+            color: red;
+        }
+    </style>
+{% endblock %}
+
 {% block additional_js %}
     <script type="text/javascript">
         $(document).ready(function() {
@@ -7,9 +16,13 @@
                 // сбор данных фильтров
                 var avatar = $('#filter-avatar').val(),
                     surname = $('#filter-surname').val(),
-                    name = $('#filter-name').val();
+                    name = $('#filter-name').val(),
+                    show_deleted = $('#filter-show-deleted').prop('checked');
 
-                 var filters = '?avatar=' + avatar + '&surname=' + surname + '&name=' + name;
+                var filters = '?avatar=' + avatar + '&surname__icontains=' + surname + '&name__icontains=' + name;
+                if (!show_deleted) {
+                     filters += '&is_active=True'
+                }
                 // запрос нового контента
                 $.ajax({
                     url: '{{ filter_user_link }}' + filters,
@@ -22,7 +35,7 @@
                 });
             }
 
-            $('#filter-avatar').on('change', function() {
+            $('#filter-avatar, #filter-show-deleted').on('change', function() {
                 getNewContent();
             });
             $('#filter-surname, #filter-name').on('keyup', function() {
@@ -40,7 +53,12 @@
         <div class="x_panel">
             <div class="x_title">
                 <h2>Сотрудники
-                    <small>Всего сотрудников: {{ users.count }}</small>
+                    <small>Всего активных сотрудников: {{ users.count }}</small>
+                    <span style="border-right: 1px solid gray;"></span>
+                    <small>
+                        <input type="checkbox" id="filter-show-deleted">
+                        Показывать удаленых сотрудников
+                    </small>
                 </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li title="Добавить сотрудника"><a href="{% url 'profile:user_create' %}"><i class="fa fa-plus"></i></a></li>

@@ -1,6 +1,12 @@
  {% for usr in users %}
     <tr>
-        <td class="vert-align" scope="row">{{ forloop.counter }}</td>
+        <td class="vert-align" scope="row">
+            {% if usr.is_active %}
+                {{ forloop.counter }}
+            {% else %}
+                <span class="unactive-user-counter">{{ forloop.counter }}</span>
+            {% endif %}
+        </td>
         <td>
             <img src="{{ usr.get_small_avatar }}" style="width: 80px;">
         </td>
@@ -14,9 +20,11 @@
                 <a href="{% url 'user_edit' usr.id %}">
                     <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
                 </a>
-                <a href="{% url 'profile:user_delete' usr.id %}" class="remove-link">
-                    <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
-                </a>
+                {% if usr.is_active %}
+                    <a href="{% url 'profile:user_delete' usr.id %}" class="remove-link">
+                        <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+                    </a>
+                {% endif %}
             {% endif %}
         </td>
     </tr>

@@ -133,12 +133,12 @@ def user_list(request):
 def user_filter(request):
     if 'callback' in request.GET:
         object_list = ExtUser.objects
-        filters = ['surname', 'name']
+        filters = ['surname__icontains', 'name__icontains', 'is_active']
         was_filtered = False
         for filter_name in filters:
             filter_value = request.GET.get(filter_name, '')
             if filter_value:
-                filter_pack = {filter_name + '__icontains': filter_value}
+                filter_pack = {filter_name: filter_value}
                 object_list = object_list.filter(**filter_pack)
                 was_filtered = True
         avatar = request.GET.get('avatar', '')
