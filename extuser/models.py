@@ -55,6 +55,7 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     REQUIRED_FIELDS = ['surname', 'name']
 
     class Meta:
+        ordering = ('surname',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 

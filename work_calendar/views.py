@@ -146,3 +146,39 @@ def delete_work_shift(request, work_shift_id):
     work_shift = get_object_or_404(WorkShift, id=work_shift_id)
     work_shift.delete()
     return redirect('calendar:show_calendar')
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def get_employee_bisy(request, employee_id):
+    try:
+        date = parse_date(request.GET.get('date', str(datetime.date.today())))
+        start_week = date - datetime.timedelta(date.weekday())
+        end_week = start_week + datetime.timedelta(6)
+
+        # подготовка структурированного словаря с рабочими сменами
+        work_shifts = WorkShift.objects.filter(
+            date__range=[start_week, end_week], employee=employee_id
+        ).order_by('date')
+
+        work_shifts_struct = {}
+        for work_day in work_shifts:
+            date_format = formats.date_format(work_day.date, "d.m.Y")
+            if date_format not in work_shifts_struct:
+                work_shifts_struct[date_format] = []
+            work_shifts_struct[date_format].append(work_day.club.name)
+
+        grid = []
+        week_cursor = start_week
+        while week_cursor <= end_week:
+            date_cursor = formats.date_format(week_cursor, "d.m.Y")
+            names = ''
+            if date_cursor in work_shifts_struct:
+                names = "\n".join(work_shifts_struct[date_cursor])
+            grid.append(names)
+            week_cursor += datetime.timedelta(1)
+        table = render_to_string('calendar/_employee_bisy.html', {'grid': grid})
+        return JsonResponse({'complete': table})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'complete': 0})

@@ -28,6 +28,9 @@
         .club-td {
             max-width: 128px;
         }
+        #bisy-table {
+            overflow: hidden;
+        }
     </style>
     <link href="{% static 'css/vendors/pnotify/dist/pnotify.css' %}" rel="stylesheet">
     <link href="{% static 'css/jquery.timepicker.css' %}" rel="stylesheet">
@@ -61,16 +64,22 @@
                                 $('#form-container select').addClass('form-control');
 
                                 $('#form-container #id_employee option:first').remove();
+
                                 // скрывать поле сотрудника если не выбрана соответсвующая настройка
+                                var employee_container =  $('#form-container #id_employee').closest('.form-group'),
+                                    start_time_container =  $('#form-container #id_start_time').closest('.form-group'),
+                                    end_time_container =  $('#form-container #id_end_time').closest('.form-group');
+                                if ($('#bisy-table').length == 0) {
+                                    $('<div id="bisy-table"></div>').insertAfter(employee_container);
+                                }
+                                $('#bisy-table').hide();
                                 $('#id_special_config').off('change').on('change', function() {
-                                    var employee_container =  $('#form-container #id_employee').closest('.form-group'),
-                                        start_time_container =  $('#form-container #id_start_time').closest('.form-group'),
-                                        end_time_container =  $('#form-container #id_end_time').closest('.form-group');
                                     var val = $(this).val();
                                     if (val == 'employee') {
                                         employee_container.show();
                                         start_time_container.show();
                                         end_time_container.show();
+                                        $('#bisy-table').show();
                                     } else {
                                         if (val == 'cant_work') {
                                             start_time_container.hide();
@@ -80,9 +89,28 @@
                                             end_time_container.show();
                                         }
                                         employee_container.hide();
+                                        $('#bisy-table').hide();
                                     }
                                 });
                                 $('#id_special_config').trigger('change');
+
+                                // показывать занятость сотрудников
+                                $('#id_employee').off('change').on('change', function() {
+                                    var employee_id = $(this).val();
+                                        $.ajax({
+                                            url: '/tasks/get_employee_bisy/' + employee_id,
+                                            data: options,
+                                            type: 'GET',
+                                            success: function (response) {
+                                                console.log(response);
+                                                if (response['complete'] != '0') {
+                                                    $('#bisy-table').html(response['complete']);
+                                                    $('#bisy-table').show();
+                                                }
+                                            }
+                                        });
+                                });
+                                $('#id_employee').trigger('change');
 
                                 var timepicker_options = { 'timeFormat': 'H:i', 'step': 15 };
                                 $('#form-container #id_start_time').timepicker(timepicker_options);
@@ -172,6 +200,14 @@
             // нажатие на кнопку удаления
             $('.delete-user-link').on('click', function() {
                 return confirm('Вы действительно хотите удалить рабочую смену?');
+            });
+
+
+            // выбор недели по дате
+            $('#calendar').daterangepicker(calendar_options);
+            $('#calendar').on('apply.daterangepicker', function(e, picker) {
+                var date = picker.startDate.format('YYYY-MM-DD');
+                location = '{% url 'calendar:show_calendar' %}?start_date=' + date;
             });
         });
     </script>
