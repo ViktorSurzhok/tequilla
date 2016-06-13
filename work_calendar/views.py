@@ -158,7 +158,7 @@ def get_employee_bisy(request, employee_id):
 
         # подготовка структурированного словаря с рабочими сменами
         work_shifts = WorkShift.objects.filter(
-            date__range=[start_week, end_week], employee=employee_id
+            date__range=[start_week, end_week], employee=employee_id, special_config=WorkShift.SPECIAL_CONFIG_EMPLOYEE
         ).order_by('date')
 
         work_shifts_struct = {}

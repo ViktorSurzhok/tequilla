@@ -223,3 +223,29 @@ def user_delete(request, user_id):
         user.is_active = False
         user.save()
     return redirect('user_list')
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def user_create(request):
+    if request.method == 'POST':
+        form = UserEditAdminForm(data=request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            new_employee = form.save()
+            new_employee.set_password('12345')
+            new_employee.save()
+            new_employee.groups.add(cd['group'])
+
+            # клубы
+            for club in cd['clubs']:
+                new_employee.clubs.add(club)
+            messages.add_message(request, messages.INFO, 'Новый сотрудник успешно добавлен')
+            return redirect('user_edit', user_id=new_employee.id)
+    else:
+        form = UserEditAdminForm()
+    return render(
+        request,
+        'users/user_edit.html',
+        {'user_info': None, 'form': form}
+    )

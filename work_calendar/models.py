@@ -9,10 +9,14 @@ class WorkShift(TimeStampedModel):
     """
     Рабочая смена проставляемая в календаре.
     """
+    SPECIAL_CONFIG_CANT_WORK = 'cant_work'
+    SPECIAL_CONFIG_TRAINEE = 'trainee'
+    SPECIAL_CONFIG_EMPLOYEE = 'employee'
+
     SPECIAL_CONFIG_CHOICES = (
-        ('cant_work', 'Не работаем'),
-        ('trainee', 'Стажер'),
-        ('employee', 'Сотрудник')
+        (SPECIAL_CONFIG_CANT_WORK, 'Не работаем'),
+        (SPECIAL_CONFIG_TRAINEE, 'Стажер'),
+        (SPECIAL_CONFIG_EMPLOYEE, 'Сотрудник')
     )
     club = models.ForeignKey(Club, verbose_name='Клуб')
     date = models.DateField('Дата')
@@ -22,7 +26,7 @@ class WorkShift(TimeStampedModel):
     comment = models.TextField('Дополнительно', blank=True)
     probation = models.BooleanField('Стажировка', default=False)
     special_config = models.CharField(
-        'Кто работает', max_length=12, choices=SPECIAL_CONFIG_CHOICES, default='employee'
+        'Кто работает', max_length=12, choices=SPECIAL_CONFIG_CHOICES, default=SPECIAL_CONFIG_EMPLOYEE
     )
 
     def __str__(self):

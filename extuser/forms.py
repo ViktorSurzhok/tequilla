@@ -94,14 +94,15 @@ class UserEditAdminForm(forms.ModelForm):
             self.fields['clubs'].initial = [t.pk for t in self.instance.clubs.all()]
 
     def save(self, commit=True):
-        # сохранение новой группы
-        self.instance.groups.clear()
-        self.instance.groups.add(self['group'].value())
+        if self.instance and self.instance.id:
+            # сохранение новой группы
+            self.instance.groups.clear()
+            self.instance.groups.add(self['group'].value())
 
-        # клубы
-        self.instance.clubs.clear()
-        for club in self['clubs'].value():
-            self.instance.clubs.add(club)
+            # клубы
+            self.instance.clubs.clear()
+            for club in self['clubs'].value():
+                self.instance.clubs.add(club)
 
         return super(UserEditAdminForm, self).save(commit)
 
