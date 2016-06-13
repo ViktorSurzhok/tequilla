@@ -100,6 +100,9 @@ class Club(TimeStampedModel):
         return self.name + (' (м.' + self.metro.name + ', ' if self.metro is not None else ' (') + \
                self.street + ', ' + self.house + ')'
 
+    def get_address(self):
+        return ('м.' + self.metro.name + ', ' if self.metro is not None else ' ') + self.street + ', ' + self.house
+
     class Meta:
         ordering = ('order',)
 

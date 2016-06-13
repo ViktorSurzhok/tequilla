@@ -5,27 +5,25 @@ from club.models import Club
 from extuser.models import ExtUser
 
 
-class EmployeeInCalendar(TimeStampedModel):
+class WorkShift(TimeStampedModel):
     """
-    Сотрудник для которого проставляется рабочий день.
-    Содержит дополнительные поля т.к. для рабочего дня можно в поле сотрудника выбрать "Стажер" или "Не работаем"
+    Рабочая смена проставляемая в календаре.
     """
-    user = models.ForeignKey(ExtUser, verbose_name='Сотрудник', blank=True, null=True)
-    cant_work = models.BooleanField('Не работаем', default=False)
-    probation = models.BooleanField('Стажер', default=False)
-
-
-class WorkDay(TimeStampedModel):
-    """
-    Рабочий день проставляемый в календаре.
-    """
+    SPECIAL_CONFIG_CHOICES = (
+        ('cant_work', 'Не работаем'),
+        ('trainee', 'Стажер'),
+        ('employee', 'Сотрудник')
+    )
     club = models.ForeignKey(Club, verbose_name='Клуб')
     date = models.DateField('Дата')
-    employee = models.ForeignKey(EmployeeInCalendar, verbose_name='Сотрудник')
+    employee = models.ForeignKey(ExtUser, verbose_name='Сотрудник')
     start_time = models.CharField('Время начала', max_length=6, default='00:00')
     end_time = models.CharField('Время окончания', max_length=6, default='00:00')
     comment = models.TextField('Дополнительно', blank=True)
     probation = models.BooleanField('Стажировка', default=False)
+    special_config = models.CharField(
+        'Кто работает', max_length=12, choices=SPECIAL_CONFIG_CHOICES, default='employee'
+    )
 
     def __str__(self):
-        return self.club.name + ' ' + str(self.date) + ' ' + self.employee.get_full_name()
+        return self.club.name + self.employee.get_full_name()

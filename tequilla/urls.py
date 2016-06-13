@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^clubs/', include('club.urls', namespace='club')),
     url(r'^album/', include('album.urls', namespace='album')),
     url(r'^schedule/', include('schedule.urls', namespace='schedule')),
+    url(r'^tasks/', include('work_calendar.urls', namespace='calendar')),
     url(r'^employee/(?P<user_id>\d+)/', user_detail, name='user_detail'),
     url(r'^employee/album/(?P<user_id>\d+)/', user_albums, name='user_albums'),
     url(r'^employee/edit/(?P<user_id>\d+)/', user_edit, name='user_edit'),

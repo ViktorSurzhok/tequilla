@@ -51,7 +51,4 @@ class ClubEditAdminForm(forms.ModelForm):
         model = Club
         exclude = ('old_id',)
 
-
-
-
 DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0)
