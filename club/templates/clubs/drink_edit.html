@@ -2,46 +2,75 @@
 {% load staticfiles %}
 {% load formset_tags %}
 
+{% block title %}Редактирование напитков для клуба: {{ club.name }}{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .form-control {
+            margin-left: 5px;
+            margin-right: 20px;
+        }
+    </style>
+{% endblock %}
+
 {% block additional_js %}
     <script src="{% static 'js/jquery.formset.js' %}"></script>
+    <script type="text/javascript">
+        $(function() {
+
+            $("#formset").formset({
+                animateForms: false
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
-    <form method="POST" action="{% url 'club:drinks_edit' club.id %}">
-    {% csrf_token %}
-    <div id="formset" data-formset-prefix="{{ formset.prefix }}">
-    {{ formset.management_form }}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>
+                        Редактирование напитков для клуба: {{ club.name }}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form method="POST" action="{% url 'club:drinks_edit' club.id %}">
+                    {% csrf_token %}
+                        <div id="formset" data-formset-prefix="{{ formset.prefix }}">
+                        {{ formset.management_form }}
 
-    <div data-formset-body>
-        <!-- New forms will be inserted in here -->
-        {% for form in formset %}
-            <div data-formset-form>
-                {{ form }}
-                <button type="button" data-formset-delete-button>Удалить</button>
+                        <div data-formset-body class="form-inline">
+                            <!-- New forms will be inserted in here -->
+                            {% for form in formset %}
+                                <div data-formset-form class="small-margin-top">
+                                    {{ form }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+
+                        <script type="form-template" data-formset-empty-form>
+                            {% escapescript %}
+                                <div data-formset-form  class="small-margin-top">
+                                    {{ formset.empty_form }}
+                                </div>
+                            {% endescapescript %}
+                        </script>
+
+                        <div class="small-margin-top">
+                            <input type="button" value="Добавить еще один напиток" data-formset-add class="btn btn-info add-new-drink">
+                            <input type="submit" value="Сохранить изменения" class="btn btn-success">
+                        </div>
+                    </div>
+                </form>
             </div>
-        {% endfor %}
+        </div>
     </div>
-
-
-    <script type="form-template" data-formset-empty-form>
-        {% escapescript %}
-            <div data-formset-form>
-                {{ formset.empty_form }}
-                <button type="button" data-formset-delete-button>Удалить</button>
-            </div>
-        {% endescapescript %}
-    </script>
-
-    <!-- This button will add a new form when clicked -->
-    <input type="button" value="Добавить еще один напиток" data-formset-add>
-    <input type="submit" value="Сохранить изменения">
-</div>
-</form>
-    <script>jQuery(function($) {
-        $("#formset").formset({
-            animateForms: true
-        });
-    });</script>
-
 
 {% endblock %}

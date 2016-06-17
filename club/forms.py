@@ -51,4 +51,8 @@ class ClubEditAdminForm(forms.ModelForm):
         model = Club
         exclude = ('old_id',)
 
-DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0)
+DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0, widgets={
+    'name': forms.TextInput(attrs={'class': 'form-control'}),
+    'price_in_bar': forms.TextInput(attrs={'class': 'form-control'}),
+    'price_for_sale': forms.TextInput(attrs={'class': 'form-control'}),
+})
