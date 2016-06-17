@@ -73,6 +73,45 @@
             $('.save-report-button').on('click', function(e) {
                 e.preventDefault();
                 var href = $(this).attr('href');
+                var id = $(this).data('report-id');
+                var data = {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    start_time: $('.start-time-' + id).val(),
+                    end_time: $('.end-time-' + id).val(),
+                    shots_count: $('.shots-count-' + id).val(),
+                    sum_for_bar: $('.sum-for-bar-' + id).val(),
+                    discount: $('.discount-' + id).val()
+                };
+                $.ajax({
+                    url: href,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Отчет успешно обновлен.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location = '{% url 'reports:reports_by_week' %}' + window.location.search;
+                            }, 1000);
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при обновлении отчета.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    }
+                });
             });
         });
 
@@ -143,29 +182,29 @@
                                     </td>
                                     <td style="width:13%;" class="input_td">
                                         <div class="col-md-7 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.start_time|default:"--:--" }}" class="timepicker-input form-control">
+                                            <input type="text" value="{{ report.start_time|default:"--:--" }}" class="timepicker-input form-control start-time-{{ report.id }}">
                                         </div>
                                     </td>
                                     <td style="width:13%;" class="input_td">
                                         <div class="col-md-7 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.end_time|default:"--:--" }}" class="timepicker-input form-control">
+                                            <input type="text" value="{{ report.end_time|default:"--:--" }}" class="timepicker-input form-control end-time-{{ report.id }}">
                                         </div>
                                     </td>
                                     <td style="width:12%;" class="input_td">
                                         <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.shots_count|default_if_none:"" }}" class="form-control">
+                                            <input type="text" value="{{ report.shots_count|default_if_none:"" }}" class="form-control shots-count-{{ report.id }}">
                                         </div>
                                         <span class="number_text">шт.</span>
                                     </td>
                                     <td style="width:12%;" class="input_td">
                                         <div class="col-md-8 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.sum_for_bar|default_if_none:"" }}" class="form-control">
+                                            <input type="text" value="{{ report.sum_for_bar|default_if_none:"" }}" class="form-control sum-for-bar-{{ report.id }}">
                                         </div>
                                         <span class="number_text">руб.</span>
                                     </td>
                                     <td style="width:13%;" class="input_td">
                                         <div class="col-md-8 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.discount|default_if_none:"" }}" class="form-control">
+                                            <input type="text" value="{{ report.discount|default_if_none:"" }}" class="form-control discount-{{ report.id }}">
                                         </div>
                                         <span class="number_text">руб.</span>
                                     </td>
@@ -197,7 +236,7 @@
                                                 </div>
                                         </div>
 
-                                        <a href="{% url 'save_report' report.id %}" class="btn btn-xs btn-success save-report-button"
+                                        <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}" class="btn btn-xs btn-success save-report-button"
                                            title="Сохранить">
                                             <i class="fa fa-check"></i> Сохранить
                                         </a>

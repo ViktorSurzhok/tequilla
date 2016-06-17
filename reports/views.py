@@ -21,10 +21,10 @@ def reports_by_week(request):
     end_week = start_week + datetime.timedelta(6)
 
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])\
-        .exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK).order_by('-work_shift__date')
+        .exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
+        .order_by('-work_shift__date', 'is_filled')
     reports_struct = {}
     for report in reports:
-        #format_date = formats.date_format(report.work_shift.date, "d.m.Y")
         date = report.work_shift.date
         if date not in reports_struct:
             reports_struct[date] = []
@@ -63,7 +63,9 @@ def save_report(request, report_id):
     report = get_object_or_404(Report, id=report_id)
     form = UpdateReportForm(instance=report, data=request.POST)
     if form.is_valid():
-        form.save()
+        report = form.save()
+        report.is_filled = True
+        report.save()
         return JsonResponse({'complete': 1})
     else:
         print(form.errors)
