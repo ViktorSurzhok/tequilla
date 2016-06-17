@@ -9,6 +9,7 @@ from django.utils import formats
 from django.views.decorators.http import require_POST
 
 from club.models import Club
+from reports.models import Report
 from tequilla.decorators import group_required
 from work_calendar.forms import WorkShiftForm
 from work_calendar.models import WorkShift
@@ -24,7 +25,9 @@ def show_calendar(request):
     end_week = start_week + datetime.timedelta(6)
 
     # подготовка структурированного словаря с рабочими сменами
-    work_shifts = WorkShift.objects.filter(date__range=[start_week, end_week]).order_by('date')
+    work_shifts = WorkShift.objects.filter(
+        date__range=[start_week, end_week], employee__is_active=True
+    ).order_by('date')
     work_shifts_struct = {}
     for work_shift in work_shifts:
         club_id = work_shift.club.id
@@ -135,7 +138,8 @@ def save_work_shift(request):
     except WorkShift.DoesNotExist:
         form = WorkShiftForm(data=request.POST)
     if form.is_valid():
-        form.save()
+        work_shift = form.save()
+        Report.objects.get_or_create(work_shift=work_shift)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
 

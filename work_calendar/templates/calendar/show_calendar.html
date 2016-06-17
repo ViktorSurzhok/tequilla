@@ -32,13 +32,11 @@
             overflow: hidden;
         }
     </style>
-    <link href="{% static 'css/vendors/pnotify/dist/pnotify.css' %}" rel="stylesheet">
     <link href="{% static 'css/jquery.timepicker.css' %}" rel="stylesheet">
 {% endblock %}
 
 
 {% block additional_js %}
-    <script type="text/javascript" src="{% static 'js/vendors/pnotify/dist/pnotify.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
     <script type="text/javascript">
         $(function() {
@@ -105,7 +103,6 @@
                                             data: options,
                                             type: 'GET',
                                             success: function (response) {
-                                                console.log(response);
                                                 if (response['complete'] != '0') {
                                                     $('#bisy-table').html(response['complete']);
                                                     $('#bisy-table').show();
@@ -194,7 +191,7 @@
                             $('.ui-pnotify').fadeIn('slow');
                             setTimeout(function () {
                                 $('.ui-pnotify').fadeOut('fast');
-                            });
+                            }, 2000);
                         }
                     }
                 });

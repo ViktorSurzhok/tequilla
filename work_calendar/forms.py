@@ -10,7 +10,7 @@ class WorkShiftForm(forms.ModelForm):
     """
 
     employee = forms.ModelChoiceField(
-        queryset=Group.objects.get(name='employee').user_set.all(), required=True, label='Сотрудник'
+        queryset=Group.objects.get(name='employee').user_set.filter(is_active=True), required=True, label='Сотрудник'
     )
 
     class Meta:

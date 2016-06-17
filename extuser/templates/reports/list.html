@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Отчеты{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .address {
+            font-style: italic;
+        }
+
+        .report-user-name {
+            color: #FFAEAE;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+
+    <script type="text/javascript">
+        $(function() {
+            var timepicker_options = {
+                'timeFormat': 'H:i',
+                'step': 15
+            };
+            $('.timepicker-input').timepicker(timepicker_options);
+
+            // выбор недели по дате
+            $('#calendar').daterangepicker(calendar_options);
+            $('#calendar').on('apply.daterangepicker', function(e, picker) {
+                var date = picker.startDate.format('YYYY-MM-DD');
+                location = '{% url 'reports:reports_by_week' %}?start_date=' + date;
+            });
+
+            // нажатие кнопки сохранения комментария для отчета
+            $('.add-comment-button').on('click', function(e) {
+                e.preventDefault();
+                var id = $(this).data('report-id');
+                var data = {
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    id: id,
+                    comment: $('#comment_' + id).find('textarea').val()
+                };
+                $.ajax({
+                    url: '{% url 'reports:save_comment_for_report' %}',
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Комментарий успешно добавлен',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при добавлении комментария.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                        }
+                        $('.ui-pnotify').fadeIn('slow');
+                        setTimeout(function () {
+                            $('.ui-pnotify').fadeOut('fast');
+                        }, 2000);
+                    }
+                });
+            });
+
+            $('.save-report-button').on('click', function(e) {
+                e.preventDefault();
+                var href = $(this).attr('href');
+            });
+        });
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Отчеты
+                    <small>{{ start_week }} - {{ end_week }}</small>
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <a href="?week={{ prev_week }}&start_date={{ start_date }}">
+                    <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                </a>
+                <a href="?week={{ next_week }}&start_date={{ start_date }}">
+                    <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                </a>
+                <div class="small-margin-top">
+                    <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                </div>
+                {% for date, reports in reports_by_dates.items %}
+                    <div class="small-margin-top">
+                        <h2>{{ date|date:"d M Y" }} г.</h2>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr style="background-color:#eee">
+                                <th style="width:12%;">Информация</th>
+                                <th style="width:12%;">Заполнен</th>
+                                <th style="width:13%;">Приступила</th>
+                                <th style="width:13%;">Закончила</th>
+                                <th style="width:12%;">Кол-во шотов</th>
+                                <th style="width:12%;"><span title="Сумма, отданная в бар(с учетом скидки)">Cумма в бар</span>
+                                </th>
+                                <th style="width:13%;"><span
+                                        title="Сумма скидки(сумма перевода)">Cумма скидки</span></th>
+                                <th style="width:13%;">Операции</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for report in reports %}
+
+                                <tr style="background:#eee;">
+                                    <td style="width:12%;">
+                                        {% with shift=report.work_shift %}
+                                            <div><b>{{ shift.club.name }}</b></div>
+                                            <div class="address">{{ shift.club.get_address }}</div>
+                                            <div class="report-user-name">
+                                                {% if shift.special_config == 'trainee' %}
+                                                    Стажер
+                                                {% else %}
+                                                    {{ shift.employee.get_full_name }}
+                                                {% endif %}
+                                            </div>
+                                        {% endwith %}
+                                    </td>
+                                    <td style="width:12%;" class="input_td">
+                                        <span class="fons-style:italic;">{% if report.is_filled %}Да{% else %}
+                                            Нет{% endif %}</span>
+                                    </td>
+                                    <td style="width:13%;" class="input_td">
+                                        <div class="col-md-7 col-sm-12 col-xs-12 form-group">
+                                            <input type="text" value="{{ report.start_time|default:"--:--" }}" class="timepicker-input form-control">
+                                        </div>
+                                    </td>
+                                    <td style="width:13%;" class="input_td">
+                                        <div class="col-md-7 col-sm-12 col-xs-12 form-group">
+                                            <input type="text" value="{{ report.end_time|default:"--:--" }}" class="timepicker-input form-control">
+                                        </div>
+                                    </td>
+                                    <td style="width:12%;" class="input_td">
+                                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                            <input type="text" value="{{ report.shots_count|default_if_none:"" }}" class="form-control">
+                                        </div>
+                                        <span class="number_text">шт.</span>
+                                    </td>
+                                    <td style="width:12%;" class="input_td">
+                                        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+                                            <input type="text" value="{{ report.sum_for_bar|default_if_none:"" }}" class="form-control">
+                                        </div>
+                                        <span class="number_text">руб.</span>
+                                    </td>
+                                    <td style="width:13%;" class="input_td">
+                                        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+                                            <input type="text" value="{{ report.discount|default_if_none:"" }}" class="form-control">
+                                        </div>
+                                        <span class="number_text">руб.</span>
+                                    </td>
+                                    <td style="width:13%;" class="operations">
+                                            <a href="" class="btn btn-xs btn-dark open_drinks"
+                                               data-toggle="modal" title="Список напитков">
+                                                <i class="fa fa-glass"></i> Напитки/блюда
+                                            </a>
+                                            <a href="#comment_{{ report.id }}" class="btn btn-xs btn-info" data-toggle="modal"
+                                               title="Комментарий">
+                                                <i class="fa fa-comment"></i> Комментарий
+                                            </a>
+                                            <div class="modal" style="padding:20px; display: none;" id="comment_{{ report.id }}">
+                                                <div class="modal-dialog modal-lg" style="width: 660px;">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body">
+                                                            <label class="control-label">Комментарий</label>
+                                                            <textarea name="comment" style="width:100%;height: 150px;">{{ report.comment }}</textarea>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                                                <i class="fa fa-close"></i> Закрыть
+                                                            </button>
+                                                            <button class="btn btn-primary btn-large add-comment-button" data-report-id="{{ report.id }}" data-dismiss="modal">
+                                                                <i class="fa fa-check"></i> Сохранить
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        </div>
+
+                                        <a href="{% url 'save_report' report.id %}" class="btn btn-xs btn-success save-report-button"
+                                           title="Сохранить">
+                                            <i class="fa fa-check"></i> Сохранить
+                                        </a>
+                                            <a href=""
+                                               class="btn btn-xs btn-primary send_message_btn" target="_blank"
+                                               title="Сохранить">
+                                                <i class="fa fa-envelope"></i> Сообщение
+                                            </a>
+
+                                        {% comment %}<div class="modal modal_w_big hide" style="padding-top:20px;" id="drinks_26919">
+                                            <a class="btn btn-info add_more_drink"
+                                               style="margin-left:20px;">Добавить</a>
+                                            <div class="modal-body">
+                                                <table class="table table-striped table-bordered table-condensed"
+                                                       style="margin-top:10px;">
+                                                    <tbody>
+                                                    <tr>
+                                                        <th class="drink_name_th">Напиток/блюдо</th>
+                                                        <th>Цена в баре<br>за 1 шот/1 шт</th>
+                                                        <th>Цена продажи<br>за 1 шот/1 шт</th>
+                                                        <th>Количество шотов</th>
+                                                        <th></th>
+                                                        <th style="display:none;"></th>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-large close_drinks_not_save"
+                                                        data-dismiss="modal"><i class="icon-remove"></i> Отмена
+                                                </button>
+                                                <button class="btn btn-primary btn-large close_drinks_save"
+                                                        data-dismiss="modal"><i class="icon-ok icon-white"></i> Ок
+                                                </button>
+                                            </div>
+                                        </div>{% endcomment %}
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                        </tbody>
+                        </table>
+                    </div>
+                {% empty %}
+                    <h4>
+                        Нет отчетов за выбранную неделю.
+                    </h4>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -25,6 +25,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/maps/jquery-jvectormap-2.0.3.css' %}" />
   <link href="{% static 'css/icheck/flat/green.css' %}" rel="stylesheet" />
   <link href="{% static 'css/floatexamples.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/jquery.timepicker.css' %}" rel="stylesheet">
 
     {% block additional_css %}
     {% endblock %}
@@ -162,7 +163,7 @@
 
 
       <!-- page content -->
-      <div class="right_col" role="main">
+      <div class="right_col clearfix" role="main">
           {% block content %}{% endblock %}
       </div>
       <!-- /page content -->
@@ -207,6 +208,7 @@
   <script type="text/javascript" src="{% static 'js/flot/jquery.flot.stack.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/flot/curvedLines.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/flot/jquery.flot.resize.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/vendors/pnotify/dist/pnotify.js' %}"></script>
 
     {% block additional_js %}
     {% endblock %}
