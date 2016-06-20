@@ -1,0 +1,15 @@
+<tr class="drink-line">
+    <td class="col-md-9">
+        <select class="form-control drink-line-id">
+            {% for club_drink in report.work_shift.club.drink_set.all %}
+                <option value="{{ club_drink.id }}" {% if drink == club_drink %}selected{% endif %}>{{ club_drink.name }}</option>
+            {% endfor %}
+        </select>
+    </td>
+    <td class="col-md-2">
+        <input type="text" name="drink-count" class="form-control drink-line-count" {% if drink %}value="{{ drink.count }}"{% endif %}>
+    </td>
+    <td class="col-md-1">
+        <button class="btn btn-danger drink-remove-line"><i class="fa fa-remove"></i></button>
+    </td>
+</tr>

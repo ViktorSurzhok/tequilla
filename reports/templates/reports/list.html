@@ -12,6 +12,10 @@
         .report-user-name {
             color: #FFAEAE;
         }
+
+        .close_drinks_not_save {
+            margin-bottom: 0;
+        }
     </style>
 {% endblock %}
 
@@ -113,6 +117,83 @@
                     }
                 });
             });
+
+            // нажатие на кнопку добавления напитка к отчету
+            $('.add-more-drink').on('click', function(e) {
+                e.preventDefault();
+                var report_id = $(this).data('report-id');
+                var report_link = $(this).data('report-link');
+                $.ajax({
+                    url: report_link,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response['complete'] != '0' && response['complete'] != '') {
+                            $('#drinks_' + report_id + ' tbody').append(response['complete']);
+                        }
+                    }
+                });
+            });
+            // подгрузка напитков при открытии окна с напитками
+            $('.open_drinks').on('click', function(e) {
+                e.preventDefault();
+                var report_id = $(this).data('report-id');
+                var report_link = $(this).data('report-link');
+                console.log(report_link);
+                $.ajax({
+                    url: report_link,
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        if (response['complete'] != '0' && response['complete'] != '') {
+                            $('#drinks_' + report_id + ' tbody').html(response['complete']);
+                        }
+                    }
+                });
+            });
+
+            // нажатие на кнопку "Сохранить" в напитках
+            $('.close_drinks_save').on('click', function(e) {
+                e.preventDefault();
+                var report_link = $(this).data('report-link');
+                var report_id = $(this).data('report-id');
+                var drinks = [];
+                $('#drinks_' + report_id + ' .drink-line').each(function() {
+                    drinks.push({id: $(this).find('.drink-line-id').val(), count: $(this).find('.drink-line-count').val()});
+                });
+                drinks = JSON.stringify(drinks);
+                $.ajax({
+                    url: report_link,
+                    data: {'drinks[]': drinks, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Напитки успешно добавлены.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при сохранении напитков.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                        }
+                        $('.ui-pnotify').fadeIn('slow');
+                        setTimeout(function () {
+                            $('.ui-pnotify').fadeOut('fast');
+                        }, 2000);
+                    }
+                });
+            });
+
+            // нажатие на кнопку удаления напитка
+            $('.modal-body').on('click', '.drink-remove-line', function() {
+                var line = $(this).closest('.drink-line');
+                line.remove();
+            });
         });
 
     </script>
@@ -209,8 +290,11 @@
                                         <span class="number_text">руб.</span>
                                     </td>
                                     <td style="width:13%;" class="operations">
-                                            <a href="" class="btn btn-xs btn-dark open_drinks"
-                                               data-toggle="modal" title="Список напитков">
+                                            <a href="#drinks_{{ report.id }}" class="btn btn-xs btn-dark open_drinks"
+                                               data-toggle="modal"
+                                               title="Список напитков"
+                                               data-report-id="{{ report.id }}"
+                                               data-report-link="{% url 'reports:get_report_drinks' report.id %}">
                                                 <i class="fa fa-glass"></i> Напитки/блюда
                                             </a>
                                             <a href="#comment_{{ report.id }}" class="btn btn-xs btn-info" data-toggle="modal"
@@ -246,33 +330,43 @@
                                                 <i class="fa fa-envelope"></i> Сообщение
                                             </a>
 
-                                        {% comment %}<div class="modal modal_w_big hide" style="padding-top:20px;" id="drinks_26919">
-                                            <a class="btn btn-info add_more_drink"
-                                               style="margin-left:20px;">Добавить</a>
-                                            <div class="modal-body">
-                                                <table class="table table-striped table-bordered table-condensed"
-                                                       style="margin-top:10px;">
-                                                    <tbody>
-                                                    <tr>
-                                                        <th class="drink_name_th">Напиток/блюдо</th>
-                                                        <th>Цена в баре<br>за 1 шот/1 шт</th>
-                                                        <th>Цена продажи<br>за 1 шот/1 шт</th>
-                                                        <th>Количество шотов</th>
-                                                        <th></th>
-                                                        <th style="display:none;"></th>
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
+                                        <div class="modal modal_w_big" style="padding-top:20px; display: none;" id="drinks_{{ report.id }}">
+                                            <div class="modal-dialog modal-lg" style="width: 660px;">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">Редактирование напитков для отчета</h4>
+                                                    </div>
+                                                    <a class="btn btn-info add-more-drink small-margin-top"
+                                                       style="margin-left:20px;"
+                                                       data-report-id="{{ report.id }}"
+                                                        data-report-link="{% url 'reports:get_report_drink_template' report.id %}">Добавить</a>
+                                                    <div class="modal-body">
+                                                        <table class="table table-stripped table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Напиток</th>
+                                                                <th>Количество</th>
+                                                                <th></th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-large close_drinks_not_save"
+                                                                data-dismiss="modal"><i class="fa fa-remove"></i> Отмена
+                                                        </button>
+                                                        <button class="btn btn-primary btn-large close_drinks_save"
+                                                                data-dismiss="modal"
+                                                                data-report-link="{% url 'reports:save_report_drinks' report.id %}"
+                                                                data-report-id="{{ report.id }}">
+                                                            <i class="fa fa-check"></i> Сохранить
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-large close_drinks_not_save"
-                                                        data-dismiss="modal"><i class="icon-remove"></i> Отмена
-                                                </button>
-                                                <button class="btn btn-primary btn-large close_drinks_save"
-                                                        data-dismiss="modal"><i class="icon-ok icon-white"></i> Ок
-                                                </button>
-                                            </div>
-                                        </div>{% endcomment %}
+                                        </div>
                                     </td>
                                 </tr>
                         {% endfor %}

@@ -1,13 +1,17 @@
 import datetime
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
+from django.template.loader import render_to_string
 from django.utils import formats
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
+from club.models import Drink
 from reports.forms import UpdateReportForm
-from reports.models import Report
+from reports.models import Report, ReportDrink
 from tequilla.decorators import group_required
 from work_calendar.models import WorkShift
 
@@ -60,7 +64,10 @@ def save_comment_for_report(request):
 
 @login_required
 def save_report(request, report_id):
-    report = get_object_or_404(Report, id=report_id)
+    try:
+        report = Report.objects.get(id=report_id)
+    except Report.DoesNotExist:
+        return JsonResponse({'complete': 0})
     form = UpdateReportForm(instance=report, data=request.POST)
     if form.is_valid():
         report = form.save()
@@ -69,4 +76,44 @@ def save_report(request, report_id):
         return JsonResponse({'complete': 1})
     else:
         print(form.errors)
+        return JsonResponse({'complete': 0})
+
+
+@login_required
+def get_report_drinks(request, report_id):
+    try:
+        report = Report.objects.get(id=report_id)
+        data = {'complete': render_to_string('reports/_drinks.html', {'report': report})}
+        return JsonResponse(data)
+    except Report.DoesNotExist:
+        return JsonResponse({'complete': 0})
+
+
+@login_required
+def get_report_drink_template(request, report_id):
+    try:
+        report = Report.objects.get(id=report_id)
+        data = {'complete': render_to_string('reports/_drink.html', {'report': report})}
+        return JsonResponse(data)
+    except Report.DoesNotExist:
+        return JsonResponse({'complete': 0})
+
+
+@login_required
+@require_POST
+def save_report_drinks(request, report_id):
+    try:
+        report = Report.objects.get(id=report_id)
+        drinks = json.loads(request.POST.get('drinks[]', '[]'))
+        ReportDrink.objects.filter(report=report_id).delete()
+        for item in drinks:
+            if item['count']:
+                try:
+                    drink = Drink.objects.get(id=item['id'])
+                    ReportDrink.objects.create(report=report, drink=drink, count=item['count'])
+                except Drink.DoesNotExist:
+                    pass
+
+        return JsonResponse({'complete': 1})
+    except Report.DoesNotExist:
         return JsonResponse({'complete': 0})
