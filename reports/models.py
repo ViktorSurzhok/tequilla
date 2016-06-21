@@ -12,7 +12,7 @@ class Report(TimeStampedModel):
     sum_for_bar = models.IntegerField('Сумма в бар', blank=True, null=True)
     discount = models.IntegerField('Сумма скидки', blank=True, null=True)
     comment = models.TextField(blank=True)
-    is_filled = models.BooleanField(default=False)
+    filled_date = models.DateTimeField(null=True)
     work_shift = models.ForeignKey(WorkShift, verbose_name='Рабочая смена')
 
 

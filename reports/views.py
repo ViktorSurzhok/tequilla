@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import formats
 from django.utils.dateparse import parse_date
+from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
 from club.models import Drink
@@ -26,7 +27,7 @@ def reports_by_week(request):
 
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])\
         .exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
-        .order_by('-work_shift__date', 'is_filled')
+        .order_by('-work_shift__date', 'filled_date')
     reports_struct = {}
     for report in reports:
         date = report.work_shift.date
@@ -66,12 +67,16 @@ def save_comment_for_report(request):
 def save_report(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
+        # защита от редактирования чужих отчетов
+        if not (not request.user.groups.filter(name='employee').exists() or report.work_shift.employee == request.user):
+            return JsonResponse({'complete': 0})
     except Report.DoesNotExist:
         return JsonResponse({'complete': 0})
     form = UpdateReportForm(instance=report, data=request.POST)
     if form.is_valid():
         report = form.save()
-        report.is_filled = True
+        if not report.filled_date:
+            report.filled_date = now()
         report.save()
         return JsonResponse({'complete': 1})
     else:
@@ -104,6 +109,10 @@ def get_report_drink_template(request, report_id):
 def save_report_drinks(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
+        employee = report.work_shift.employee
+        # защита от редактирования напитков обычными сотрудниками напитков других сотрудников
+        if not (not request.user.groups.filter(name='employee').exists() or employee == request.user):
+            return JsonResponse({'complete': 0})
         drinks = json.loads(request.POST.get('drinks[]', '[]'))
         ReportDrink.objects.filter(report=report_id).delete()
         for item in drinks:

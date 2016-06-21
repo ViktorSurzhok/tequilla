@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block title %}Отчеты{% endblock %}
 
@@ -258,7 +259,7 @@
                                         {% endwith %}
                                     </td>
                                     <td style="width:12%;" class="input_td">
-                                        <span class="fons-style:italic;">{% if report.is_filled %}Да{% else %}
+                                        <span class="fons-style:italic;">{% if report.filled_date %}{{ report.filled_date }}{% else %}
                                             Нет{% endif %}</span>
                                     </td>
                                     <td style="width:13%;" class="input_td">
@@ -273,7 +274,7 @@
                                     </td>
                                     <td style="width:12%;" class="input_td">
                                         <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.shots_count|default_if_none:"" }}" class="form-control shots-count-{{ report.id }}">
+                                            <input type="text" value="{{ report.shots_count|default_if_none:""|intcomma }}" class="form-control shots-count-{{ report.id }}">
                                         </div>
                                         <span class="number_text">шт.</span>
                                     </td>

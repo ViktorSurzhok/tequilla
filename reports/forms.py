@@ -6,4 +6,6 @@ from .models import Report
 class UpdateReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        exclude = ('is_filled', 'work_shift')
+        exclude = ('filled_date', 'work_shift')
+        localized_fields = ('__all__')
+

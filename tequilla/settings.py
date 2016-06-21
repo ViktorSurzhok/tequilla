@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
+    'django.contrib.humanize'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -40,6 +41,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -126,5 +128,7 @@ DEFAULT_CLUB_PHOTO = STATIC_URL + 'img/default_club.png'
 STATIC_DIR = os.path.join(BASE_DIR, 'static/')
 
 STATIC_ROOT = STATIC_DIR
+
+
 
 from tequilla.settings_local import *
