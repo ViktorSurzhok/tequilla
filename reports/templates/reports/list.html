@@ -61,7 +61,7 @@
             });
 
             // нажатие кнопки сохранения комментария для отчета
-            $('.add-comment-button').on('click', function(e) {
+            $('#reports-container').on('click', '.add-comment-button', function(e) {
                 e.preventDefault();
                 var id = $(this).data('report-id');
                 var data = {
@@ -97,7 +97,7 @@
                 });
             });
 
-            $('.save-report-button').on('click', function(e) {
+            $('#reports-container').on('click', '.save-report-button', function(e) {
                 e.preventDefault();
                 var href = $(this).attr('href');
                 var id = $(this).data('report-id');
@@ -142,7 +142,7 @@
             });
 
             // нажатие на кнопку добавления напитка к отчету
-            $('.add-more-drink').on('click', function(e) {
+            $('#reports-container').on('click', '.add-more-drink', function(e) {
                 e.preventDefault();
                 var report_id = $(this).data('report-id');
                 var report_link = $(this).data('report-link');
@@ -157,16 +157,14 @@
                 });
             });
             // подгрузка напитков при открытии окна с напитками
-            $('.open_drinks').on('click', function(e) {
+            $('#reports-container').on('click', '.open_drinks', function(e) {
                 e.preventDefault();
                 var report_id = $(this).data('report-id');
                 var report_link = $(this).data('report-link');
-                console.log(report_link);
                 $.ajax({
                     url: report_link,
                     type: 'GET',
                     success: function (response) {
-                        console.log(response);
                         if (response['complete'] != '0' && response['complete'] != '') {
                             $('#drinks_' + report_id + ' tbody').html(response['complete']);
                         }
@@ -175,7 +173,7 @@
             });
 
             // нажатие на кнопку "Сохранить" в напитках
-            $('.close_drinks_save').on('click', function(e) {
+            $('#reports-container').on('click', '.close_drinks_save', function(e) {
                 e.preventDefault();
                 var report_link = $(this).data('report-link');
                 var report_id = $(this).data('report-id');

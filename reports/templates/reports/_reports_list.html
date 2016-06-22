@@ -1,5 +1,3 @@
-{% load humanize %}
-
 {% for date, reports in reports_by_dates %}
     <div class="small-margin-top">
         <h2>{{ date|date:"d M Y" }} г.</h2>
@@ -50,9 +48,8 @@
                         </div>
                     </td>
                     <td style="width:12%;" class="input_td">
-                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                            <input type="text" value="{{ report.shots_count|default_if_none:""|intcomma }}" class="form-control shots-count-{{ report.id }}">
-                        </div>
+
+                            <span>{{ report.get_shots_count }} </span>
                         <span class="number_text">шт.</span>
                     </td>
                     <td style="width:12%;" class="input_td">

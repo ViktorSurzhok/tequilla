@@ -427,7 +427,6 @@ class Command(BaseCommand):
                     report_obj = Report.objects.create(
                         start_time=start_time,
                         end_time=end_time,
-                        shots_count=shots_count,
                         sum_for_bar=bar_sum,
                         discount=sale_sum,
                         comment=comment,
