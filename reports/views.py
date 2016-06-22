@@ -12,6 +12,7 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
 from club.models import Drink, Club
+from extuser.models import ExtUser
 from reports.forms import UpdateReportForm
 from reports.models import Report, ReportDrink
 from tequilla.decorators import group_required
@@ -19,15 +20,28 @@ from work_calendar.models import WorkShift
 
 
 @login_required
-def reports_by_week(request):
+def reports_by_week(request, user_id=None):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
     date = start_date + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
-    reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])\
-        .exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
+    if request.user.has_perm('extuser.can_edit_users'):
+        employee = None
+    elif user_id is None or int(user_id) != request.user.id:
+        return Http404
+    else:
+        try:
+            employee = ExtUser.objects.get(id=request.user.id)
+        except ExtUser.DoesNotExist:
+            return Http404
+
+    reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])
+    if employee:
+        reports = reports.filter(work_shift__employee=employee)
+
+    reports.exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
         .order_by('-work_shift__date', 'filled_date')
 
     reports_struct = {}
@@ -86,7 +100,7 @@ def reports_filter(request):
         rendered_blocks = {
             'reports': render_to_string(
                 'reports/_reports_list.html',
-                {'reports_by_dates': sorted(reports_struct.items(), reverse=True)}
+                {'reports_by_dates': sorted(reports_struct.items(), reverse=True), 'can_edit_users': True}
             ),
         }
     else:

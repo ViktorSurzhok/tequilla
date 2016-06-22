@@ -101,12 +101,13 @@
                            title="Сохранить">
                             <i class="fa fa-check"></i> Сохранить
                         </a>
+                        {% if can_edit_users %}
                             <a href=""
                                class="btn btn-xs btn-primary send_message_btn" target="_blank"
                                title="Сохранить">
                                 <i class="fa fa-envelope"></i> Сообщение
                             </a>
-
+                        {% endif %}
                         <div class="modal modal_w_big" style="padding-top:20px; display: none;" id="drinks_{{ report.id }}">
                             <div class="modal-dialog modal-lg" style="width: 660px;">
                                 <div class="modal-content">

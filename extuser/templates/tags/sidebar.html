@@ -27,7 +27,7 @@
                     <a href=""><i class="fa fa-calendar"></i> Расписание </a>
                 </li>
                 <li>
-                    <a href=""><i class="fa fa-flag-checkered"></i> Отчеты и перевод </a>
+                    <a href="{% url 'reports:myreports' user.id %}"><i class="fa fa-flag-checkered"></i> Отчеты и перевод </a>
                 </li>
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
