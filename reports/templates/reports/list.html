@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
-{% load humanize %}
 
 {% block title %}Отчеты{% endblock %}
 
@@ -30,6 +29,29 @@
                 'step': 15
             };
             $('.timepicker-input').timepicker(timepicker_options);
+
+
+            function getNewContent() {
+                // сбор данных фильтров
+                var employee = $('#filter-employee').val(),
+                    club = $('#filter-club').val(),
+                    type = $('#filter-type').val();
+                var filters = '?work_shift__employee=' + employee + '&work_shift__club=' + club +
+                        '&start_week={{ start_week|date:"Y-m-d" }}&end_week={{ end_week|date:"Y-m-d" }}';
+                if (type != '-1') {
+                    filters += '&filled_date__isnull=' + type;
+                }
+                // запрос нового контента
+                $.ajax({
+                    url: '{{ filter_reports_link }}' + filters,
+                    type: 'GET',
+                    dataType: 'jsonp',
+                    crossDomain: true,
+                    success: function (data) {
+                        $('#reports-container').html(data['reports']);
+                    }
+                });
+            }
 
             // выбор недели по дате
             $('#calendar').daterangepicker(calendar_options);
@@ -195,6 +217,12 @@
                 var line = $(this).closest('.drink-line');
                 line.remove();
             });
+
+            // смена фильтра
+            $('.filters select').on('change', function(e) {
+                e.preventDefault();
+                getNewContent();
+            })
         });
 
     </script>
@@ -223,162 +251,51 @@
                 <div class="small-margin-top">
                     <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
                 </div>
-                {% for date, reports in reports_by_dates.items %}
-                    <div class="small-margin-top">
-                        <h2>{{ date|date:"d M Y" }} г.</h2>
-                        <table class="table table-striped table-bordered">
-                            <thead>
-                            <tr style="background-color:#eee">
-                                <th style="width:12%;">Информация</th>
-                                <th style="width:12%;">Заполнен</th>
-                                <th style="width:13%;">Приступила</th>
-                                <th style="width:13%;">Закончила</th>
-                                <th style="width:12%;">Кол-во шотов</th>
-                                <th style="width:12%;"><span title="Сумма, отданная в бар(с учетом скидки)">Cумма в бар</span>
+                {% if perms.extuser.can_edit_users %}
+                    <div class="filters">
+                        <table>
+                            <tr>
+                                <th>
+                                    <div>Заведение</div>
+                                    <div class="col-md-12 row">
+                                      <select class="form-control" id="filter-club">
+                                            <option value=""></option>
+                                            {% for club in clubs %}
+                                                <option value="{{ club.id }}">
+                                                    {{ club.name }} {% if club.metro %}(м.{{ club.metro.name }}){% endif %}
+                                                </option>
+                                            {% endfor %}
+                                      </select>
+                                    </div>
                                 </th>
-                                <th style="width:13%;"><span
-                                        title="Сумма скидки(сумма перевода)">Cумма скидки</span></th>
-                                <th style="width:13%;">Операции</th>
+                                <th>
+                                    <div>Сотрудник</div>
+                                    <div class="col-md-12 row">
+                                      <select class="form-control" id="filter-employee">
+                                            <option value=""></option>
+                                            {% for employee in employees %}
+                                                <option value="{{ employee.id }}">{{ employee.get_full_name }}</option>
+                                            {% endfor %}
+                                      </select>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div>Тип</div>
+                                    <div class="col-md-12 row">
+                                      <select class="form-control" id="filter-type">
+                                            <option value="-1">Все</option>
+                                            <option value="0">Заполненные</option>
+                                            <option value="1">Не заполненные</option>
+                                      </select>
+                                    </div>
+                                </th>
                             </tr>
-                            </thead>
-                            <tbody>
-                            {% for report in reports %}
-
-                                <tr style="background:#eee;">
-                                    <td style="width:12%;">
-                                        {% with shift=report.work_shift %}
-                                            <div><b>{{ shift.club.name }}</b></div>
-                                            <div class="address">{{ shift.club.get_address }}</div>
-                                            <div class="report-user-name">
-                                                {% if shift.special_config == 'trainee' %}
-                                                    Стажер
-                                                {% else %}
-                                                    {{ shift.employee.get_full_name }}
-                                                {% endif %}
-                                            </div>
-                                        {% endwith %}
-                                    </td>
-                                    <td style="width:12%;" class="input_td">
-                                        <span class="fons-style:italic;">{% if report.filled_date %}{{ report.filled_date }}{% else %}
-                                            Нет{% endif %}</span>
-                                    </td>
-                                    <td style="width:13%;" class="input_td">
-                                        <div class="col-md-7 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.start_time|default:"--:--" }}" class="timepicker-input form-control start-time-{{ report.id }}">
-                                        </div>
-                                    </td>
-                                    <td style="width:13%;" class="input_td">
-                                        <div class="col-md-7 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.end_time|default:"--:--" }}" class="timepicker-input form-control end-time-{{ report.id }}">
-                                        </div>
-                                    </td>
-                                    <td style="width:12%;" class="input_td">
-                                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.shots_count|default_if_none:""|intcomma }}" class="form-control shots-count-{{ report.id }}">
-                                        </div>
-                                        <span class="number_text">шт.</span>
-                                    </td>
-                                    <td style="width:12%;" class="input_td">
-                                        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.sum_for_bar|default_if_none:"" }}" class="form-control sum-for-bar-{{ report.id }}">
-                                        </div>
-                                        <span class="number_text">руб.</span>
-                                    </td>
-                                    <td style="width:13%;" class="input_td">
-                                        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
-                                            <input type="text" value="{{ report.discount|default_if_none:"" }}" class="form-control discount-{{ report.id }}">
-                                        </div>
-                                        <span class="number_text">руб.</span>
-                                    </td>
-                                    <td style="width:13%;" class="operations">
-                                            <a href="#drinks_{{ report.id }}" class="btn btn-xs btn-dark open_drinks"
-                                               data-toggle="modal"
-                                               title="Список напитков"
-                                               data-report-id="{{ report.id }}"
-                                               data-report-link="{% url 'reports:get_report_drinks' report.id %}">
-                                                <i class="fa fa-glass"></i> Напитки/блюда
-                                            </a>
-                                            <a href="#comment_{{ report.id }}" class="btn btn-xs btn-info" data-toggle="modal"
-                                               title="Комментарий">
-                                                <i class="fa fa-comment"></i> Комментарий
-                                            </a>
-                                            <div class="modal" style="padding:20px; display: none;" id="comment_{{ report.id }}">
-                                                <div class="modal-dialog modal-lg" style="width: 660px;">
-                                                    <div class="modal-content">
-                                                        <div class="modal-body">
-                                                            <label class="control-label">Комментарий</label>
-                                                            <textarea name="comment" style="width:100%;height: 150px;">{{ report.comment }}</textarea>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-default" data-dismiss="modal">
-                                                                <i class="fa fa-close"></i> Закрыть
-                                                            </button>
-                                                            <button class="btn btn-primary btn-large add-comment-button" data-report-id="{{ report.id }}" data-dismiss="modal">
-                                                                <i class="fa fa-check"></i> Сохранить
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                        </div>
-
-                                        <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}" class="btn btn-xs btn-success save-report-button"
-                                           title="Сохранить">
-                                            <i class="fa fa-check"></i> Сохранить
-                                        </a>
-                                            <a href=""
-                                               class="btn btn-xs btn-primary send_message_btn" target="_blank"
-                                               title="Сохранить">
-                                                <i class="fa fa-envelope"></i> Сообщение
-                                            </a>
-
-                                        <div class="modal modal_w_big" style="padding-top:20px; display: none;" id="drinks_{{ report.id }}">
-                                            <div class="modal-dialog modal-lg" style="width: 660px;">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title">Редактирование напитков для отчета</h4>
-                                                    </div>
-                                                    <a class="btn btn-info add-more-drink small-margin-top"
-                                                       style="margin-left:20px;"
-                                                       data-report-id="{{ report.id }}"
-                                                        data-report-link="{% url 'reports:get_report_drink_template' report.id %}">Добавить</a>
-                                                    <div class="modal-body">
-                                                        <table class="table table-stripped table-bordered">
-                                                            <thead>
-                                                            <tr>
-                                                                <th>Напиток</th>
-                                                                <th>Количество</th>
-                                                                <th></th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-large close_drinks_not_save"
-                                                                data-dismiss="modal"><i class="fa fa-remove"></i> Отмена
-                                                        </button>
-                                                        <button class="btn btn-primary btn-large close_drinks_save"
-                                                                data-dismiss="modal"
-                                                                data-report-link="{% url 'reports:save_report_drinks' report.id %}"
-                                                                data-report-id="{{ report.id }}">
-                                                            <i class="fa fa-check"></i> Сохранить
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                        {% endfor %}
-                        </tbody>
                         </table>
                     </div>
-                {% empty %}
-                    <h4>
-                        Нет отчетов за выбранную неделю.
-                    </h4>
-                {% endfor %}
+                {% endif %}
+                <div id="reports-container">
+                    {% include 'reports/_reports_list.html' %}
+                </div>
             </div>
         </div>
     </div>

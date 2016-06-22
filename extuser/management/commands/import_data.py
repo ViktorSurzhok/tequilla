@@ -1,3 +1,4 @@
+import datetime
 import requests
 import urllib
 from django.core.files import File
@@ -6,12 +7,14 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
 from club.forms import ClubImportForm
-from club.models import Club, Metro, ClubType, DayOfWeek
+from club.models import Club, Metro, ClubType, DayOfWeek, Drink
 from extuser.forms import UserImportForm
 from extuser.models import ExtUser
 from album.models import Album, Photo
+from reports.models import Report, ReportDrink
 
 from tequilla import settings
+from work_calendar.models import WorkShift
 
 try:
     from BeautifulSoup import BeautifulSoup
@@ -28,7 +31,7 @@ class Command(BaseCommand):
         parser.add_argument('type', nargs=1, type=str)
 
         parser.add_argument('--last_page', default=274, help='last photos page')
-        parser.add_argument('--count_page', default=2, help='pages count for download photos')
+        parser.add_argument('--count_page', default=2, help='pages count for download photos or reports')
 
     # возвращает залогиненую сессию
     def get_session(self):
@@ -343,6 +346,126 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Imported "%s" clubs' % self.clubs_count))
 
+    # загружает отчеты
+    def get_reports(self, count_page):
+        s = self.get_session()
+        week = -1
+        while count_page:
+            count_page -= 1
+            parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/reports/index/week/' + str(week))
+            self.stdout.write(self.style.SUCCESS('Get from page "%s" ' % week))
+            week -= 1
+            tables = parsed_html.body.find_all('tbody')
+            reports_count = 0
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    tds = row.find_all('td')
+                    # пропуск пустых tr
+                    if not len(tds):
+                        continue
+                    # пропуск tr не относящихся к отчетам
+                    if row.find('a', attrs={'class': 'save_report'}) is None:
+                        continue
+                    # пропуск не созданных отчетов
+                    report_id = row.find('a', attrs={'class': 'save_report'})['href']
+                    if 'create' in report_id:
+                        continue
+                    report_id = report_id.split('/')[-1]
+                    # не добавлять если отчет уже был добавлен
+                    if Report.objects.filter(old_id=report_id).exists():
+                        continue
+
+                    club_id = tds[0].find('input', attrs={'name': 'club_id'})['value']
+                    try:
+                        club_obj = Club.objects.get(old_id=club_id)
+                    except Club.DoesNotExist:
+                        club_obj = self.get_club_info(club_id, s)
+
+                    user_id = row.find('a', attrs={'class': 'send_message_btn'})['href']
+                    user_id = user_id.split('/')[-1]
+                    try:
+                        user_obj = ExtUser.objects.get(old_id=user_id)
+                    except ExtUser.DoesNotExist:
+                        user_obj = self.get_employee_info(user_id, s)
+
+                    created_date = tds[1].text
+                    month_names = {'янв': '01', 'фев': '02', 'мар': '03', 'апр': '04', 'мая': '05', 'июн': '06',
+                                   'июл': '07', 'авг': '08', 'сен': '09', 'окт': '10', 'ноя': '11', 'дек': '12'}
+                    created_date = created_date.split()
+                    created_date[1] = month_names[created_date[1]]
+                    created_date = ' '.join(created_date)
+                    parsed_created_date = datetime.datetime.strptime(created_date, "%d %m %Y г.%H:%M")
+
+                    start_time_hour = tds[2].find(
+                        'select', attrs={'name': 'start_time_hour'}).find('option', attrs={'selected': 'selected'})['value']
+                    start_time_min = tds[2].find(
+                        'select', attrs={'name': 'start_time_min'}).find('option', attrs={'selected': 'selected'})['value']
+                    end_time_hour = tds[3].find(
+                        'select', attrs={'name': 'end_time_hour'}).find('option', attrs={'selected': 'selected'})['value']
+                    end_time_min = tds[3].find(
+                        'select', attrs={'name': 'end_time_min'}).find('option', attrs={'selected': 'selected'})['value']
+                    start_time = start_time_hour+':'+start_time_min
+                    end_time = end_time_hour+':'+end_time_min
+
+                    shots_count = tds[4].find('input', attrs={'name': 'shot_count'})['value']
+                    bar_sum = tds[5].find('input', attrs={'name': 'bar_sum'})['value']
+                    sale_sum = tds[6].find('input', attrs={'name': 'sale_sum'})['value']
+
+                    for_date = tds[7].find('input', attrs={'name': 'date'})['value']
+                    for_date = datetime.datetime.strptime(for_date, '%d.%m.%Y')
+                    work_shift, created = WorkShift.objects.get_or_create(
+                        club=club_obj,
+                        employee=user_obj,
+                        start_time=start_time,
+                        end_time=end_time,
+                        date=for_date.date(),
+                        special_config=WorkShift.SPECIAL_CONFIG_EMPLOYEE
+                    )
+
+                    comment = row.find('div', attrs={'id': 'comment_' + str(report_id)}).find('textarea').text
+                    report_obj = Report.objects.create(
+                        start_time=start_time,
+                        end_time=end_time,
+                        shots_count=shots_count,
+                        sum_for_bar=bar_sum,
+                        discount=sale_sum,
+                        comment=comment,
+                        filled_date=parsed_created_date,
+                        work_shift=work_shift,
+                        old_id=report_id
+                    )
+
+                    reports_count += 1
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            'Add report for club "%s" and date %s and employee %s' % (club_obj.name, for_date, user_obj.get_full_name())
+                        )
+                    )
+
+                    # напитки
+                    task_id = row.find('input', attrs={'name': 'task_id'})['value']
+                    drinks = row.find('div', attrs={'id': 'drinks_' + str(task_id)}).find_all('tr', attrs={'class': 'data'})
+                    drink_count_stats = 0
+                    for drink in drinks:
+                        drink_count_stats += 1
+                        drink_name = drink.find('input', attrs={'class': 'drink_name'})['value']
+                        bar_price = drink.find('input', attrs={'name': 'bar_price'})['value']
+                        sell_price = drink.find('input', attrs={'name': 'sell_price'})['value']
+                        drink_count = drink.find('input', attrs={'name': 'drink_count'})['value']
+                        try:
+                            drink_obj = Drink.objects.get(name=drink_name, club=club_obj)
+                        except:
+                            drink_obj = Drink.objects.create(
+                                name=drink_name,
+                                club=club_obj,
+                                price_in_bar=bar_price,
+                                price_for_sale=sell_price
+                            )
+                        ReportDrink.objects.get_or_create(drink=drink_obj, report=report_obj, count=drink_count)
+                    self.stdout.write(self.style.SUCCESS('Drinks for this report "%s" ' % drink_count_stats))
+        self.stdout.write(self.style.SUCCESS('Total reports added "%s" ' % reports_count))
+
     def handle(self, *args, **options):
         if options['type'][0] == 'girls':
             self.get_girls()
@@ -352,5 +475,7 @@ class Command(BaseCommand):
             self.get_clubs()
         elif options['type'][0] == 'photos':
             self.get_photos(int(options['last_page']), int(options['count_page']))
+        elif options['type'][0] == 'reports':
+            self.get_reports(int(options['count_page']))
         else:
             self.stdout.write(self.style.SUCCESS('Wrong argument. Try "girls" or "photos"'))

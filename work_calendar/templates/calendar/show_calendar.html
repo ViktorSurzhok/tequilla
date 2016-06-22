@@ -146,7 +146,8 @@
                 $('#form-container').hide();
                 $('#loader').css({display: 'block'});
                 openTestModal({
-                    href: $(this).attr('href')
+                    href: $(this).attr('href'),
+                    date: reformat_date($(this).data('date'))
                 });
             });
 
@@ -274,7 +275,10 @@
                                         {% for work_shift in day.work_shifts %}
                                             <div class="users-registred">
                                                 <div>
-                                                    <a href="{% url 'calendar:get_work_shift_form' work_shift.id %}" data-toggle="modal" title="Редактировать" class="btn {% if work_shift.special_config == 'cant_work' %}btn-danger{% else %}btn-dark{% endif %} btn-xs main-user-info">
+                                                    <a href="{% url 'calendar:get_work_shift_form' work_shift.id %}"
+                                                       data-toggle="modal" title="Редактировать"
+                                                       data-date="{{ day.date }}"
+                                                       class="btn {% if work_shift.special_config == 'cant_work' %}btn-danger{% else %}btn-dark{% endif %} btn-xs main-user-info">
                                                         {% if work_shift.special_config == 'employee' %}
                                                             {{ work_shift.employee.get_full_name }}
                                                             <br>

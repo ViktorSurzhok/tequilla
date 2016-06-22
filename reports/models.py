@@ -14,12 +14,13 @@ class Report(TimeStampedModel):
     comment = models.TextField(blank=True)
     filled_date = models.DateTimeField(null=True)
     work_shift = models.ForeignKey(WorkShift, verbose_name='Рабочая смена')
+    old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
 
 
 class ReportDrink(TimeStampedModel):
     drink = models.ForeignKey(Drink, verbose_name='Напиток')
     report = models.ForeignKey(Report, verbose_name='Отчет', related_name='drinks')
-    count = models.IntegerField(verbose_name='Количество')
+    count = models.DecimalField(verbose_name='Количество', decimal_places=1, max_digits=5)
 
     def __str__(self):
         return self.drink.name

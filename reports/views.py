@@ -2,15 +2,16 @@ import datetime
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.http import JsonResponse, Http404, HttpResponse
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils import formats
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
-from club.models import Drink
+from club.models import Drink, Club
 from reports.forms import UpdateReportForm
 from reports.models import Report, ReportDrink
 from tequilla.decorators import group_required
@@ -28,25 +29,70 @@ def reports_by_week(request):
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])\
         .exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
         .order_by('-work_shift__date', 'filled_date')
+
     reports_struct = {}
+    clubs = []
+    employees = []
+
     for report in reports:
         date = report.work_shift.date
         if date not in reports_struct:
             reports_struct[date] = []
+        clubs.append(report.work_shift.club)
+        employees.append(report.work_shift.employee)
         reports_struct[date].append(report)
 
     return render(
         request,
         'reports/list.html',
         {
-            'reports_by_dates': reports_struct,
+            'reports_by_dates': sorted(reports_struct.items(), reverse=True),
             'next_week': week_offset + 1,
             'prev_week': week_offset - 1,
             'start_week': start_week,
             'end_week': end_week,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
+            'clubs': sorted(set(clubs), key=lambda item: item.name),
+            'employees': sorted(set(employees), key=lambda item: item.get_full_name()),
+            'filter_reports_link': reverse('reports:reports_filter')
         }
     )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def reports_filter(request):
+    if 'callback' in request.GET:
+        start_week = request.GET['start_week']
+        end_week = request.GET['end_week']
+        object_list = Report.objects.filter(work_shift__date__range=[start_week, end_week])
+        filters = ['work_shift__employee', 'work_shift__club', 'filled_date__isnull']
+        for filter_name in filters:
+            filter_value = request.GET.get(filter_name, '')
+            if filter_value != '':
+                filter_pack = {filter_name: int(filter_value)}
+                object_list = object_list.filter(**filter_pack)
+
+        object_list.exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
+            .order_by('-work_shift__date', 'filled_date')
+        reports_struct = {}
+
+        for report in object_list:
+            date = report.work_shift.date
+            if date not in reports_struct:
+                reports_struct[date] = []
+            reports_struct[date].append(report)
+
+        rendered_blocks = {
+            'reports': render_to_string(
+                'reports/_reports_list.html',
+                {'reports_by_dates': sorted(reports_struct.items(), reverse=True)}
+            ),
+        }
+    else:
+        rendered_blocks = {'reports': ''}
+    data = '%s(%s);' % (request.GET['callback'], json.dumps(rendered_blocks))
+    return HttpResponse(data, "text/javascript")
 
 
 @login_required
