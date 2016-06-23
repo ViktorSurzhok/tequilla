@@ -65,13 +65,55 @@
                         <span class="number_text">руб.</span>
                     </td>
                     <td style="width:13%;" class="operations">
-                            <a href="#drinks_{{ report.id }}" class="btn btn-xs btn-dark open_drinks"
+                            <a href="#drinks_{{ report.id }}" class="btn btn-xs {% if report.drinks.count %}btn-dark{% else %}btn-danger{% endif %} open_drinks"
                                data-toggle="modal"
-                               title="Список напитков"
+                               title="Напитки и блюда"
                                data-report-id="{{ report.id }}"
                                data-report-link="{% url 'reports:get_report_drinks' report.id %}">
                                 <i class="fa fa-glass"></i> Напитки/блюда
                             </a>
+                            <!-- убрать -->
+                            {% if can_edit_report_transfer %}
+                                <a href="#report_transfer_{{ report.id }}"
+                                   class="btn btn-xs {% if report.transfer_accepted == 1 %}btn-info{% elif report.transfer_accepted == 2 %}btn-warning{% else %}btn-default{% endif %}"
+                                   data-toggle="modal"
+                                   title="Перевод">
+                                    <i class="fa fa-share"></i> Перевод
+                                </a>
+                                <div class="modal report-transfer-container" style="padding:20px; display: none;" id="report_transfer_{{ report.id }}">
+                                    <div class="modal-dialog modal-lg" style="width: 660px;">
+                                        <div class="modal-content">
+                                            <div class="modal-body">
+                                                <form method="POST" data-parsley-validate="" class="form-horizontal form-label-left"
+                                                      action="{% url 'reports:report_transfer_save' %}" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                                                    {% for field in report.transfer_form %}
+                                                        <div class="form-group">
+                                                            {% if field.name != 'employee' and field.name != 'start_week' %}
+                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                                                    {{ field.label }} {% if field.field.required %}
+                                                                    <span class="required">*</span>{% endif %}
+                                                                </label>
+                                                            {% endif %}
+                                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                {{ field }}
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-bottom: 0;">
+                                                    <i class="fa fa-close"></i> Закрыть
+                                                </button>
+                                                <button class="btn btn-primary btn-large save-report-transfer-button" data-report-id="{{ report.id }}" data-dismiss="modal">
+                                                    <i class="fa fa-check"></i> Сохранить
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                             <a href="#comment_{{ report.id }}"
                                class="btn btn-xs {% if report.comment %}btn-danger{% else %}btn-info{% endif %}"
                                data-toggle="modal"
@@ -106,6 +148,12 @@
                                class="btn btn-xs btn-primary send_message_btn" target="_blank"
                                title="Сохранить">
                                 <i class="fa fa-envelope"></i> Сообщение
+                            </a>
+                            <br>
+                            <a href="{% url 'reports:report_delete' report.id %}"
+                               class="btn btn-xs btn-danger remove-report-link" target="_blank"
+                               title="Удалить">
+                                <i class="fa fa-remove"></i> Удалить
                             </a>
                         {% endif %}
                         <div class="modal modal_w_big" style="padding-top:20px; display: none;" id="drinks_{{ report.id }}">

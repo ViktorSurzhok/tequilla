@@ -4,7 +4,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse, Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils import formats
 from django.utils.dateparse import parse_date
@@ -13,8 +13,8 @@ from django.views.decorators.http import require_POST
 
 from club.models import Drink, Club
 from extuser.models import ExtUser
-from reports.forms import UpdateReportForm
-from reports.models import Report, ReportDrink
+from reports.forms import UpdateReportForm, ReportTransferForm, ReportTransferFormForAdmin
+from reports.models import Report, ReportDrink, ReportTransfer
 from tequilla.decorators import group_required
 from work_calendar.models import WorkShift
 
@@ -40,6 +40,13 @@ def reports_by_week(request, user_id=None):
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])
     if employee:
         reports = reports.filter(work_shift__employee=employee)
+        try:
+            report_transfer = ReportTransfer.objects.get(employee=employee, start_week=start_week)
+            report_transfer_form = ReportTransferForm(instance=report_transfer)
+        except ReportTransfer.DoesNotExist:
+            report_transfer_form = ReportTransferForm(initial={'employee': employee, 'start_week': start_week})
+    else:
+        report_transfer_form = ReportTransferForm()
 
     reports.exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)\
         .order_by('-work_shift__date', 'filled_date')
@@ -54,6 +61,17 @@ def reports_by_week(request, user_id=None):
             reports_struct[date] = []
         clubs.append(report.work_shift.club)
         employees.append(report.work_shift.employee)
+        try:
+            report_transfer = ReportTransfer.objects.get(employee=report.work_shift.employee, start_week=start_week)
+            transfer_accepted = 1 if report_transfer.is_accepted else 2
+            transfer_form = ReportTransferFormForAdmin(instance=report_transfer)
+        except ReportTransfer.DoesNotExist:
+            transfer_form = ReportTransferFormForAdmin(
+                initial={'employee': report.work_shift.employee, 'start_week': start_week}
+            )
+            transfer_accepted = 3
+        report.transfer_form = transfer_form
+        report.transfer_accepted = transfer_accepted
         reports_struct[date].append(report)
 
     return render(
@@ -68,7 +86,9 @@ def reports_by_week(request, user_id=None):
             'start_date': formats.date_format(start_date, 'Y-m-d'),
             'clubs': sorted(set(clubs), key=lambda item: item.name),
             'employees': sorted(set(employees), key=lambda item: item.get_full_name()),
-            'filter_reports_link': reverse('reports:reports_filter')
+            'filter_reports_link': reverse('reports:reports_filter'),
+            'report_transfer_form': report_transfer_form,
+            'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer')
         }
     )
 
@@ -100,7 +120,11 @@ def reports_filter(request):
         rendered_blocks = {
             'reports': render_to_string(
                 'reports/_reports_list.html',
-                {'reports_by_dates': sorted(reports_struct.items(), reverse=True), 'can_edit_users': True}
+                {
+                    'reports_by_dates': sorted(reports_struct.items(), reverse=True),
+                    'can_edit_users': True,
+                    'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer')
+                }
             ),
         }
     else:
@@ -183,6 +207,40 @@ def save_report_drinks(request, report_id):
                 except Drink.DoesNotExist:
                     pass
 
+        return JsonResponse({'complete': 1})
+    except Report.DoesNotExist:
+        return JsonResponse({'complete': 0})
+
+
+@login_required
+@require_POST
+def report_transfer_save(request):
+    try:
+        employee = ExtUser.objects.get(id=request.POST.get('employee', 0))
+        date = parse_date(str(datetime.date.today()))
+        start_week = date - datetime.timedelta(date.weekday())
+        report_transfer = ReportTransfer.objects.get(employee=employee, start_week=request.POST.get('start_week', start_week))
+        if 'is_accepted' in request.POST:
+            report_transfer_form = ReportTransferFormForAdmin(data=request.POST, instance=report_transfer)
+        else:
+            report_transfer_form = ReportTransferForm(data=request.POST, instance=report_transfer)
+    except (ExtUser.DoesNotExist, ReportTransfer.DoesNotExist):
+        if 'is_accepted' in request.POST:
+            report_transfer_form = ReportTransferFormForAdmin(data=request.POST)
+        else:
+            report_transfer_form = ReportTransferForm(data=request.POST)
+    if report_transfer_form.is_valid():
+        report_transfer_form.save()
+        # todo: отправка уведомления директору
+        return JsonResponse({'complete': 1})
+    return JsonResponse({'complete': 0})
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def report_delete(request, report_id):
+    try:
+        Report.objects.get(id=report_id).delete()
         return JsonResponse({'complete': 1})
     except Report.DoesNotExist:
         return JsonResponse({'complete': 0})

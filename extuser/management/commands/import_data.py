@@ -11,7 +11,7 @@ from club.models import Club, Metro, ClubType, DayOfWeek, Drink
 from extuser.forms import UserImportForm
 from extuser.models import ExtUser
 from album.models import Album, Photo
-from reports.models import Report, ReportDrink
+from reports.models import Report, ReportDrink, ReportTransfer
 
 from tequilla import settings
 from work_calendar.models import WorkShift
@@ -346,6 +346,29 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Imported "%s" clubs' % self.clubs_count))
 
+    # загружает перевод для отчета
+    def get_transfer(self, url, session, work_shift):
+        parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/' + url)
+        transfer_id = url.split('/')[4]
+        try:
+            ReportTransfer.objects.get(old_id=transfer_id)
+            return 1
+        except ReportTransfer.DoesNotExist:
+            pass
+
+        form = parsed_html.find('form', attrs={'id': 'payment-form'})
+        data = {
+            'total_sum': form.find('input', attrs={'id': 'ReportPay_sum'})['value'],
+            'transfer_type': form.find('textarea', attrs={'id': 'ReportPay_pay_text'}).text,
+            'comment': form.find('textarea', attrs={'id': 'ReportPay_comment'}).text,
+            'created': datetime.datetime.strptime(form.find_all('span')[1].text, '%d.%m.%Y %H:%M'),
+            'is_accepted': form.find('input', attrs={'id': 'ReportPay_confirmed', 'checked': 'checked'}) is not None,
+            'old_id': transfer_id,
+            'employee': work_shift.employee,
+            'start_week': work_shift.date - datetime.timedelta(work_shift.date.weekday())
+        }
+        ReportTransfer.objects.create(**data)
+
     # загружает отчеты
     def get_reports(self, count_page):
         s = self.get_session()
@@ -408,7 +431,6 @@ class Command(BaseCommand):
                     start_time = start_time_hour+':'+start_time_min
                     end_time = end_time_hour+':'+end_time_min
 
-                    shots_count = tds[4].find('input', attrs={'name': 'shot_count'})['value']
                     bar_sum = tds[5].find('input', attrs={'name': 'bar_sum'})['value']
                     sale_sum = tds[6].find('input', attrs={'name': 'sale_sum'})['value']
 
@@ -434,6 +456,13 @@ class Command(BaseCommand):
                         work_shift=work_shift,
                         old_id=report_id
                     )
+
+                    # перевод
+                    have_transfer = row.find('a', attrs={'id': 'payment_report_' + str(report_id)})['class']
+                    have_transfer = 'btn-warning' in have_transfer or 'btn-info' in have_transfer
+                    if have_transfer:
+                        url = row.find('a', attrs={'id': 'payment_report_' + str(report_id)})['href']
+                        self.get_transfer(url, s, work_shift)
 
                     reports_count += 1
                     self.stdout.write(

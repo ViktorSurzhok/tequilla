@@ -2,6 +2,7 @@ from django.db import models
 from model_utils.models import TimeStampedModel
 
 from club.models import Drink
+from extuser.models import ExtUser
 from work_calendar.models import WorkShift
 
 
@@ -26,3 +27,16 @@ class ReportDrink(TimeStampedModel):
 
     def __str__(self):
         return self.drink.name
+
+
+class ReportTransfer(TimeStampedModel):
+    total_sum = models.DecimalField(
+        'ТОЧНАЯ СУММА ПЕРЕВОДА (до копеек) С УЧЕТОВ ШТРАФОВ, ЗАЛОГОВ, ДОЛГОВ и т.д.',
+        decimal_places=2, max_digits=12
+    )
+    transfer_type = models.TextField('Способ перевода', blank=True)
+    comment = models.TextField('Комментарий', blank=True)
+    start_week = models.DateField('Дата начала недели за которую написан перевод')
+    employee = models.ForeignKey(ExtUser)
+    is_accepted = models.BooleanField('Оплату подтверждаю', default=False)
+    old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)

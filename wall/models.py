@@ -12,6 +12,7 @@ class Post(TimeStampedModel):
     text = models.TextField(verbose_name='Текст сообщения', blank=True)
     parent = models.ForeignKey('self', related_name='childrens', blank=True, null=True)
     user = models.ForeignKey(ExtUser)
+    old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
 
     class Meta:
         ordering = ('-created',)

@@ -30,6 +30,9 @@
             };
             $('.timepicker-input').timepicker(timepicker_options);
 
+            $('.report-transfer-container input').not(':checkbox').addClass('form-control');
+            $('.report-transfer-container textarea').addClass('form-control');
+
 
             function getNewContent() {
                 // сбор данных фильтров
@@ -220,11 +223,98 @@
                 line.remove();
             });
 
+            // нажатие на кнопку удаления очета
+            $('#reports-container').on('click', '.remove-report-link', function(e) {
+                e.preventDefault();
+                var href = $(this).attr('href');
+                if (confirm('Подтвердите удаление отчета')) {
+                    var data = {csrfmiddlewaretoken: '{{ csrf_token }}'};
+                    $.ajax({
+                        url: href,
+                        data: data,
+                        type: 'POST',
+                        success: function (response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Отчет удален',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при удалении отчета',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    $('.ui-pnotify').fadeOut('fast');
+                                }, 2000);
+                            }
+                        }
+                    });
+                }
+            });
+
             // смена фильтра
             $('.filters select').on('change', function(e) {
                 e.preventDefault();
                 getNewContent();
-            })
+            });
+
+            // сохранение перевода
+            $('.save-report-transfer-button').on('click', function() {
+                console.log($(this).data('report-id'));
+                if ($(this).data('report-id') == '0') {
+                    var form = $('#report-transfer-modal form');
+                    var data = form.serializeArray();
+                } else {
+                    var form = $('#report_transfer_' + $(this).data('report-id')).find('form');
+                    var data = form.serializeArray();
+                    data.push({'name': 'is_accepted', 'value': form.find('input[name=is_accepted]').prop('checked')});
+                }
+                for (var i in data) {
+                    if (data[i]['name'] == 'start_week') {
+                        data[i]['value'] = reformat_date(data[i]['value']);
+                    }
+                }
+                $.ajax({
+                    url: form.attr('action'),
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Перевод успешно сохранен',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при сохранении перевода',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    }
+                });
+            });
         });
 
     </script>
@@ -296,11 +386,46 @@
                     </div>
                 {% else %}
                     <div class="small-margin-top">
-                        <button class="btn btn-danger"><i class="fa fa-share"></i> ПЕРЕВОД</button>
+                        <a class="btn btn-danger" data-toggle="modal" href="#report-transfer-modal">
+                            <i class="fa fa-share"></i> ПЕРЕВОД
+                        </a>
                     </div>
                 {% endif %}
                 <div id="reports-container">
                     {% include 'reports/_reports_list.html' with can_edit_users=perms.extuser.can_edit_users %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal report-transfer-container" style="padding:20px; display: none;" id="report-transfer-modal">
+        <div class="modal-dialog modal-lg" style="width: 660px;">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form method="POST" data-parsley-validate="" class="form-horizontal form-label-left"
+                          action="{% url 'reports:report_transfer_save' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in report_transfer_form %}
+                            <div class="form-group">
+                                {% if field.name != 'employee' and field.name != 'start_week' %}
+                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                        {{ field.label }} {% if field.field.required %}
+                                        <span class="required">*</span>{% endif %}
+                                    </label>
+                                {% endif %}
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="margin-bottom: 0;">
+                        <i class="fa fa-close"></i> Закрыть
+                    </button>
+                    <button class="btn btn-primary btn-large save-report-transfer-button" data-report-id="0" data-dismiss="modal">
+                        <i class="fa fa-check"></i> Сохранить
+                    </button>
                 </div>
             </div>
         </div>
