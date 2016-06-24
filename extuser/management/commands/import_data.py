@@ -14,6 +14,8 @@ from album.models import Album, Photo
 from reports.models import Report, ReportDrink, ReportTransfer
 
 from tequilla import settings
+from wall.models import Post
+from wall.models import Photo as WallPhoto
 from work_calendar.models import WorkShift
 
 try:
@@ -26,6 +28,9 @@ class Command(BaseCommand):
     help = 'Import girls data from old ERP'
     girls_count = 0
     clubs_count = 0
+    posts_count = 0
+    month_names = {'янв': '01', 'фев': '02', 'мар': '03', 'апр': '04', 'мая': '05', 'июн': '06',
+                   'июл': '07', 'авг': '08', 'сен': '09', 'окт': '10', 'ноя': '11', 'дек': '12'}
 
     def add_arguments(self, parser):
         parser.add_argument('type', nargs=1, type=str)
@@ -346,6 +351,89 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Imported "%s" clubs' % self.clubs_count))
 
+    # загрузка записей со стены
+    def get_wall(self):
+        def get_parsed_date(date):
+            try:
+                date = date.split()
+                date[1] = self.month_names[date[1]]
+                date = ' '.join(date)
+            except:
+                pass
+
+            # дата может задаваться в 3х разных форматах
+            try:
+                parsed_date = datetime.datetime.strptime(date, "%d %m в %H:%M")
+                parsed_date = parsed_date.replace(year=datetime.datetime.now().year)
+            except:
+                try:
+                    parsed_date = datetime.datetime.strptime(date, "%d %m %Y в %H:%M")
+                except:
+                    try:
+                        parsed_date = datetime.datetime.now() - datetime.timedelta(1)
+                        temp = datetime.datetime.strptime(date[2], "%H:%M")
+                        parsed_date = parsed_date.replace(hour=temp.hour, minute=temp.minute)
+                    except:
+                        # отдельный обработчик для 29го февраля
+                        parsed_date = datetime.datetime.strptime('29 02 2016 09:22', "%d %m %Y %H:%M")
+            return parsed_date
+
+        session = self.get_session()
+        f = open(settings.PATH_TO_FILE_WITH_WALL, 'r')
+        html = f.read()
+        parsed_html = BeautifulSoup(html, "html.parser")
+        rows = parsed_html.body.find('ul', attrs={'class': 'comment_list'}).find_all('li')
+        for row in rows:
+            post_id = row['id'].split('_')[-1]
+            try:
+                Post.objects.get(old_id=post_id)
+                continue
+            except Post.DoesNotExist:
+                pass
+            user_id = row.find('h5').find('a')['href'].split('/')[-1]
+            employee = self.get_employee_info(user_id, session)
+            post_text = str(row.find('p'))
+
+            data = {
+                'text': post_text,
+                'user': employee,
+                'old_id': post_id,
+                'created': get_parsed_date(row.find('span').text)
+            }
+            self.posts_count += 1
+            self.stdout.write(self.style.SUCCESS('Create post with old ID "%s" ' % post_id))
+            post_obj = Post.objects.create(**data)
+            for img_link in row.find_all('a', attrs={'class': 'image_thumbnail_link'}):
+                wall_photo_obj = WallPhoto()
+                wall_photo_obj.post = post_obj
+                image_link = img_link.find('img')['src']
+                name = urllib.parse.urlparse(image_link).path.split('/')[-1].lstrip('tn_')
+                image_link = 'http://tequilla.gosnomer.info/uploads/img/{}/{}'.format(user_id, name)
+                content = urllib.request.urlretrieve(image_link)
+                wall_photo_obj.file.save(name, File(open(content[0], 'rb')), save=True)
+            comment_answers = row.find('div', attrs={'class': 'comment_answers'})
+            if comment_answers:
+                for answer in comment_answers.find_all('li'):
+                    answer_id = answer['id'].split('_')[-1]
+                    try:
+                        Post.objects.get(old_id=answer_id)
+                        continue
+                    except Post.DoesNotExist:
+                        pass
+                    answer_user_id = answer.find('h5').find('a')['href'].split('/')[-1]
+                    answer_employee = self.get_employee_info(answer_user_id, session)
+                    answer_data = {
+                        'old_id': answer_id,
+                        'user': answer_employee,
+                        'text': str(answer.find('p')),
+                        'created': get_parsed_date(answer.find('span').text),
+                        'parent': post_obj
+                    }
+                    Post.objects.create(**answer_data)
+                    self.stdout.write(self.style.SUCCESS('Create comment with old ID "%s" ' % answer_id))
+                    self.posts_count += 1
+        self.stdout.write(self.style.SUCCESS('Total posts added "%s" ' % self.posts_count))
+
     # загружает перевод для отчета
     def get_transfer(self, url, session, work_shift):
         parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/' + url)
@@ -373,13 +461,13 @@ class Command(BaseCommand):
     def get_reports(self, count_page):
         s = self.get_session()
         week = -1
+        reports_count = 0
         while count_page:
             count_page -= 1
             parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/reports/index/week/' + str(week))
             self.stdout.write(self.style.SUCCESS('Get from page "%s" ' % week))
             week -= 1
             tables = parsed_html.body.find_all('tbody')
-            reports_count = 0
             for table in tables:
                 rows = table.find_all('tr')
                 for row in rows:
@@ -413,10 +501,8 @@ class Command(BaseCommand):
                         user_obj = self.get_employee_info(user_id, s)
 
                     created_date = tds[1].text
-                    month_names = {'янв': '01', 'фев': '02', 'мар': '03', 'апр': '04', 'мая': '05', 'июн': '06',
-                                   'июл': '07', 'авг': '08', 'сен': '09', 'окт': '10', 'ноя': '11', 'дек': '12'}
                     created_date = created_date.split()
-                    created_date[1] = month_names[created_date[1]]
+                    created_date[1] = self.month_names[created_date[1]]
                     created_date = ' '.join(created_date)
                     parsed_created_date = datetime.datetime.strptime(created_date, "%d %m %Y г.%H:%M")
 
@@ -495,15 +581,20 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Total reports added "%s" ' % reports_count))
 
     def handle(self, *args, **options):
-        if options['type'][0] == 'girls':
-            self.get_girls()
-        elif options['type'][0] == 'avatars':
-            self.get_avatar_for_exists_users()
-        elif options['type'][0] == 'clubs':
-            self.get_clubs()
-        elif options['type'][0] == 'photos':
-            self.get_photos(int(options['last_page']), int(options['count_page']))
-        elif options['type'][0] == 'reports':
-            self.get_reports(int(options['count_page']))
-        else:
-            self.stdout.write(self.style.SUCCESS('Wrong argument. Try "girls" or "photos"'))
+        try:
+            if options['type'][0] == 'girls':
+                self.get_girls()
+            elif options['type'][0] == 'avatars':
+                self.get_avatar_for_exists_users()
+            elif options['type'][0] == 'clubs':
+                self.get_clubs()
+            elif options['type'][0] == 'wall':
+                self.get_wall()
+            elif options['type'][0] == 'photos':
+                self.get_photos(int(options['last_page']), int(options['count_page']))
+            elif options['type'][0] == 'reports':
+                self.get_reports(int(options['count_page']))
+            else:
+                self.stdout.write(self.style.SUCCESS('Wrong argument. Try "girls" or "photos"'))
+        except Exception as e:
+            print(e)

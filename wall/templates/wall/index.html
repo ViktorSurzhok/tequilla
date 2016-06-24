@@ -215,7 +215,7 @@
                                         </div>
                                         <div class="block_content">
                                             <h2 class="title">
-                                                <a>{{ post.user.surname }} {{ post.user.name }}</a>
+                                                <a href="{% url 'user_detail' post.user.id %}">{{ post.user.surname }} {{ post.user.name }}</a>
                                             </h2>
                                             <div class="byline">
                                                 <span>{{ post.created }}</span>
@@ -297,7 +297,7 @@
                                                                 </div>
                                                                 <div class="block_content">
                                                                     <h2 class="title">
-                                                                        <a>{{ ch_post.user.surname }} {{ ch_post.user.name }}</a>
+                                                                        <a href="{% url 'user_detail' ch_post.user.id %}">{{ ch_post.user.surname }} {{ ch_post.user.name }}</a>
                                                                     </h2>
                                                                     <div class="byline">
                                                                         <span>{{ ch_post.created }}</span>
