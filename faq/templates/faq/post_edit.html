@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    {% if post %}
+        Редактирование статьи {{ post.name }}
+    {% else %}
+        Добавление новой статьи
+    {% endif %}
+{% endblock %}
+
+{% block additional_css %}
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
+{% endblock %}
+
+{% block additional_js %}
+    <!-- include summernote js-->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
+    <script src="{% static 'js/summernote-ru-RU.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('input, textarea').not(':checkbox').addClass('form-control');
+
+            $('#id_content').summernote({
+                height: 200,
+                lang: 'ru-RU',
+                dialogsInBody: false,
+                dialogsFade: false,
+                iframe: false
+
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>
+                        {% if post %}
+                            Редактирование статьи {{ post.name }}
+                        {% else %}
+                            Добавление новой статьи
+                        {% endif %}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    {% if messages %}
+                        <p class="alert alert-success fade in">
+                            {% for message in messages %}
+                                <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span><br>
+                            {% endfor %}
+                        </p>
+                    {% endif %}
+                    <form method="POST"
+                          id="edit-user-form"
+                          data-parsley-validate=""
+                          class="form-horizontal form-label-left"
+                          action="{% if post %}{% url 'faq:post_edit' post.id %}{% else %}{% url 'faq:post_create' %}{% endif %}">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group{% if field.errors %} bad{% endif %}">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                    {{ field.label }} {% if field.field.required %}
+                                    <span class="required">*</span>{% endif %}
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <ul class="parsley-errors-list" id="parsley-id-{{ forloop.counter }}">
+                                            {% for error in field.errors %}
+                                                <li>{{ error|escape }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="ln_solid"></div>
+                        <div class="form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

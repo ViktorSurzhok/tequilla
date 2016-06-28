@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% load staticfiles %}
+
+{% block title %}{{ post.name }}{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .wall-panel {
+            list-style: none;
+        }
+
+        ul.wall-panel li {
+            border-bottom: none;
+        }
+
+        ul.wall-panel li a {
+            font-size: 18px;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.response-comment').on('click', function(e) {
+                e.preventDefault();
+                $('.response-comment-form-' + $(this).data('comment-id')).show();
+            });
+
+            $('.remove-link').on('click', function() {
+                return confirm('Подтвердите удаление');
+            });
+        });
+    </script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>
+                        {{ post.name }}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    {% autoescape off %}
+                        {{ post.content }}
+                    {% endautoescape %}
+                    <h2 class="small-margin-top">Вопросы и комментарии:</h2>
+                    <ul class="list-unstyled timeline">
+                        {% for comment in comments %}
+                            <li class="wall-comment-container-{{ comment.id }}">
+                                <div class="block">
+                                    <div class="tags">
+                                        {% if comment.employee.avatar %}
+                                            {% thumbnail comment.employee.avatar "85x85" as av %}
+                                                <img src="{{ av.url }}">
+                                            {% endthumbnail %}
+                                        {% else %}
+                                            <img src="{{ comment.employee.get_default_avatar }}" style="width: 85px;">
+                                        {% endif %}
+                                    </div>
+                                    <div class="block_content">
+                                        <h2 class="title">
+                                            <a href="{% url 'user_detail' comment.employee.id %}">{{ comment.employee.surname }} {{ comment.employee.name }}</a>
+                                        </h2>
+                                        <div class="byline">
+                                            <span>{{ comment.created }}</span>
+                                        </div>
+                                        {% if perms.extuser.can_edit_comments or comment.employee == user %}
+                                            <ul class="panel_toolbox wall-panel">
+                                                <li><a class="remove-link" href="{% url 'faq:comment_remove' comment.id %}"><i
+                                                        class="fa fa-remove"></i></a></li>
+                                            </ul>
+                                        {% endif %}
+                                            <p class="excerpt">{{ comment.content|linebreaks }}</p>
+                                        <button type="submit" data-comment-id="{{ comment.id }}"
+                                                class="btn btn-success response-comment">Ответить
+                                        </button>
+                                        <div class="col-md-offset-1 response-comment-form-{{ comment.id }} response-post-form">
+                                            <form action="{% url 'faq:send_comment' post.id %}" data-parsley-validate=""
+                                                  class="form-horizontal form-label-left" method="POST">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <input type="hidden" value="{{ comment.id }}" name="parent">
+                                                    <div class="col-md-10 col-sm-10 col-xs-12">
+                                                        <textarea name="content" class="form-control"
+                                                                  rows="3"
+                                                                  placeholder="Ваш ответ"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="ln_solid"></div>
+                                                <div class="form-group">
+                                                    <div class="col-md-10 col-sm-10 col-xs-12">
+                                                        <button type="submit" class="btn btn-primary">Отправить
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                         {% if comment.childrens %}
+                                                <ul class="list-unstyled timeline">
+                                                    {% for ch_post in comment.childrens.all %}
+                                                        <li class="wall-post-container-{{ ch_post.id }}">
+                                                            <div class="block">
+                                                                <div class="tags">
+                                                                    {% if ch_post.employee.avatar %}
+                                                                        {% thumbnail ch_post.employee.avatar "85x85" as av %}
+                                                                            <img src="{{ av.url }}">
+                                                                        {% endthumbnail %}
+                                                                    {% else %}
+                                                                        <img src="{{ ch_post.employee.get_default_avatar }}"
+                                                                             style="width: 85px;">
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="block_content">
+                                                                    <h2 class="title">
+                                                                        <a href="{% url 'user_detail' ch_post.employee.id %}">{{ ch_post.employee.surname }} {{ ch_post.employee.name }}</a>
+                                                                    </h2>
+                                                                    <div class="byline">
+                                                                        <span>{{ ch_post.created }}</span>
+                                                                    </div>
+                                                                    {% if perms.extuser.can_edit_posts or ch_post.employee == user %}
+                                                                        <ul class="panel_toolbox wall-panel">
+                                                                            <li>
+                                                                                <a class="remove-link" href="{% url 'faq:comment_remove' ch_post.id %}">
+                                                                                    <i class="fa fa-remove"></i>
+                                                                                </a></li>
+                                                                        </ul>
+                                                                    {% endif %}
+                                                                    {% autoescape off %}
+                                                                        <p class="excerpt">{{ ch_post.content|linebreaks }}</p>
+                                                                    {% endautoescape %}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <form action="{% url 'faq:send_comment' post.id %}" data-parsley-validate=""
+                          class="form-horizontal form-label-left" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <div class="col-md-10 col-sm-10 col-xs-12">
+                                <textarea name="content" class="form-control"
+                                          rows="3"
+                                          placeholder="Ваш вопрос\комментарий"></textarea>
+                            </div>
+                        </div>
+                        <div class="ln_solid"></div>
+                        <div class="form-group">
+                            <div class="col-md-10 col-sm-10 col-xs-12">
+                                <button type="submit" class="btn btn-primary">Отправить
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

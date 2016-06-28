@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}FAQ{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        $(function() {
+            $('.remove-link').on('click', function() {
+                return confirm('Подтвердите удаление');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <h1>Статьи</h1>
+    <a href="{% url 'faq:post_create' %}" class="btn btn-info">Добавить статью</a>
+    {% for post in posts %}
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2><a href="{% url 'faq:post_detail' post.id %}"><i class="fa fa-book"></i> {{ post.name }}</a></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a href="{% url 'faq:post_detail' post.id %}"><i class="fa fa-open"></i>Открыть</a></li>
+                        <li><a href="{% url 'faq:post_edit' post.id %}">Редактировать</a></li>
+                        <li><a class="remove-link" href="{% url 'faq:post_remove' post.id %}">Удалить</a></li>
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    {{ post.description }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

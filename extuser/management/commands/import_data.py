@@ -14,6 +14,7 @@ from album.models import Album, Photo
 from reports.models import Report, ReportDrink, ReportTransfer
 
 from tequilla import settings
+from faq.models import Post as FaqPost, Comment as FaqComment
 from wall.models import Post
 from wall.models import Photo as WallPhoto
 from work_calendar.models import WorkShift
@@ -580,6 +581,51 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS('Drinks for this report "%s" ' % drink_count_stats))
         self.stdout.write(self.style.SUCCESS('Total reports added "%s" ' % reports_count))
 
+    # def get_faq(self):
+    #     s = self.get_session()
+    #     parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/faq')
+    #     rows = parsed_html.body.find('div', attrs={'class': 'items'}).find_all('div', attrs={'class': 'panel'})
+    #     for row in rows:
+    #         post_id = row.find('a', attrs={'class': 'btn-success'})['href']
+    #         post_id = post_id.split('/')[-1]
+    #         try:
+    #             FaqPost.objects.get(old_id=post_id)
+    #             continue
+    #         except FaqPost.DoesNotExist:
+    #             pass
+    #         parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/faq/' + str(post_id))
+    #         panel = parsed_html.body.find('div', attrs={'class': 'panel'})
+    #         name = panel.find('h2').text
+    #         text = str(panel.find('p'))
+    #         post = FaqPost.objects.create(name=name, content=text, old_id=post_id, description='Описание')
+    #         print('post {} {} {}'.format(post_id, name, text))
+    #         if int(post_id) > 3:
+    #             continue
+    #         comments_content = parsed_html.find_all('p')
+    #         current_comment = 1
+    #         for comment in parsed_html.find_all('li')[37:]:
+    #             comment_id = comment.find('a', attrs={'class': 'close'})['href']
+    #             comment_id = comment_id.split('/')[-1]
+    #             try:
+    #                 FaqComment.objects.get(old_id=comment_id)
+    #                 continue
+    #             except FaqComment.DoesNotExist:
+    #                 pass
+    #             employee_id = comment.find_all('a')[1]['href']
+    #             employee_id = employee_id.split('/')[-1]
+    #             employee = self.get_employee_info(employee_id, s)
+    #             date = comment.find('span').text
+    #             date = date.split()
+    #             date[1] = self.month_names[date[1]]
+    #             date = ' '.join(date)
+    #             parsed_date = datetime.datetime.strptime(date, "%d %m %Y в %H:%M")
+    #             content = comments_content[current_comment]
+    #             current_comment += 1
+    #             print('comment {} {} {} {}'.format(comment_id, employee, parsed_date, content))
+    #             FaqComment.objects.create(
+    #                 post=post, employee=employee, content=content, old_id=post_id, created=parsed_date
+    #             )
+
     def handle(self, *args, **options):
         try:
             if options['type'][0] == 'girls':
@@ -590,6 +636,8 @@ class Command(BaseCommand):
                 self.get_clubs()
             elif options['type'][0] == 'wall':
                 self.get_wall()
+            # elif options['type'][0] == 'faq':
+            #     self.get_faq()
             elif options['type'][0] == 'photos':
                 self.get_photos(int(options['last_page']), int(options['count_page']))
             elif options['type'][0] == 'reports':
