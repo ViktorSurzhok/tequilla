@@ -33,7 +33,10 @@ class Menu(TimeStampedModel):
     post = models.ForeignKey(
         Post, verbose_name='Привязка к записи', blank=True, null=True
     )
-    order = models.SmallIntegerField
+    order = models.SmallIntegerField(verbose_name='Сортировка', default=0)
+
+    class Meta:
+        ordering = ('order',)
 
     def __str__(self):
         return self.name

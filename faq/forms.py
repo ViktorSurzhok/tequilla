@@ -13,7 +13,7 @@ class PostEditForm(forms.ModelForm):
 class MenuEditForm(forms.ModelForm):
     class Meta:
         model = Menu
-        fields = ('name', 'parent', 'post')
+        fields = ('name', 'parent', 'post', 'order')
 
     def __init__(self, *args, **kwargs):
         super(MenuEditForm, self).__init__(*args, **kwargs)
