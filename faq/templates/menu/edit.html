@@ -2,33 +2,20 @@
 {% load staticfiles %}
 
 {% block title %}
-    {% if post %}
-        Редактирование статьи {{ post.name }}
+    {% if menu %}
+        Редактирование меню {{ menu.name }}
     {% else %}
-        Добавление новой статьи
+        Добавление нового меню
     {% endif %}
 {% endblock %}
 
-{% block additional_css %}
-    <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.css" rel="stylesheet">
-{% endblock %}
 
 {% block additional_js %}
-    <!-- include summernote js-->
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.1/summernote.js"></script>
-    <script src="{% static 'js/summernote-ru-RU.js' %}"></script>
+
+
     <script type="text/javascript">
         $(function () {
-            $('input, textarea, select').not(':checkbox').addClass('form-control');
-
-            $('#id_content').summernote({
-                height: 200,
-                lang: 'ru-RU',
-                dialogsInBody: false,
-                dialogsFade: false,
-                iframe: false
-
-            });
+            $('input, select').not(':checkbox').addClass('form-control');
         });
     </script>
 {% endblock %}
@@ -39,10 +26,10 @@
             <div class="x_panel">
                 <div class="x_title">
                     <h2>
-                        {% if post %}
-                            Редактирование статьи {{ post.name }}
+                        {% if menu %}
+                            Редактирование меню {{ menu.name }}
                         {% else %}
-                            Добавление новой статьи
+                            Добавление нового меню
                         {% endif %}
                     </h2>
                     <ul class="nav navbar-right panel_toolbox">
@@ -63,7 +50,7 @@
                           id="edit-user-form"
                           data-parsley-validate=""
                           class="form-horizontal form-label-left"
-                          action="{% if post %}{% url 'faq:post_edit' post.id %}{% else %}{% url 'faq:post_create' %}{% endif %}">
+                          action="{% if menu %}{% url 'faq:menu_edit' menu.id %}{% else %}{% url 'faq:menu_create' %}{% endif %}">
                         {% csrf_token %}
                         {% for field in form %}
                             <div class="form-group{% if field.errors %} bad{% endif %}">

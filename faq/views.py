@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from faq.forms import PostEditForm, CommentAddForm
-from faq.models import Post, Comment
+from faq.forms import PostEditForm, CommentAddForm, MenuEditForm
+from faq.models import Post, Comment, Menu
 from tequilla.decorators import group_required
 
 
@@ -74,3 +74,42 @@ def comment_remove(request, comment_id):
     if comment.employee == request.user or request.user.groups.filter(name='director').exists():
         comment.delete()
     return redirect('faq:post_detail', post_id=comment.post.id)
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def menu_list(request):
+    return render(request, 'menu/list.html', {'items': Menu.objects.all()})
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def menu_edit(request, menu_id=None):
+    try:
+        menu = Menu.objects.get(id=menu_id)
+    except Menu.DoesNotExist:
+        menu = None
+
+    if request.method == 'POST':
+        form = MenuEditForm(data=request.POST) if menu is None else MenuEditForm(instance=menu, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('faq:menu_list')
+    else:
+        form = MenuEditForm() if menu is None else MenuEditForm(instance=menu)
+    return render(
+        request,
+        'menu/edit.html',
+        {
+            'form': form,
+            'menu': menu
+        }
+    )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def menu_remove(request, menu_id):
+    menu = get_object_or_404(Menu, id=menu_id)
+    menu.delete()
+    return redirect('faq:menu_list')

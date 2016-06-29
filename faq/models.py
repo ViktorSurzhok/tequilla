@@ -23,3 +23,17 @@ class Comment(TimeStampedModel):
 
     def __str__(self):
         return self.content[:50]
+
+
+class Menu(TimeStampedModel):
+    name = models.CharField('Название', max_length=255)
+    parent = models.ForeignKey(
+        'self', related_name='childrens', blank=True, null=True, verbose_name='Родительское меню'
+    )
+    post = models.ForeignKey(
+        Post, verbose_name='Привязка к записи', blank=True, null=True
+    )
+    order = models.SmallIntegerField
+
+    def __str__(self):
+        return self.name
