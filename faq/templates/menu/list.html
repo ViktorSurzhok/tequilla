@@ -21,6 +21,7 @@
                 <div class="x_title">
                     <h2><i class="fa fa-book"></i> {{ item.name }}
                         {% if item.post %}<small>Привязано к записи: {{ item.post.name }}</small>{% endif %}
+                        {% if item.parent %}<small>| Родительское меню: {{ item.parent.name }}</small>{% endif %}
                     </h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a href="{% url 'faq:menu_edit' item.id %}">Редактировать</a></li>
