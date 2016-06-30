@@ -1,0 +1,33 @@
+{% for item in items %}
+    <tr>
+        {% for filter in data.filters %}
+            <td>
+                {% if filter.prop == 'id' %}
+                    {{ item.id }}
+                {% elif filter.prop == 'name' %}
+                    {{ item.name }}
+                {% elif filter.prop == 'description' %}
+                    {{ item.description }}
+                {% elif filter.prop == 'num' %}
+                    {{ item.num }}
+                {% elif filter.prop == 'sum' %}
+                    {{ item.sum }}
+                {% elif filter.prop == 'dismissal' %}
+                    {% if item.dismissal %}Да{% else %}Нет{% endif %}
+                {% endif %}
+            </td>
+        {% endfor %}
+        <td style="width: 115px;">
+            <a href="{% url 'catalog:catalog_edit' item_type item.id %}" class="btn-warning btn">
+                <i class="fa fa-edit"></i>
+            </a>
+            <a href="{% url 'catalog:catalog_remove' item_type item.id %}" class="btn-danger btn remove-link">
+                <i class="fa fa-remove"></i>
+            </a>
+        </td>
+    </tr>
+{% empty %}
+    <tr>
+        <td colspan="5">Объекты не найдены.</td>
+    </tr>
+{% endfor %}

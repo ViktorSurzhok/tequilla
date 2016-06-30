@@ -11,7 +11,7 @@ from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
-from club.models import Drink, Club
+from club.models import Drink, Club, City
 from extuser.models import ExtUser
 from reports.forms import UpdateReportForm, ReportTransferForm, ReportTransferFormForAdmin
 from reports.models import Report, ReportDrink, ReportTransfer
@@ -88,7 +88,8 @@ def reports_by_week(request, user_id=None):
             'employees': sorted(set(employees), key=lambda item: item.get_full_name()),
             'filter_reports_link': reverse('reports:reports_filter'),
             'report_transfer_form': report_transfer_form,
-            'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer')
+            'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer'),
+            'cities': City.objects.all()
         }
     )
 
@@ -100,7 +101,7 @@ def reports_filter(request):
         start_week = request.GET['start_week']
         end_week = request.GET['end_week']
         object_list = Report.objects.filter(work_shift__date__range=[start_week, end_week])
-        filters = ['work_shift__employee', 'work_shift__club', 'filled_date__isnull']
+        filters = ['work_shift__employee', 'work_shift__club', 'filled_date__isnull', 'work_shift__club__city']
         for filter_name in filters:
             filter_value = request.GET.get(filter_name, '')
             if filter_value != '':
@@ -115,6 +116,17 @@ def reports_filter(request):
             date = report.work_shift.date
             if date not in reports_struct:
                 reports_struct[date] = []
+            try:
+                report_transfer = ReportTransfer.objects.get(employee=report.work_shift.employee, start_week=start_week)
+                transfer_accepted = 1 if report_transfer.is_accepted else 2
+                transfer_form = ReportTransferFormForAdmin(instance=report_transfer)
+            except ReportTransfer.DoesNotExist:
+                transfer_form = ReportTransferFormForAdmin(
+                    initial={'employee': report.work_shift.employee, 'start_week': start_week}
+                )
+                transfer_accepted = 3
+            report.transfer_form = transfer_form
+            report.transfer_accepted = transfer_accepted
             reports_struct[date].append(report)
 
         rendered_blocks = {

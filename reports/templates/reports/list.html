@@ -38,9 +38,11 @@
                 // сбор данных фильтров
                 var employee = $('#filter-employee').val(),
                     club = $('#filter-club').val(),
-                    type = $('#filter-type').val();
+                    type = $('#filter-type').val(),
+                    city = $('#filter-city').val();
                 var filters = '?work_shift__employee=' + employee + '&work_shift__club=' + club +
-                        '&start_week={{ start_week|date:"Y-m-d" }}&end_week={{ end_week|date:"Y-m-d" }}';
+                        '&start_week={{ start_week|date:"Y-m-d" }}&end_week={{ end_week|date:"Y-m-d" }}' +
+                        '&work_shift__club__city=' + city;
                 if (type != '-1') {
                     filters += '&filled_date__isnull=' + type;
                 }
@@ -52,6 +54,8 @@
                     crossDomain: true,
                     success: function (data) {
                         $('#reports-container').html(data['reports']);
+                        $('.report-transfer-container input').not(':checkbox').addClass('form-control');
+                        $('.report-transfer-container textarea').addClass('form-control');
                     }
                 });
             }
@@ -126,7 +130,7 @@
                             });
                             $('.ui-pnotify').fadeIn('slow');
                             setTimeout(function () {
-                                location = '{% url 'reports:reports_by_week' %}' + window.location.search;
+                                location = '' + window.location.search;
                             }, 1000);
                         } else {
                             new PNotify({
@@ -378,6 +382,17 @@
                                             <option value="-1">Все</option>
                                             <option value="0">Заполненные</option>
                                             <option value="1">Не заполненные</option>
+                                      </select>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div>Город</div>
+                                    <div class="col-md-12 row">
+                                      <select class="form-control" id="filter-city">
+                                            <option value=""></option>
+                                            {% for city in cities %}
+                                                <option value="{{ city.id }}">{{ city.name }}</option>
+                                            {% endfor %}
                                       </select>
                                     </div>
                                 </th>

@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import inlineformset_factory
 
-from club.models import Club, ClubType, DayOfWeek, Drink
+from club.models import Club, ClubType, DayOfWeek, Drink, Metro
 from extuser.models import ExtUser
 
 
@@ -50,6 +50,19 @@ class ClubEditAdminForm(forms.ModelForm):
     class Meta:
         model = Club
         exclude = ('old_id',)
+
+
+class ClubTypeForm(forms.ModelForm):
+    class Meta:
+        model = ClubType
+        fields = ('name',)
+
+
+class MetroForm(forms.ModelForm):
+    class Meta:
+        model = Metro
+        fields = ('name',)
+
 
 DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0, widgets={
     'name': forms.TextInput(attrs={'class': 'form-control'}),

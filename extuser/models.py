@@ -66,3 +66,16 @@ class UserActivityLog(TimeStampedModel):
     Статистику по времени входа каждого пользователя может просматривать руководство в профиле сотрудника.
     """
     user = models.ForeignKey(ExtUser, related_name='activity_logs')
+
+
+class PenaltyType(TimeStampedModel):
+    description = models.TextField('Описание')
+    sum = models.IntegerField('Сумма')
+    num = models.PositiveSmallIntegerField('Номер', default=0)
+    dismissal = models.BooleanField('Возможно увольнение', default=False)
+
+    def __str__(self):
+        return self.description
+
+    class Meta:
+        ordering = ('num',)

@@ -99,6 +99,19 @@
                 <li>
                     <a href="{% url 'faq:menu_list' %}"><i class="fa fa-edit"></i> Редактирование меню </a>
                 </li>
+                <li>
+                    <a>Справочники <span class="fa fa-chevron-down"></span></a>
+                     <ul class="nav child_menu">
+                        <li><a href="{% url 'catalog:catalog_list' 'clubtype' %}">Типы заведений</a></li>
+                        <li><a href="{% url 'catalog:catalog_list' 'metro' %}">Станции метро</a></li>
+                        <li><a href="{% url 'catalog:catalog_list' 'penaltytype' %}">Типы штрафов</a></li>
+                        <li><a href="#">Типы платежей</a></li>
+                        <li><a href="{% url 'catalog:catalog_list' 'uniform' %}">Форма</a></li>
+                        <li><a href="{% url 'catalog:main_employees' %}">Основной состав</a></li>
+                        <li><a href="#">Штрафы (по умолчанию)</a></li>
+                        <li><a href="#">Штрафы (понедельно)</a></li>
+                    </ul>
+                </li>
             {% endif %}
         </ul>
     </div>

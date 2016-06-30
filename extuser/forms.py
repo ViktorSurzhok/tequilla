@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
 from club.models import Club
-from extuser.models import ExtUser
+from extuser.models import ExtUser, PenaltyType
 
 
 class UserImportForm(forms.ModelForm):
@@ -199,3 +199,9 @@ class ChangePasswordForm(forms.Form):
         else:
             self.add_error('new_password', 'Обязательное поле')
         return super().clean()
+
+
+class PenaltyTypeForm(forms.ModelForm):
+    class Meta:
+        model = PenaltyType
+        fields = ('description', 'sum',  'dismissal', 'num')

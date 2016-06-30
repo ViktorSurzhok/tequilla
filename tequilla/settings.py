@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'work_calendar',
     'reports',
     'faq',
+    'catalog',
+    'uniform',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',

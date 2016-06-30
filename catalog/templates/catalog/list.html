@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ data.title }}{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+
+        function getNewContent() {
+            // сбор данных фильтров
+            var form = $('#filters-form');
+                filters = '?' + form.serialize();
+
+            // запрос нового контента
+            $.ajax({
+                url: '{{ filter_link }}' + filters,
+                type: 'GET',
+                dataType: 'jsonp',
+                crossDomain: true,
+                success: function (data) {
+                    console.log(data);
+                    $('#list-content').html(data['items']);
+                }
+            });
+        }
+
+        $(function() {
+            $('.remove-link').on('click', function() {
+                return confirm('Подтвердите удаление');
+            });
+
+            $('.filter-input').on('keyup', function() {
+                getNewContent();
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'catalog:catalog_create' item_type %}" class="btn btn-info">{{ data.new_item_text }}</a>
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>{{ data.title }}</h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <table class="table table-bordered table-striped">
+                <tr>
+                    <form id="filters-form">
+                        {% for filter in data.filters %}
+                            <th>
+                                <div>
+                                    {{ filter.label }}
+                                </div>
+                                {% if filter.type == 'text' %}
+                                    <input type="text" name="{{ filter.name }}" class="form-control filter-input">
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </form>
+                    <th>Операции</th>
+                </tr>
+                <tbody id="list-content">
+                    {% include 'catalog/_list.html' %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
