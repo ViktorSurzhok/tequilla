@@ -34,7 +34,6 @@ class ReportTransfer(TimeStampedModel):
         'ТОЧНАЯ СУММА ПЕРЕВОДА (до копеек) С УЧЕТОВ ШТРАФОВ, ЗАЛОГОВ, ДОЛГОВ и т.д.',
         decimal_places=2, max_digits=12
     )
-    transfer_type = models.TextField('Способ перевода', blank=True)
     comment = models.TextField('Комментарий', blank=True)
     start_week = models.DateField('Дата начала недели за которую написан перевод')
     employee = models.ForeignKey(ExtUser)

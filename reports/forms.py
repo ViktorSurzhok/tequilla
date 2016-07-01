@@ -13,7 +13,7 @@ class UpdateReportForm(forms.ModelForm):
 class ReportTransferForm(forms.ModelForm):
     class Meta:
         model = ReportTransfer
-        fields = ('total_sum', 'transfer_type', 'comment', 'start_week', 'employee')
+        fields = ('total_sum', 'comment', 'start_week', 'employee')
         widgets = {'start_week': forms.HiddenInput(), 'employee': forms.HiddenInput()}
         localized_fields = ('__all__')
 
@@ -21,7 +21,7 @@ class ReportTransferForm(forms.ModelForm):
 class ReportTransferFormForAdmin(forms.ModelForm):
     class Meta:
         model = ReportTransfer
-        fields = ('total_sum', 'transfer_type', 'comment', 'is_accepted', 'start_week', 'employee')
+        fields = ('total_sum', 'comment', 'is_accepted', 'start_week', 'employee')
         widgets = {
             'start_week': forms.HiddenInput(),
             'employee': forms.HiddenInput(),

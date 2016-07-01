@@ -448,7 +448,6 @@ class Command(BaseCommand):
         form = parsed_html.find('form', attrs={'id': 'payment-form'})
         data = {
             'total_sum': form.find('input', attrs={'id': 'ReportPay_sum'})['value'],
-            'transfer_type': form.find('textarea', attrs={'id': 'ReportPay_pay_text'}).text,
             'comment': form.find('textarea', attrs={'id': 'ReportPay_comment'}).text,
             'created': datetime.datetime.strptime(form.find_all('span')[1].text, '%d.%m.%Y %H:%M'),
             'is_accepted': form.find('input', attrs={'id': 'ReportPay_confirmed', 'checked': 'checked'}) is not None,
