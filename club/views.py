@@ -72,10 +72,17 @@ def club_edit(request, club_id=0):
         form = ClubEditAdminForm(instance=club, data=request.POST)
         if form.is_valid():
             club_obj = form.save(commit=False)
+
+            # добавление фото
             photo = request.FILES.get('photo', None)
             if photo:
                 club_obj.photo = photo
             club_obj.save()
+
+            # сотрудники
+            club_obj.employee.clear()
+            for club in form['employee'].value():
+                club_obj.employee.add(club)
             messages.add_message(request, messages.INFO, 'Информация о заведении успешно обновлена')
             return redirect('club:club_edit', club_id=club_obj.id)
     else:

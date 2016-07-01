@@ -1,5 +1,6 @@
 import json
 
+import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -8,8 +9,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 import importlib
 
 from django.template.loader import render_to_string
+from django.utils.dateparse import parse_date
 
 from catalog.models import MainEmployees
+from club.models import DayOfWeek
+from extuser.forms import MainPenaltyScheduleForm
+from extuser.models import MainPenaltySchedule
+from schedule.models import WorkDay
 from tequilla.decorators import group_required
 
 
@@ -99,16 +105,79 @@ def catalog_list(request, item_type):
 @login_required
 @group_required('director', 'chief', 'coordinator')
 def main_employees(request):
-    if request.method == 'POST':
-        pass
+    item = MainEmployees.get_file()
+    if request.method == 'POST' and 'employees' in request.FILES:
+        item.file = request.FILES['employees']
+        item.save()
+        messages.add_message(request, messages.INFO, 'Файл успешно загружен')
+        return redirect('catalog:main_employees')
     return render(
         request,
         'catalog/main_employees.html',
         {
-            'item': MainEmployees.get_file()
+            'item': item
         }
     )
 
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def main_penalty_schedule(request):
+    items = MainPenaltySchedule.get_settings()
+    if request.method == 'POST':
+        item_type = request.POST.get('type', MainPenaltySchedule.SCHEDULE_TYPE_CHOICE)
+        item, created = MainPenaltySchedule.objects.get_or_create(type=item_type, start_week=None)
+        data = {'type': item.type, 'day_of_week': request.POST.get('day_of_week', 0)}
+        form = MainPenaltyScheduleForm(instance=item, data=data)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.INFO, 'Информация успешно сохранена')
+        return redirect('catalog:main_penalty_schedule')
+    forms = [MainPenaltyScheduleForm(instance=item) for item in items]
+    return render(
+        request,
+        'catalog/penalty_schedule.html',
+        {
+            'forms': forms,
+            'work_days': DayOfWeek.objects.all()
+        }
+    )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def week_penalty_schedule(request):
+    week_offset = int(request.GET.get('week', 0))
+    start_date = datetime.date.today()
+    date = start_date + datetime.timedelta(week_offset * 7)
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(6)
+
+    items = MainPenaltySchedule.get_settings_by_week(start_week)
+
+    if request.method == 'POST':
+        item_type = request.POST.get('type', MainPenaltySchedule.SCHEDULE_TYPE_CHOICE)
+        item, created = MainPenaltySchedule.objects.get_or_create(type=item_type, start_week=start_week)
+        data = {'type': item.type, 'day_of_week': request.POST.get('day_of_week', 0)}
+        form = MainPenaltyScheduleForm(instance=item, data=data)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.INFO, 'Информация успешно сохранена')
+        return redirect('catalog:week_penalty_schedule')
+    forms = [MainPenaltyScheduleForm(instance=item) for item in items]
+    return render(
+        request,
+        'catalog/penalty_schedule.html',
+        {
+            'forms': forms,
+            'work_days': DayOfWeek.objects.all(),
+            'next_week': week_offset + 1,
+            'prev_week': week_offset - 1,
+            'start_week': start_week,
+            'end_week': end_week,
+            'week_offset': week_offset
+        }
+    )
 
 
 @login_required
@@ -179,4 +248,13 @@ def catalog_edit(request, item_type, item_id=None):
 @login_required
 @group_required('director', 'chief', 'coordinator')
 def catalog_remove(request, item_type, item_id):
-    pass
+    if item_type not in CATALOG_DATA:
+        return Http404
+    data = CATALOG_DATA[item_type]
+    Class = class_for_name(data['module_name'], data['class_name'])
+    try:
+        item = Class.objects.get(id=item_id)
+        item.delete()
+    except Class.DoesNotExist:
+        pass
+    return redirect('catalog:catalog_list', item_type=item_type)

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load extuser_tags %}
+{% block title %}
+    График проставления штрафов по умолчанию
+{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        select {
+            margin-right: 25px;
+            width: 100% !important;
+        }
+        .btn {
+            margin-bottom: 0;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>График проставления штрафов по умолчанию
+                        {% if start_week %}
+                            <small>{{ start_week }} - {{ end_week }}</small>
+                        {% endif %}
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    {% if start_week %}
+                        <a href="?week={{ prev_week }}">
+                            <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                        </a>
+                        <a href="?week={{ next_week }}">
+                            <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                        </a>
+                    {% endif %}
+                        {% if messages %}
+                            <p class="alert alert-success fade in">
+                                {% for message in messages %}
+                                    <span{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</span><br>
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                        {% for form in forms %}
+                            <div class="small-margin-top">
+                                <form data-parsley-validate=""
+                                  class="form-label-left form-inline"
+                                  action="{% if start_week %}{% url 'catalog:week_penalty_schedule' %}?week={{ week_offset }}{% else %}{% url 'catalog:main_penalty_schedule' %}{% endif %}"
+                                  method="POST">
+                                    {% csrf_token %}
+                                    {% for field in form %}
+                                        {% if field.name != 'type' %}
+                                        <div class="form-group col-md-3">
+                                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                                {{ field.label }}
+                                            </label>
+                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                {{ field }}
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                            <div class="form-group col-md-2">
+                                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                                {{ field.label }}
+                                            </label>
+                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                {{ field }}
+                                                {{ field|display }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                        <div class="form-group col-md-2">
+                                            <input type="submit" class="btn btn-success" value="Сохранить">
+                                        </div>
+                                </form>
+                            </div>
+                        {% endfor %}
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

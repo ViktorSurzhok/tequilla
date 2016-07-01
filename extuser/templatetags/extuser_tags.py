@@ -13,3 +13,9 @@ def get_sidebar(user):
         'user': user,
         'additional_menu': Menu.objects.filter(parent__isnull=True)
     }
+
+
+@register.filter(name='display')
+def display_value(bf):
+    """Returns the display value of a BoundField"""
+    return dict(bf.field.choices).get(bf.value(), '')

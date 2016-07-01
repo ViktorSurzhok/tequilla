@@ -146,6 +146,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if 'employee' in user_groups %}
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
@@ -158,14 +159,36 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                    <h2>Фото девушек основного состава</h2>
 
-                    <h2>Инструкция по работе с программой</h2>
+                        {% if main_employees_file.file %}
+                            <h2>Фото девушек основного состава</h2>
+                            <a href="{{ main_employees_file.file.url }}" target="_blank">
+                                <img src="{% static 'img/pdf.png' %}">Основной состав
+                            </a>
+                        {% endif %}
+
+                        <h2>Инструкция по работе с программой</h2>
+                        <a href="#" class="btn btn-danger" target="_blank"><i class="fa fa-hand-o-right"></i> Открыть инструкцию</a>
+
+                        <h2 class="small-margin-top">Предстоящая работа</h2>
+                        ...
+                        <h2>Последние отчеты</h2>
+                        <ol>
+                            {% for report in last_reports %}
+                                <li>{{ report.work_shift.club.name }} - {{ report.get_shots_count }} шотов продано, {{ report.sum_for_bar }} в бар, сумма скидки {{ report.discount }}.</li>
+                            {% endfor %}
+                        </ol>
+                        <a href="{% url 'reports:myreports' user.id %}" class="btn btn-info"><i class="fa fa-hand-o-right"></i> Перейти в раздел</a>
+
+                        <h2 class="small-margin-top">Статистика</h2>
+                        ...
                 </div>
             </div>
 
         </div>
     </div>
+    {% endif %}
+
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">

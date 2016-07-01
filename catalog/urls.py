@@ -7,5 +7,7 @@ urlpatterns = [
     url(r'^remove/(?P<item_type>\w+)/(?P<item_id>\d+)/$', views.catalog_remove, name='catalog_remove'),
     url(r'^filter/(?P<item_type>\w+)/$', views.catalog_filter, name='catalog_filter'),
     url(r'^main_employees/$', views.main_employees, name='main_employees'),
+    url(r'^main_penalty_schedule/$', views.main_penalty_schedule, name='main_penalty_schedule'),
+    url(r'^week_penalty_schedule/$', views.week_penalty_schedule, name='week_penalty_schedule'),
     url(r'^(?P<item_type>\w+)/$', views.catalog_list, name='catalog_list'),
 ]

@@ -69,6 +69,9 @@ class UserActivityLog(TimeStampedModel):
 
 
 class PenaltyType(TimeStampedModel):
+    """
+    Тип штрафа.
+    """
     description = models.TextField('Описание')
     sum = models.IntegerField('Сумма')
     num = models.PositiveSmallIntegerField('Номер', default=0)
@@ -79,3 +82,42 @@ class PenaltyType(TimeStampedModel):
 
     class Meta:
         ordering = ('num',)
+
+
+class MainPenaltySchedule(TimeStampedModel):
+    """
+    График проставления штрафов по умолчанию
+    """
+    SCHEDULE_TYPE_CHOICE = 'schedule'
+    REPORT_TYPE_CHOICE = 'report'
+    TYPE_CHOICES = (
+        (SCHEDULE_TYPE_CHOICE, 'График'),
+        (REPORT_TYPE_CHOICE, 'Отчеты')
+    )
+
+    type = models.CharField('Тип', max_length=10, choices=TYPE_CHOICES)
+    day_of_week = models.ForeignKey('club.DayOfWeek', verbose_name='День недели', blank=True, null=True)
+    start_week = models.DateField('Дата начала недели за которую написан перевод', blank=True, null=True)
+
+    def type_verbose(self):
+        return dict(MainPenaltySchedule.TYPE_CHOICES)[self.type]
+
+    @staticmethod
+    def get_settings():
+        obj, created = MainPenaltySchedule.objects.get_or_create(
+            type=MainPenaltySchedule.SCHEDULE_TYPE_CHOICE, start_week=None
+        )
+        obj2, created = MainPenaltySchedule.objects.get_or_create(
+            type=MainPenaltySchedule.REPORT_TYPE_CHOICE, start_week=None
+        )
+        return [obj, obj2]
+
+    @staticmethod
+    def get_settings_by_week(start_week):
+        obj, created = MainPenaltySchedule.objects.get_or_create(
+            type=MainPenaltySchedule.SCHEDULE_TYPE_CHOICE, start_week=start_week
+        )
+        obj2, created = MainPenaltySchedule.objects.get_or_create(
+            type=MainPenaltySchedule.REPORT_TYPE_CHOICE, start_week=start_week
+        )
+        return [obj, obj2]

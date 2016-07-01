@@ -108,8 +108,8 @@
                         <li><a href="#">Типы платежей</a></li>
                         <li><a href="{% url 'catalog:catalog_list' 'uniform' %}">Форма</a></li>
                         <li><a href="{% url 'catalog:main_employees' %}">Основной состав</a></li>
-                        <li><a href="#">Штрафы (по умолчанию)</a></li>
-                        <li><a href="#">Штрафы (понедельно)</a></li>
+                        <li><a href="{% url 'catalog:main_penalty_schedule' %}">Штрафы (по умолчанию)</a></li>
+                        <li><a href="{% url 'catalog:week_penalty_schedule' %}">Штрафы (понедельно)</a></li>
                     </ul>
                 </li>
             {% endif %}

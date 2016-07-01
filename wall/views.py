@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from catalog.models import MainEmployees
+from reports.models import Report
 from tequilla import settings
 from wall.models import Post, Photo
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -24,7 +26,12 @@ def index(request):
     return render(
         request,
         'wall/index.html',
-        {'posts': posts, 'user_groups': request.user.groups.all().values_list('name', flat=True)}
+        {
+            'posts': posts,
+            'user_groups': request.user.groups.all().values_list('name', flat=True),
+            'main_employees_file': MainEmployees.get_file(),
+            'last_reports': Report.objects.filter(work_shift__employee=request.user).order_by('created')[:3]
+        }
     )
 
 

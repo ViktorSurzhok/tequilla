@@ -39,13 +39,6 @@ class ClubEditAdminForm(forms.ModelForm):
         required=False
     )
 
-    def save(self, commit=True):
-        # сотрудники
-        self.instance.employee.clear()
-        for club in self['employee'].value():
-            self.instance.employee.add(club)
-
-        return super(ClubEditAdminForm, self).save(commit)
 
     class Meta:
         model = Club
