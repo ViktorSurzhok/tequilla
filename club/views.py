@@ -17,15 +17,15 @@ from tequilla.decorators import group_required
 @login_required
 @group_required('director', 'chief', 'coordinator')
 def club_list(request):
+    clubs = Club.objects.filter(is_active=True)
     return render(
         request,
         'clubs/club_list.html',
         {
-            'clubs': Club.objects.all(),
+            'clubs': clubs,
             'filter_club_link': 'http://' + request.get_host() + reverse('club:club_filter'),
             'city': City.objects.all(),
-            'metro': Metro.objects.all(),
-            'count': Club.objects.filter(is_active=True).count()
+            'metro': Metro.objects.all()
         }
     )
 
@@ -35,7 +35,7 @@ def club_list(request):
 def club_filter(request):
     if 'callback' in request.GET:
         object_list = Club.objects
-        filters = ['city', 'metro', 'name__icontains', 'street__icontains', 'house__icontains']
+        filters = ['city', 'metro', 'name__icontains', 'street__icontains', 'house__icontains', 'is_active']
         was_filtered = False
         for filter_name in filters:
             filter_value = request.GET.get(filter_name, '')

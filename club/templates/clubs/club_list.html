@@ -19,10 +19,14 @@
                     metro = $('#filter-metro').val(),
                     street = $('#filter-street').val(),
                     house = $('#filter-house').val(),
+                    show_deleted = $('#filter-show-deleted').prop('checked'),
                     name = $('#filter-name').val();
 
                  var filters = '?photo=' + photo + '&city=' + city + '&metro=' + metro + '&street__icontains=' +
                          street + '&house__icontains=' + house + '&name__icontains=' + name;
+                if (!show_deleted) {
+                     filters += '&is_active=True'
+                }
                 // запрос нового контента
                 $.ajax({
                     url: '{{ filter_club_link }}' + filters,
@@ -35,7 +39,7 @@
                 });
             }
 
-            $('#filter-photo, #filter-city, #filter-metro').on('change', function() {
+            $('#filter-photo, #filter-city, #filter-metro, #filter-show-deleted').on('change', function() {
                 getNewContent();
             });
             $('#filter-street, #filter-name, #filter-house').on('keyup', function() {
@@ -54,7 +58,12 @@
         <div class="x_panel">
             <div class="x_title">
                 <h2>Заведения
-                    <small>Всего активных клубов: {{ count }}</small>
+                    <small>Всего активных клубов: {{ clubs.count }}</small>
+                    <span style="border-right: 1px solid gray;"></span>
+                    <small>
+                        <input type="checkbox" id="filter-show-deleted">
+                        Показывать удаленные клубы
+                    </small>
                 </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
