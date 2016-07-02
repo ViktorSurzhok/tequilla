@@ -95,7 +95,7 @@ def club_edit(request, club_id=0):
 
 
 @login_required
-@group_required('chief')
+@group_required('chief', 'director')
 def drinks_edit(request, club_id):
     club = get_object_or_404(Club, id=club_id)
     if request.method == "POST":

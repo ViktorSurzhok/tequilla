@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
 from club.models import Club
-from extuser.models import ExtUser, PenaltyType, MainPenaltySchedule
+from extuser.models import ExtUser
 
 
 class UserImportForm(forms.ModelForm):
@@ -199,23 +199,3 @@ class ChangePasswordForm(forms.Form):
         else:
             self.add_error('new_password', 'Обязательное поле')
         return super().clean()
-
-
-class PenaltyTypeForm(forms.ModelForm):
-    class Meta:
-        model = PenaltyType
-        fields = ('description', 'sum',  'dismissal', 'num')
-
-
-class MainPenaltyScheduleForm(forms.ModelForm):
-    class Meta:
-        model = MainPenaltySchedule
-        fields = ('type', 'day_of_week')
-        widgets = {
-            'type': forms.HiddenInput(
-                attrs={'required': False, 'readonly': True}
-            ),
-            'day_of_week': forms.Select(
-                attrs={'required': True, 'class': 'form-control'}
-            ),
-        }

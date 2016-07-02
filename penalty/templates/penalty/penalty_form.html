@@ -1,0 +1,39 @@
+<form method="POST" id="penalty-form" data-parsley-validate="" class="form-horizontal form-label-left" action="">
+    <input id="id_penalty" type="hidden" value="{{ penalty_id }}">
+    {% for field in form %}
+        <div class="form-group{% if field.errors %} bad{% endif %}">
+            <label class="control-label col-md-3 col-sm-4 col-xs-12">
+                {{ field.label }} {% if field.field.required %}
+                <span class="required">*</span>{% endif %}
+            </label>
+            <div class="col-md-8 col-sm-6 col-xs-12">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="form-group{% if field.errors %} bad{% endif %}">
+        <label class="control-label col-md-3 col-sm-4 col-xs-12">
+            Норма штрафа(за 1)
+        </label>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <input class="form-control" disabled="disabled" value="0" name="penalty_norm" id="penalty_norm" type="text">
+        </div>
+    </div>
+    <div class="form-group{% if field.errors %} bad{% endif %}">
+        <label class="control-label col-md-3 col-sm-4 col-xs-12">
+            Сумма(норма)
+        </label>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <input class="form-control" disabled="disabled" value="0" name="penalty_sum_norm" id="penalty_sum_norm" type="text">
+        </div>
+    </div>
+    <div class="form-group{% if field.errors %} bad{% endif %}">
+        <label class="control-label col-md-3 col-sm-4 col-xs-12">
+            Другая сумма
+        </label>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <input name="penalty_custom_sum_check" id="penalty_custom_sum_check" value="1" type="checkbox"{% if penalty and penalty.use_custom_sum %} checked{% endif %}>
+            <input class="form-control" {% if penalty and penalty.use_custom_sum %}value="{{ penalty.custom_sum }}"{% else %}disabled="disabled" value="0"{% endif %} name="penalty_sum_custom" id="penalty_sum_custom" type="text">
+        </div>
+    </div>
+</form>

@@ -5,17 +5,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 import importlib
 
 from django.template.loader import render_to_string
-from django.utils.dateparse import parse_date
 
 from catalog.models import MainEmployees
 from club.models import DayOfWeek
-from extuser.forms import MainPenaltyScheduleForm
-from extuser.models import MainPenaltySchedule
-from schedule.models import WorkDay
+from penalty.forms import MainPenaltyScheduleForm
+from penalty.models import MainPenaltySchedule
 from tequilla.decorators import group_required
 
 
@@ -60,9 +58,9 @@ CATALOG_DATA = {
         'title': 'Типы штрафов',
         'new_item_text': 'Добавить новый тип штрафа',
         'class_name': 'PenaltyType',
-        'module_name': 'extuser.models',
+        'module_name': 'penalty.models',
         'form_class_name': 'PenaltyTypeForm',
-        'form_module_name': 'extuser.forms',
+        'form_module_name': 'penalty.forms',
         'filters': [
             {'name': 'description__icontains', 'type': 'text', 'prop': 'description', 'label': 'Описание'},
             {'name': 'num__exact', 'type': 'text', 'prop': 'num', 'label': 'Номер'},

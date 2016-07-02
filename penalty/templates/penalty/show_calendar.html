@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Штрафы{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        a.button-add {
+            display: none;
+        }
+        td:hover a.button-add {
+            display: inline-block;
+            padding: 2px 5px;
+        }
+        #penalty_sum_custom {
+            display: inline-block;
+            width: 80%;
+            float:right;
+        }
+        #loader {
+            width: 64px;
+            margin: 0 auto;
+        }
+        .ui-pnotify {
+            top: 25px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        $(function() {
+
+            // редактирование текста записи
+            function openTestModal(options){
+                $('.add-new-penalty').modal({
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+                $('.add-new-penalty').one('shown.bs.modal', function (e) {
+                    var form = $(this).find('form');
+                    $.ajax({
+                        url: typeof options.href != 'undefined' ? options.href : '{% url 'penalty:get_empty_penalty_form' %}',
+                        data: options,
+                        type: 'GET',
+                        success: function (response) {
+                            console.log(response['penalties_sum']);
+                            if (response && typeof response['complete'] != 'undefined') {
+                                $('#form-container').html(response['complete']);
+                                $('#form-container input').not(':checkbox').addClass('form-control');
+                                $('#form-container select').addClass('form-control');
+                                $('#form-container #id_employee option:first').remove();
+                                $('#form-container textarea').attr('rows', 4);
+                                $('#form-container #id_employee').prop('disabled', true);
+                                $('#form-container #id_date').prop('disabled', true);
+
+                                // Изменение нормы штрафа и суммы при изменении количества
+                                function recalcPrice() {
+                                    var penalty_type = parseInt($('#id_type').val());
+                                    var count = parseInt($('#id_count').val());
+                                    console.log(penalty_type, count);
+                                    if (!isNaN(penalty_type) && !isNaN(count)) {
+                                        var sum = response['penalties_sum'][penalty_type];
+                                    } else {
+                                        var sum = 0;
+                                        count = 0;
+                                    }
+                                    $('#penalty_norm').val(sum);
+                                    $('#penalty_sum_norm').val(sum * count);
+                                }
+                                $('#form-container').on('change', '#id_type', recalcPrice);
+                                $('#form-container').on('keyup', '#id_count', recalcPrice);
+                                $('#id_type').trigger('change');
+
+                                $('#form-container').on('change', '#penalty_custom_sum_check', function() {
+                                    if ($(this).prop('checked')) {
+                                        $('#penalty_sum_custom').removeAttr('disabled');
+                                    } else {
+                                        $('#penalty_sum_custom').attr('disabled', true);
+                                    }
+                                });
+                            } else {
+                                $('#form-container').text('Произошла ошибка');
+                            }
+                            $('#loader').hide();
+                            $('#form-container').show();
+                        }
+                    });
+                });
+            }
+
+
+            // нажатие на кнопку "Добавить" в календаре
+            $('.button-add').on('click', function(e){
+                e.preventDefault();
+                $('#form-container').hide();
+                $('#loader').css({display: 'block'});
+                openTestModal({
+                    id: $(this).data('employee-id'),
+                    date: reformat_date($(this).data('date'))
+                });
+            });
+
+            // редактирование добавленного штрафа
+            $('.main-penalty-info').on('click', function(e) {
+                e.preventDefault();
+                $('#form-container').hide();
+                $('#loader').css({display: 'block'});
+                openTestModal({
+                    href: $(this).attr('href'),
+                    date: reformat_date($(this).data('date'))
+                });
+            });
+
+            // нажатие на кнопку сохранения на форме
+            $('#save-penalty').on('click', function() {
+                var data = {
+                    employee: $('#id_employee').val(),
+                    type: $('#id_type').val(),
+                    date: reformat_date($('#id_date').val()),
+                    count: $('#id_count').val(),
+                    use_custom_sum: $('#penalty_custom_sum_check').prop('checked'),
+                    penalty_sum_custom: $('#penalty_sum_custom').val(),
+                    id_penalty: $('#id_penalty').val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                };
+
+                $.ajax({
+                    url: '{% url 'penalty:save_penalty' %}',
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Рабочая штраф успешно сохранен.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location = window.location.search;
+                            }, 1000);
+
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при добавлении штрафа. Заполните все обязательные поля.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast', function() {
+                                    $(this).remove();
+                                });
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+
+            // нажатие на кнопку удаления
+            $('.delete-penalty-link').on('click', function() {
+                return confirm('Вы действительно хотите удалить штраф?');
+            });
+
+
+            // выбор недели по дате
+            $('#calendar').daterangepicker(calendar_options);
+            $('#calendar').on('apply.daterangepicker', function(e, picker) {
+                var date = picker.startDate.format('YYYY-MM-DD');
+                location = '{% url 'penalty:show_calendar' %}?start_date=' + date;
+            });
+        });
+    </script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Штрафы
+                        <small>{{ start_week }} - {{ end_week }}</small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <a href="{% url 'penalty:show_calendar' %}?week={{ prev_week }}&start_date={{ start_date }}">
+                        <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                    </a>
+                    <a href="{% url 'penalty:show_calendar' %}?week={{ next_week }}&start_date={{ start_date }}">
+                        <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                    </a>
+                    <div class="small-margin-top">
+                        {% if perms.extuser.can_edit_users %}
+                            <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                        {% endif %}
+                    </div>
+
+                        <table class="table table-striped table-bordered">
+                            <thead class="fc-head">
+                            <tr>
+                                <th>Tequilla girl</th>
+                                {% for day in week_days %}
+                                    <th>{{ day }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody class="fc-body">
+                            {% for item in grid %}
+                            <tr>
+                                <td class="club-td">
+                                    <div><b>{{ item.employee.get_full_name }}</b></div>
+                                </td>
+                                {% for day in item.data_for_employee %}
+                                    <td>
+                                        <div style="height: 30px;">
+                                            <a class="btn btn-warning btn-xs button-add"
+                                               href="#user-add-modal"
+                                               data-toggle="modal"
+                                               data-employee-id="{{ item.employee.id }}"
+                                               data-date="{{ day.date }}"
+                                               title="Добавить">
+                                                <i class="fa fa-plus-circle"></i>
+                                                Добавить
+                                            </a>
+                                            &nbsp;
+                                        </div>
+                                        {% for penalty in day.penalties %}
+                                            <div class="users-registred">
+                                                <div>
+                                                    <a href="{% url 'penalty:get_penalty_form' penalty.id %}"
+                                                       data-toggle="modal" title="Редактировать"
+                                                       data-date="{{ day.date }}"
+                                                       class="btn btn-danger btn-xs main-penalty-info">
+                                                        №{{ penalty.type.num }}
+                                                    </a>
+                                                    <a href="{% url 'penalty:delete_penalty' penalty.id %}" title="Удалить" class="delete-penalty-link">
+                                                        <i class="fa fa-remove"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade add-new-penalty" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 660px;">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="{% static 'img/heart.gif' %}" id="loader">
+                    <div id="form-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="save-penalty">
+                        <i class="fa fa-check"></i> Сохранить
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
