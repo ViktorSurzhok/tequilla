@@ -69,6 +69,7 @@ class Penalty(TimeStampedModel):
     count = models.PositiveSmallIntegerField('Количество')
     custom_sum = models.IntegerField('Сумма', blank=True, null=True)
     use_custom_sum = models.BooleanField('Другая сумма', default=False)
+    was_paid = models.BooleanField('Штраф был оплачен', default=False)
 
     def get_norm_sum(self):
         return self.count * self.type.sum

@@ -32,4 +32,4 @@ class PenaltyForm(forms.ModelForm):
 
     class Meta:
         model = Penalty
-        fields = ('employee', 'type', 'date', 'count')
+        fields = ('employee', 'type', 'date', 'count', 'was_paid')

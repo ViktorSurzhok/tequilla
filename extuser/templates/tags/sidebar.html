@@ -27,13 +27,17 @@
                     <a href=""><i class="fa fa-calendar"></i> Расписание </a>
                 </li>
                 <li>
-                    <a href="{% url 'reports:myreports' user.id %}"><i class="fa fa-flag-checkered"></i> Отчеты и перевод </a>
+                    <a href="{% url 'reports:myreports' user.id %}">
+                        <i class="fa fa-flag-checkered"></i> Отчеты и перевод
+                    </a>
                 </li>
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
                 </li>
                 <li>
-                    <a href=""><i class="fa fa-frown-o"></i> Штрафы </a>
+                    <a {% if have_unpaid_penalty %}class="has-penalty" {% endif %} href="{% url 'penalty:my_penalties' %}">
+                        <i class="fa fa-frown-o"></i> Штрафы
+                    </a>
                 </li>
                 <li>
                     <a href="{% url 'user_list' %}"><i class="fa fa-female"></i> Сотрудники </a>

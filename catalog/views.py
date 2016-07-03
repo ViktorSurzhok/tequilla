@@ -9,6 +9,8 @@ from django.shortcuts import render, redirect
 import importlib
 
 from django.template.loader import render_to_string
+from django.utils import formats
+from django.utils.dateparse import parse_date
 
 from catalog.models import MainEmployees
 from club.models import DayOfWeek
@@ -146,7 +148,7 @@ def main_penalty_schedule(request):
 @group_required('director', 'chief', 'coordinator')
 def week_penalty_schedule(request):
     week_offset = int(request.GET.get('week', 0))
-    start_date = datetime.date.today()
+    start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
     date = start_date + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
@@ -173,7 +175,8 @@ def week_penalty_schedule(request):
             'prev_week': week_offset - 1,
             'start_week': start_week,
             'end_week': end_week,
-            'week_offset': week_offset
+            'week_offset': week_offset,
+            'start_date': formats.date_format(start_date, 'Y-m-d')
         }
     )
 

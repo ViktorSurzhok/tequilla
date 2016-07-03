@@ -1,0 +1,9 @@
+{% for penalty in penalties %}
+    <span data-toggle="tooltip"
+          data-placement="bottom"
+          title=""
+          style="margin-right: 7px;"
+          data-original-title="{{ penalty.date|date:"d.m.Y" }}, сумма {{ penalty.get_sum }}">
+        №{{ penalty.type.num }}
+    </span>
+{% endfor %}

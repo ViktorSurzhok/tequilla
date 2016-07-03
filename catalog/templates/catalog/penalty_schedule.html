@@ -17,6 +17,20 @@
 {% endblock %}
 
 
+{% block additional_js %}
+    <script type="text/javascript">
+        $(function() {
+            // выбор недели по дате
+            $('#calendar').daterangepicker(calendar_options);
+            $('#calendar').on('apply.daterangepicker', function(e, picker) {
+                var date = picker.startDate.format('YYYY-MM-DD');
+                location = '{% url 'catalog:week_penalty_schedule' %}?start_date=' + date;
+            });
+        });
+    </script>
+{% endblock %}
+
+
 {% block content %}
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -35,12 +49,17 @@
                 </div>
                 <div class="x_content">
                     {% if start_week %}
-                        <a href="?week={{ prev_week }}">
+                        <a href="?week={{ prev_week }}&start_date={{ start_date }}">
                             <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
                         </a>
-                        <a href="?week={{ next_week }}">
+                        <a href="?week={{ next_week }}&start_date={{ start_date }}">
                             <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
                         </a>
+                        <div class="small-margin-top">
+                            {% if perms.extuser.can_edit_users %}
+                                <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                            {% endif %}
+                    </div>
                     {% endif %}
                         {% if messages %}
                             <p class="alert alert-success fade in">

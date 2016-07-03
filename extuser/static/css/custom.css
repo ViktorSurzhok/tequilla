@@ -5357,3 +5357,8 @@ ul.notifications {
 .small-margin-left {
   margin-left: 20px;
 }
+
+a.has-penalty {
+    background: #b10821 !important;
+    color: white !important;
+}

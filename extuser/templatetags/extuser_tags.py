@@ -1,6 +1,7 @@
 from django import template
 
 from faq.models import Menu
+from penalty.models import Penalty
 from ..models import ExtUser
 
 register = template.Library()
@@ -11,6 +12,7 @@ def get_sidebar(user):
     return {
         'user_groups': user.groups.all().values_list('name', flat=True),
         'user': user,
+        'have_unpaid_penalty': Penalty.objects.filter(employee=user, was_paid=False).exists(),
         'additional_menu': Menu.objects.filter(parent__isnull=True)
     }
 

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои штрафы{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Мои штрафы
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="" role="tabpanel" data-example-id="togglable-tabs">
+                        <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true">Оплаченные штрафы</a>
+                            </li>
+                            <li role="presentation" class="">
+                                <a {% if unpaid_penalties %}class="has-penalty"{% endif %} href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false">
+                                    Неоплаченные штрафы
+                                </a>
+                            </li>
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade active in" id="tab_content1"
+                                 aria-labelledby="home-tab">
+                                <p>{% include 'penalty/_my_penalties.html' with penalties=paid_penalties %}</p>
+                                {% include 'pagination.html' with page=paid_penalties %}
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">
+                                <p>{% include 'penalty/_my_penalties.html' with penalties=unpaid_penalties %}</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

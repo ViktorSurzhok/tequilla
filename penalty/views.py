@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
@@ -12,6 +13,7 @@ from django.views.decorators.http import require_POST
 from extuser.models import ExtUser
 from penalty.forms import PenaltyForm
 from penalty.models import Penalty, PenaltyType
+from tequilla import settings
 from tequilla.decorators import group_required
 
 
@@ -46,7 +48,6 @@ def show_calendar(request):
         week_cursor += datetime.timedelta(1)
 
     # наполнение сетки
-    #todo: сотрудники только или еще и координаторы
     employees = Group.objects.get(name='employee').user_set.filter(is_active=True)
     grid = []
     for employee in employees:
@@ -146,3 +147,23 @@ def save_penalty(request):
         penalty.save()
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
+
+
+@login_required
+def my_penalties(request):
+    paid_penalties = Penalty.objects.filter(employee=request.user, was_paid=True).order_by('-date')
+    unpaid_penalties = Penalty.objects.filter(employee=request.user, was_paid=False).order_by('-date')
+    paginator = Paginator(paid_penalties, settings.POST_COUNT_ON_WALL)
+    page = request.GET.get('page')
+    try:
+        paid_penalties = paginator.page(page)
+    except PageNotAnInteger:
+        paid_penalties = paginator.page(1)
+    except EmptyPage:
+        paid_penalties = paginator.page(paginator.num_pages)
+
+    return render(
+        request,
+        'penalty/mypenalties.html',
+        {'paid_penalties': paid_penalties, 'unpaid_penalties': unpaid_penalties}
+    )

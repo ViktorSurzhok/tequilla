@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 
 from club.models import Drink, Club, City
 from extuser.models import ExtUser
+from penalty.models import Penalty
 from reports.forms import UpdateReportForm, ReportTransferForm, ReportTransferFormForAdmin
 from reports.models import Report, ReportDrink, ReportTransfer
 from tequilla.decorators import group_required
@@ -70,6 +71,18 @@ def reports_by_week(request, user_id=None):
                 initial={'employee': report.work_shift.employee, 'start_week': start_week}
             )
             transfer_accepted = 3
+
+        # штрафы для выбранного сотрудника за выбранный день
+        penalties = Penalty.objects.filter(
+            employee=report.work_shift.employee, date__range=[start_week, end_week]
+        ).order_by('date')
+        paid_penalties = []
+        unpaid_penalties = []
+        for penalty in penalties:
+            paid_penalties.append(penalty) if penalty.was_paid else unpaid_penalties.append(penalty)
+
+        report.paid_penalties = paid_penalties
+        report.unpaid_penalties = unpaid_penalties
         report.transfer_form = transfer_form
         report.transfer_accepted = transfer_accepted
         reports_struct[date].append(report)
@@ -89,7 +102,9 @@ def reports_by_week(request, user_id=None):
             'filter_reports_link': reverse('reports:reports_filter'),
             'report_transfer_form': report_transfer_form,
             'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer'),
-            'cities': City.objects.all()
+            'cities': City.objects.all(),
+            'paid_penalties': paid_penalties,
+            'unpaid_penalties': unpaid_penalties
         }
     )
 
@@ -125,6 +140,18 @@ def reports_filter(request):
                     initial={'employee': report.work_shift.employee, 'start_week': start_week}
                 )
                 transfer_accepted = 3
+
+            # штрафы для выбранного сотрудника за выбранный день
+            penalties = Penalty.objects.filter(
+                employee=report.work_shift.employee, date__range=[start_week, end_week]
+            ).order_by('date')
+            paid_penalties = []
+            unpaid_penalties = []
+            for penalty in penalties:
+                paid_penalties.append(penalty) if penalty.was_paid else unpaid_penalties.append(penalty)
+
+            report.paid_penalties = paid_penalties
+            report.unpaid_penalties = unpaid_penalties
             report.transfer_form = transfer_form
             report.transfer_accepted = transfer_accepted
             reports_struct[date].append(report)

@@ -100,6 +100,26 @@
                                                             </div>
                                                         </div>
                                                     {% endfor %}
+                                                    {% if report.paid_penalties %}
+                                                        <div class="form-group">
+                                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" style="color:green;">
+                                                            Оплаченные штрафы за неделю
+                                                        </label>
+                                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                            {% include 'reports/_penalties_in_transfer.html' with penalties=report.paid_penalties %}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if report.unpaid_penalties %}
+                                                        <div class="form-group">
+                                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" style="color:red;">
+                                                            Неоплаченные штрафы за неделю
+                                                        </label>
+                                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                {% include 'reports/_penalties_in_transfer.html' with penalties=report.unpaid_penalties %}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
