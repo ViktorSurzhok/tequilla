@@ -55,6 +55,8 @@ def reports_by_week(request, user_id=None):
     reports_struct = {}
     clubs = []
     employees = []
+    paid_penalties = []
+    unpaid_penalties = []
 
     for report in reports:
         date = report.work_shift.date

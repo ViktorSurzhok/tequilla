@@ -43,7 +43,7 @@ CATALOG_DATA = {
             {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
         ]
     },
-    'uniform': {
+    'attribute': {
         'title': 'Форма',
         'new_item_text': 'Добавить новую форму',
         'class_name': 'Uniform',

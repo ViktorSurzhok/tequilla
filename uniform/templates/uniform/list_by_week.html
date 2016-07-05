@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Остаток формы{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        #loader {
+            width: 64px;
+            margin: 0 auto;
+        }
+        .balance {
+            color: red;
+            font-weight: 700;
+        }
+        .daterangepicker.dropdown-menu {
+            z-index: 2000;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        setCalendarForButton('');
+
+        $(function() {
+            // редактирование текста записи
+            function openTestModal(options){
+                $('.add-new-uniform-for-employee').modal({
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+                $('.add-new-uniform-for-employee').one('shown.bs.modal', function (e) {
+                    console.log(options);
+                    var form = $(this).find('form');
+                    $.ajax({
+                        url: typeof options.href != 'undefined' ? options.href : '{% url 'uniform:get_empty_form_uniform_for_employee' %}',
+                        data: options,
+                        type: 'GET',
+                        success: function (response) {
+
+                            if (response && typeof response['complete'] != 'undefined') {
+                                $('#form-container').html(response['complete']);
+                                $('#form-container input').not(':checkbox').addClass('form-control');
+                                $('#form-container select').addClass('form-control');
+
+                                $('#id_date').daterangepicker(calendar_options);
+                                {% comment %}$('#id_date').on('apply.daterangepicker', function (e, picker) {
+                                    var date = picker.startDate.format('YYYY-MM-DD');
+                                    location = url + '?start_date=' + date;
+                                });{% endcomment %}
+                            }
+                            $('#loader').hide();
+                            $('#form-container').show();
+                        }
+                    });
+                });
+            }
+
+            // нажатие на кнопку "Добавить запись"
+            $('.button-add').on('click', function(e){
+                e.preventDefault();
+                $('#form-container').hide();
+                $('#loader').css({display: 'block'});
+                openTestModal({});
+            });
+
+            // редактирование существущей записи формы для сотрудника
+            $('.change-current-item').on('click', function(e){
+                e.preventDefault();
+                $('#form-container').hide();
+                $('#loader').css({display: 'block'});
+                openTestModal({
+                    href: $(this).attr('href')
+                });
+            });
+
+            // добавление новой записи формы для сотрудника
+            $('.add-new-item').on('click', function(e){
+                e.preventDefault();
+                $('#form-container').hide();
+                $('#loader').css({display: 'block'});
+                console.log('open test modal');
+                openTestModal({
+                    href: $(this).attr('href'),
+                    employee: $(this).data('employee-id'),
+                    uniform: $(this).data('uniform-id')
+                });
+            });
+
+            // нажатие на кнопку сохранения доступного количества единиц формы в попапе
+            $('.count-submit-button').on('click', function() {
+                var url = $(this).attr('href'),
+                    uniform_id = $(this).data('uniform-id'),
+                    data = {
+                    uniform_by_week_id: uniform_id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    count: $('#uniform-count-' + uniform_id).val()
+                };
+
+                $.ajax({
+                    url: url,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Количество формы успешно изменено.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location = '' + window.location.search;
+                            }, 1000);
+
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при изменении количества формы',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+
+            //нажатие на кнопку сохранения новой записи привязи формы к пользователю
+            $('.add-new-uniform-for-employee-button').on('click', function() {
+                var form = $(this).closest('.add-new-uniform-for-employee').find('form'),
+                    url = $(this).attr('href'),
+                    data = form.serializeArray();
+
+                for (var i in data) {
+                    if (data[i].name == 'date') {
+                        data[i].value = reformat_date(data[i].value);
+                        break;
+                    }
+                }
+                data.push({'name': 'csrfmiddlewaretoken', 'value':'{{ csrf_token }}'});
+
+                $.ajax({
+                    url: url,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Новая запись успешно добавлена.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location = '' + window.location.search;
+                            }, 1000);
+
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при добавлени новой записи.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+
+            $('.remove-uniforms-for-employee').on('click', function() {
+                return confirm('Подтвердите удаление');
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Отчеты
+                    <small>{{ start_week }} - {{ end_week }}</small>
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <!-- buttons start -->
+                <a href="?week={{ prev_week }}&start_date={{ start_date }}">
+                    <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                </a>
+                <a href="?week={{ next_week }}&start_date={{ start_date }}">
+                    <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                </a>
+                <div class="small-margin-top">
+                    <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                </div>
+                <div class="small-margin-top">
+                    <a class="btn btn-success btn-lg button-add" data-toggle="modal">Добавить запись</a>
+                    <button class="btn btn-warning btn-lg">Копировать на следующую неделю</button>
+                </div>
+                <!-- buttons end -->
+                <div id="uniform-container">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr><td></td>
+                                {% for uniform in uniform_by_week %}
+                                    <td>{{ uniform.uniform.name }}</td>
+                                {% endfor %}
+                                <td>Отдала</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Всего</td>
+                                {% for uniform in uniform_by_week %}
+                                    <td>
+                                        <a class="btn btn-info" href="#change-count-button-{{ uniform.id }}" data-toggle="modal">
+                                            {{ uniform.count }}
+                                        </a>
+                                        <div class="modal in" id="change-count-button-{{ uniform.id }}" style="display: none;">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-body">
+                                                        <form class="form-horizontal" action="#" method="post">
+                                                            <div class="form-group">
+                                                                <label class="control-label required col-md-4 col-sm-4 col-xs-12" for="uniform_id">
+                                                                    Атрибут <span class="required">*</span>
+                                                                </label>
+                                                                <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 8px;">
+                                                                    <span>{{ uniform.uniform.name }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="control-group">
+                                                                <label class="control-label required col-md-4 col-sm-4 col-xs-12" for="count">
+                                                                    Количество <span class="required">*</span>
+                                                                </label>
+                                                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                                                    <input class="form-control"
+                                                                           id="uniform-count-{{ uniform.uniform.id }}"
+                                                                           style="width:50px;"
+                                                                           name="count"
+                                                                           type="text"
+                                                                           value="{{ uniform.count }}"
+                                                                           maxlength="4">
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-large" data-dismiss="modal" style="margin-bottom: 0;">
+                                                            <i class="fa fa-remove"></i> Закрыть
+                                                        </button>
+                                                        <a class="btn btn-primary btn-large count-submit-button"
+                                                           href="{% url 'uniform:uniform_change_count' uniform.id %}"
+                                                           data-uniform-id="{{ uniform.uniform.id }}"
+                                                           data-dismiss="modal">
+                                                            <i class="fa fa-check"></i> Сохранить
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                                <td>0 руб.</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Остаток</td>
+                                {% for item in uniform_balance %}
+                                    <td>
+                                        <span class="balance">{{ item }}</span>
+                                    </td>
+                                {% endfor %}
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            {% for employee, data in structed_employee.items %}
+                                <tr>
+                                    <td>{{ employee.get_full_name }}</td>
+                                    {% for item in data.values %}
+                                        <td>
+                                            {% if item.has_value %}
+                                                <a class="btn btn-info change-current-item"
+                                                   data-toggle="modal"
+                                                   href="{% url 'uniform:get_form_uniform_for_employee' item.value.id %}">
+                                                    {{ item.value.count }}
+                                                </a>
+                                            {% else %}
+                                                <a class="btn btn-info add-new-item"
+                                                   data-toggle="modal"
+                                                   href="{% url 'uniform:get_empty_form_uniform_for_employee' %}"
+                                                   data-uniform-id="{{ item.value }}"
+                                                   data-employee-id="{{ employee.id }}">
+                                                    0
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    <td>
+                                        <a class="btn btn-info" href="#" data-toggle="modal">
+                                            Изменить
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-danger remove-uniforms-for-employee" href="{% url 'uniform:remove_for_employee' employee.id start_week %}">
+                                            <i class="fa fa-remove"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade add-new-uniform-for-employee" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="{% static 'img/heart.gif' %}" id="loader">
+                    <div id="form-container"></div>
+                    </div>
+                <div class="modal-footer">
+                    <button class="btn btn-large" data-dismiss="modal" style="margin-bottom: 0;">
+                        <i class="fa fa-remove"></i> Закрыть
+                    </button>
+                    <a class="btn btn-primary btn-large add-new-uniform-for-employee-button"
+                       href="{% url 'uniform:save_uniform_for_employee' %}"
+                       data-dismiss="modal">
+                        <i class="fa fa-check"></i> Сохранить
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

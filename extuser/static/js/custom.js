@@ -22,6 +22,15 @@ var calendar_options = {
         firstDay: 1
     }
 };
+
+function setCalendarForButton(url) {
+// выбор недели по дате
+    $('#calendar').daterangepicker(calendar_options);
+    $('#calendar').on('apply.daterangepicker', function (e, picker) {
+        var date = picker.startDate.format('YYYY-MM-DD');
+        location = url + '?start_date=' + date;
+    });
+}
 // Sidebar
 $(function () {
     var URL = window.location,

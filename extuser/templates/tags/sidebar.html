@@ -75,7 +75,7 @@
                     <a href=""><i class="fa fa-calendar"></i> Недельный план </a>
                 </li>
                 <li>
-                    <a href=""><i class="fa fa-sort-amount-desc"></i> Остатки формы </a>
+                    <a href="{% url 'uniform:uniform_by_week' %}"><i class="fa fa-sort-amount-desc"></i> Остатки формы </a>
                 </li>
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
@@ -109,7 +109,7 @@
                         <li><a href="{% url 'catalog:catalog_list' 'clubtype' %}">Типы заведений</a></li>
                         <li><a href="{% url 'catalog:catalog_list' 'metro' %}">Станции метро</a></li>
                         <li><a href="{% url 'catalog:catalog_list' 'penaltytype' %}">Типы штрафов</a></li>
-                        <li><a href="{% url 'catalog:catalog_list' 'uniform' %}">Форма</a></li>
+                        <li><a href="{% url 'catalog:catalog_list' 'attribute' %}">Форма</a></li>
                         <li><a href="{% url 'catalog:main_employees' %}">Основной состав</a></li>
                         <li><a href="{% url 'catalog:main_penalty_schedule' %}">Штрафы (по умолчанию)</a></li>
                         <li><a href="{% url 'catalog:week_penalty_schedule' %}">Штрафы (понедельно)</a></li>

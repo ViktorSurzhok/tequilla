@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from model_utils.models import TimeStampedModel
 
@@ -29,8 +31,21 @@ class UniformByWeek(TimeStampedModel):
     def __str__(self):
         return self.uniform.name
 
+    # todo: Написать метод рассчета остатков формы
+    @staticmethod
+    def get_uniform_by_week(start_week):
+        """Возвращает объекты униформы, если их нет в базе - создает и возвращает"""
+        result = []
+        for uniform in Uniform.objects.all():
+            obj, created = UniformByWeek.objects.get_or_create(start_week=start_week, uniform=uniform)
+            result.append(obj)
+        return result
+
 
 class UniformForEmployee(TimeStampedModel):
+    """
+    Форма которую взял сотрудник
+    """
     employee = models.ForeignKey(ExtUser, verbose_name='Tequilla girl')
     uniform = models.ForeignKey(Uniform, verbose_name='Атрибут')
     count = models.PositiveSmallIntegerField('Количество', default=0)

@@ -1,0 +1,14 @@
+<form class="form-horizontal" action="#" method="post">
+    <input name="id_uniform_for_employee" type="hidden" value="{{ id_uniform_for_employee }}">
+    {% for field in form %}
+        <div class="form-group{% if field.errors %} bad{% endif %}">
+            <label class="control-label col-md-3 col-sm-4 col-xs-12">
+                {{ field.label }} {% if field.field.required %}
+                <span class="required">*</span>{% endif %}
+            </label>
+            <div class="col-md-8 col-sm-6 col-xs-12">
+                {{ field }}
+            </div>
+        </div>
+    {% endfor %}
+</form>

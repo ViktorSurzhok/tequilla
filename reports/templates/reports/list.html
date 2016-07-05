@@ -60,12 +60,7 @@
                 });
             }
 
-            // выбор недели по дате
-            $('#calendar').daterangepicker(calendar_options);
-            $('#calendar').on('apply.daterangepicker', function(e, picker) {
-                var date = picker.startDate.format('YYYY-MM-DD');
-                location = '{% url 'reports:reports_by_week' %}?start_date=' + date;
-            });
+            setCalendarForButton('{% url 'reports:reports_by_week' %}');
 
             // нажатие кнопки сохранения комментария для отчета
             $('#reports-container').on('click', '.add-comment-button', function(e) {
