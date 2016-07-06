@@ -71,7 +71,8 @@ def uniform_list_by_week(request):
             'start_date': formats.date_format(start_date, 'Y-m-d'),
             'structed_employee': structed_employee,
             'uniform_balance': uniform_balance,
-            'transfer_price': transfer_price
+            'transfer_price': transfer_price,
+            'current_date': date
         }
     )
 
@@ -158,3 +159,25 @@ def change_transfer(request, transfer_id):
         return JsonResponse({'complete': 0})
     except UniformByWeek.DoesNotExist:
         return JsonResponse({'complete': 0})
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+@require_POST
+def copy_to_next_week(request, date):
+    current_date = parse_date(date)
+    start_current_week = current_date - datetime.timedelta(current_date.weekday())
+    uniform_for_current_week = UniformByWeek.get_uniform_by_week(start_current_week)
+
+    start_next_week = start_current_week + datetime.timedelta(7)
+    uniform_for_next_week = UniformByWeek.get_uniform_by_week(start_next_week)
+
+    data = {}
+    for ufw in uniform_for_current_week:
+        data[ufw.uniform.id] = ufw.count
+
+    for ufw in uniform_for_next_week:
+        ufw.count = data[ufw.uniform.id]
+        ufw.save()
+
+    return JsonResponse({'complete': 1})

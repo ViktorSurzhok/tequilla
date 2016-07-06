@@ -215,6 +215,40 @@
             $('.remove-uniforms-for-employee').on('click', function() {
                 return confirm('Подтвердите удаление');
             });
+
+            $('#copy-to-next-week').on('click', function(e) {
+                e.preventDefault();
+                if (confirm('Подтвердите копирование. Существующие данные для следующей недели будут затёрты!')) {
+                    var url = $(this).attr('href');
+                    $.ajax({
+                        url: url,
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        type: 'POST',
+                        success: function(response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Информация о атрибутах скопирована на следующую неделю.',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при копировании атрибутов.',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                            }
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    });
+                }
+            });
         });
     </script>
 {% endblock %}
@@ -245,7 +279,7 @@
                 </div>
                 <div class="small-margin-top">
                     <a class="btn btn-success btn-lg button-add" data-toggle="modal">Добавить запись</a>
-                    <button class="btn btn-warning btn-lg">Копировать на следующую неделю</button>
+                    <a id="copy-to-next-week" class="btn btn-warning btn-lg" href="{% url 'uniform:copy_to_next_week' current_date %}">Копировать на следующую неделю</a>
                 </div>
                 <!-- buttons end -->
                 <div id="uniform-container">
