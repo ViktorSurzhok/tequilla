@@ -7,7 +7,7 @@ from uniform.models import Uniform, UniformForEmployee
 class UniformEditForm(forms.ModelForm):
     class Meta:
         model = Uniform
-        fields = ('name', 'num')
+        fields = ('name', 'num', 'price')
 
 
 class CreateUniformForEmployee(forms.ModelForm):

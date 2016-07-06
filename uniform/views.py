@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from extuser.models import ExtUser
 from tequilla.decorators import group_required
 from uniform.forms import CreateUniformForEmployee
-from uniform.models import UniformByWeek, UniformForEmployee
+from uniform.models import UniformByWeek, UniformForEmployee, UniformTransferByWeek
 
 
 @login_required
@@ -37,18 +37,23 @@ def uniform_list_by_week(request):
         .order_by('employee__surname', 'uniform__num')
     # структурирование данных по сотрудникам
     structed_employee = {}
+    transfer_price = 0
     for ufe in uniform_for_employee:
         if ufe.employee not in structed_employee:
-            structed_employee[ufe.employee] = {}
-        structed_employee[ufe.employee][ufe.uniform.id] = {'has_value': True, 'value': ufe}
+            transfer, new = UniformTransferByWeek.objects.get_or_create(employee=ufe.employee, start_week=start_week)
+            structed_employee[ufe.employee] = {'uniforms': {}, 'transfer': transfer}
+            if not transfer.was_paid:
+                transfer_price += transfer.get_sum()
+        structed_employee[ufe.employee]['uniforms'][ufe.uniform.id] = {'has_value': True, 'value': ufe}
 
-    for val in structed_employee.values():
+    for item in structed_employee.values():
+        values = item['uniforms']
         index = 0
         for ubw in uniform_by_week_ids:
-            if ubw in val:
-                minus_balance = val[ubw]['value'].count
+            if ubw in values:
+                minus_balance = values[ubw]['value'].count
             else:
-                val[ubw] = {'has_value': False, 'value': ubw}
+                values[ubw] = {'has_value': False, 'value': ubw}
                 minus_balance = 0
             # вычитаем из баланса использованные вещи
             uniform_balance[index] -= minus_balance
@@ -65,7 +70,8 @@ def uniform_list_by_week(request):
             'end_week': end_week,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
             'structed_employee': structed_employee,
-            'uniform_balance': uniform_balance
+            'uniform_balance': uniform_balance,
+            'transfer_price': transfer_price
         }
     )
 
@@ -136,3 +142,19 @@ def remove_for_employee(request, employee_id, start_date):
     except Exception as e:
         print(e)
         return Http404
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+@require_POST
+def change_transfer(request, transfer_id):
+    """Изменение перевода за форму"""
+    try:
+        uniform_transfer = UniformTransferByWeek.objects.get(id=transfer_id)
+        if 'was_paid' in request.POST:
+            uniform_transfer.was_paid = request.POST.get('was_paid', 'false') == 'true'
+            uniform_transfer.save()
+            return JsonResponse({'complete': 1})
+        return JsonResponse({'complete': 0})
+    except UniformByWeek.DoesNotExist:
+        return JsonResponse({'complete': 0})

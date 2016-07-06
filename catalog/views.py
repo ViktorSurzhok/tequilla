@@ -53,6 +53,7 @@ CATALOG_DATA = {
         'filters': [
             {'name': 'id__exact', 'type': 'text', 'prop': 'id', 'label': 'ID'},
             {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
+            {'name': 'price__exact', 'type': 'text', 'prop': 'price', 'label': 'Цена'},
             {'name': 'num__exact', 'type': 'text', 'prop': 'num', 'label': 'Позиция'},
         ]
     },

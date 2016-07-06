@@ -31,7 +31,6 @@
                     backdrop: 'static'
                 });
                 $('.add-new-uniform-for-employee').one('shown.bs.modal', function (e) {
-                    console.log(options);
                     var form = $(this).find('form');
                     $.ajax({
                         url: typeof options.href != 'undefined' ? options.href : '{% url 'uniform:get_empty_form_uniform_for_employee' %}',
@@ -45,10 +44,6 @@
                                 $('#form-container select').addClass('form-control');
 
                                 $('#id_date').daterangepicker(calendar_options);
-                                {% comment %}$('#id_date').on('apply.daterangepicker', function (e, picker) {
-                                    var date = picker.startDate.format('YYYY-MM-DD');
-                                    location = url + '?start_date=' + date;
-                                });{% endcomment %}
                             }
                             $('#loader').hide();
                             $('#form-container').show();
@@ -178,6 +173,45 @@
                 });
             });
 
+            //нажатие на кнопку сохранения инфо о трансфере
+            $('.change-transfer-button').on('click', function() {
+                var form = $(this).closest('.transfer-modal-container').find('form'),
+                    url = $(this).attr('href'),
+                    data = form.serializeArray();
+                data.push({name: 'was_paid', value: form.find('input[name=was_paid]').prop('checked')});
+                $.ajax({
+                    url: url,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            new PNotify({
+                                title: 'Ура!',
+                                text: 'Информация о переводе успешно сохранена.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                location = '' + window.location.search;
+                            }, 1000);
+
+                        } else {
+                            new PNotify({
+                                title: 'О нет!',
+                                text: 'Произошла ошибка при сохранении ниформации о переводе.',
+                                type: 'error',
+                                styling: 'bootstrap3'
+                            });
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+
             $('.remove-uniforms-for-employee').on('click', function() {
                 return confirm('Подтвердите удаление');
             });
@@ -219,7 +253,7 @@
                         <thead>
                             <tr><td></td>
                                 {% for uniform in uniform_by_week %}
-                                    <td>{{ uniform.uniform.name }}</td>
+                                    <td>{{ uniform.uniform.name }} ({{ uniform.uniform.price }})</td>
                                 {% endfor %}
                                 <td>Отдала</td>
                                 <td></td>
@@ -279,7 +313,7 @@
                                         </div>
                                     </td>
                                 {% endfor %}
-                                <td>0 руб.</td>
+                                <td>{{ transfer_price }} руб.</td>
                                 <td></td>
                             </tr>
                             <tr>
@@ -295,7 +329,7 @@
                             {% for employee, data in structed_employee.items %}
                                 <tr>
                                     <td>{{ employee.get_full_name }}</td>
-                                    {% for item in data.values %}
+                                    {% for item in data.uniforms.values %}
                                         <td>
                                             {% if item.has_value %}
                                                 <a class="btn btn-info change-current-item"
@@ -315,9 +349,55 @@
                                         </td>
                                     {% endfor %}
                                     <td>
-                                        <a class="btn btn-info" href="#" data-toggle="modal">
-                                            Изменить
+                                        <a class="btn btn-dark" href="#transfer-form-{{ data.transfer.id }}" data-toggle="modal">
+                                            {% if data.transfer.was_paid %}
+                                                Перевод
+                                            {% else %}
+                                                {{ data.transfer.get_sum }} руб.
+                                            {% endif %}
                                         </a>
+                                        <!-- start modal transfer -->
+                                        <div class="modal in transfer-modal-container" id="transfer-form-{{ data.transfer.id }}" style="display: none;">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-body">
+                                                        <form class="form-horizontal" action="#" method="post">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="id_employee" value="{{ employee.id }}">
+                                                            <div class="form-group">
+                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
+                                                                    Tequilla girl
+                                                                </label>
+                                                                <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 3px;">
+                                                                    <span>{{ employee.get_full_name }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
+                                                                    Перевод
+                                                                </label>
+                                                                <div class="col-md-8 col-sm-6 col-xs-12">
+                                                                    <input name="was_paid" type="checkbox" {% if data.transfer.was_paid %}checked{% endif %} value="1">
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-large" data-dismiss="modal" style="margin-bottom: 0;">
+                                                            <i class="fa fa-remove"></i> Закрыть
+                                                        </button>
+                                                        <a class="btn btn-primary btn-large change-transfer-button"
+                                                           href="{% url 'uniform:change_transfer' data.transfer.id %}"
+                                                           data-uniform-id="{{ uniform.uniform.id }}"
+                                                           data-dismiss="modal">
+                                                            <i class="fa fa-check"></i> Сохранить
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- end modal transfer -->
                                     </td>
                                     <td>
                                         <a class="btn btn-danger remove-uniforms-for-employee" href="{% url 'uniform:remove_for_employee' employee.id start_week %}">

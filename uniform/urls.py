@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     url(r'^$', views.uniform_list_by_week, name='uniform_by_week'),
     url(r'^uniform_change_count/(?P<uniform_by_week_id>\d+)/$', views.uniform_change_count, name='uniform_change_count'),
+    url(r'^change_transfer/(?P<transfer_id>\d+)/$', views.change_transfer, name='change_transfer'),
     url(
         r'^get_empty_form_uniform_for_employee/$',
         views.uniform_for_employee_form,
