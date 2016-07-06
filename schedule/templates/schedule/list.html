@@ -16,12 +16,7 @@
     <script type="text/javascript">
         $(function () {
 
-            // выбор недели по дате
-            $('#calendar').daterangepicker(calendar_options);
-            $('#calendar').on('apply.daterangepicker', function(e, picker) {
-                var date = picker.startDate.format('YYYY-MM-DD');
-                location = '{{ base_url_for_navigation }}?start_date=' + date;
-            });
+            setCalendarForButton('{{ base_url_for_navigation }}');
 
             // отправка запроса на сервер для сохранения данных с формы
             function send_request(data) {

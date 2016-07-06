@@ -25,11 +25,7 @@
 {% block additional_js %}
     <script type="text/javascript">
         // выбор недели по дате
-        $('#calendar').daterangepicker(calendar_options);
-        $('#calendar').on('apply.daterangepicker', function(e, picker) {
-            var date = picker.startDate.format('YYYY-MM-DD');
-            location = '{% url 'schedule:schedule_by_week_all_users' %}?start_date=' + date;
-        });
+        setCalendarForButton('{% url 'schedule:schedule_by_week_all_users' %}');
     </script>
 {% endblock %}
 

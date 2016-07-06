@@ -1,5 +1,6 @@
 import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect
@@ -9,10 +10,13 @@ from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 from extuser.models import ExtUser
+from tequilla.decorators import group_required
 from uniform.forms import CreateUniformForEmployee
 from uniform.models import UniformByWeek, UniformForEmployee
 
 
+@login_required
+@group_required('director', 'chief', 'coordinator')
 def uniform_list_by_week(request):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
@@ -66,6 +70,8 @@ def uniform_list_by_week(request):
     )
 
 
+@login_required
+@group_required('director', 'chief', 'coordinator')
 def uniform_change_count(request, uniform_by_week_id):
     """Изменение доступного количества единиц формы"""
     try:
@@ -77,6 +83,8 @@ def uniform_change_count(request, uniform_by_week_id):
         return JsonResponse({'complete': 0})
 
 
+@login_required
+@group_required('director', 'chief', 'coordinator')
 def uniform_for_employee_form(request, object_id=None):
     try:
         obj = UniformForEmployee.objects.get(id=object_id)
@@ -100,6 +108,8 @@ def uniform_for_employee_form(request, object_id=None):
 
 
 @require_POST
+@login_required
+@group_required('director', 'chief', 'coordinator')
 def save_uniform_for_employee(request):
     try:
         uniform_id = request.POST.get('id_uniform_for_employee', 0)
@@ -113,6 +123,8 @@ def save_uniform_for_employee(request):
     return JsonResponse({'complete': 0})
 
 
+@login_required
+@group_required('director', 'chief', 'coordinator')
 def remove_for_employee(request, employee_id, start_date):
     start_date = parse_date(start_date)
     start_week = start_date - datetime.timedelta(start_date.weekday())

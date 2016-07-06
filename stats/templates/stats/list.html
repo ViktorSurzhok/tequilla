@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        $('.use-filter-button').on('click', function(e) {
+            e.preventDefault();
+            location = '?start_date=' + reformat_date($('#calendar-from').val()) + '&end_date=' +
+                    reformat_date($('#calendar-to').val());
+        });
+
+        $('.calendar').daterangepicker(calendar_options);
+    </script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Статистика
+                    <small>{{ start_date }} - {{ end_date }}</small>
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <a href="{% url 'stats:stats_by_night' %}" class="btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
+                <a href="{% url 'stats:stats_by_sale' %}" class="btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
+                <a href="{% url 'stats:stats_by_penalty' %}" class="btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
+                <div class="small-margin-top">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            С: <input type="text" class="calendar form-control" id="calendar-from" value="{{ start_date|date:"d.m.Y" }}">
+                        </div>
+                        <div class="form-group">
+                            По: <input type="text" class="calendar form-control" id="calendar-to" value="{{ end_date|date:"d.m.Y" }}">
+                        </div>
+                        <button class="btn btn-info use-filter-button" style="margin-bottom: 0;">Показать</button>
+                    </form>
+                </div>
+                <div id="stats-container" class="small-margin-top">
+                    {{ data_table }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'catalog',
     'uniform',
     'penalty',
+    'stats',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
