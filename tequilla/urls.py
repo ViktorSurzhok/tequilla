@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^catalog/', include('catalog.urls', namespace='catalog')),
     url(r'^uniform/', include('uniform.urls', namespace='uniform')),
     url(r'^stats/', include('stats.urls', namespace='stats')),
+    url(r'^statement/', include('statement.urls', namespace='statement')),
     url(r'^employee/(?P<user_id>\d+)/', user_detail, name='user_detail'),
     url(r'^employee/album/(?P<user_id>\d+)/', user_albums, name='user_albums'),
     url(r'^employee/edit/(?P<user_id>\d+)/', user_edit, name='user_edit'),

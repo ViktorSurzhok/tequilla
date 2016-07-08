@@ -244,7 +244,7 @@ def save_report_drinks(request, report_id):
             if item['count']:
                 try:
                     drink = Drink.objects.get(id=item['id'])
-                    ReportDrink.objects.create(report=report, drink=drink, count=item['count'])
+                    ReportDrink.objects.create(report=report, drink=drink, count=item['count'].replace(',', '.'))
                 except Drink.DoesNotExist:
                     pass
 

@@ -91,7 +91,7 @@
                 </li>
                 {% if 'director' in user_groups %}
                     <li>
-                        <a href=""><i class="fa fa-book"></i> Ведомость </a>
+                        <a href="{% url 'statement:statement_by_week' %}"><i class="fa fa-book"></i> Ведомость </a>
                     </li>
                 {% endif %}
                 <li>

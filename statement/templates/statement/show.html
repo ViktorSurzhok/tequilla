@@ -1,0 +1,93 @@
+{% load statement_tags %}
+<html>
+    <title>Ведомость {{ start_week }} - {{ end_week }}</title>
+    <head>
+        <style>
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+            }
+            td {
+                text-align: center;
+            }
+            tbody td:nth-child(2n - 1) {
+                background-color: #00B0F0;
+            }
+            tbody td:nth-child(2n) {
+                background-color: #92CDDC;
+            }
+            tbody td.club-even {
+                background-color:#FFC000;
+                font-weight:bold;
+                text-align: left;
+            }
+            tbody td.club-odd {
+                background-color:#FFFF00;
+                font-weight:bold;
+                text-align: left;
+            }
+
+            tbody td.manager {
+                background-color:#92D050;
+            }
+
+            .manager-header {
+                vertical-align:bottom;
+                background-color:#008000;
+                font-weight:bold;
+            }
+
+            .club-header {
+                vertical-align:bottom;
+                background-color:#D09E00;
+                font-weight:bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{ start_week }} - {{ end_week }}</h1>
+        <div style="float:left;">
+        <table>
+            <thead>
+                <tr>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    {% for drink_data in drinks_table_header %}
+                        {% if drink_data.used %}
+                            <td>{{ drink_data.name }} {% comment %}{{ drink_data.used }}{% endcomment %}</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td class="club-header">Клуб</td>
+                    <td class="manager-header">Менеджер клуба</td>
+                    <td colspan="{{ drinks_count }}"></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in grid %}
+                    <tr>
+                        <td class="club-{% cycle 'even' 'odd' %}">
+                            {{ forloop.counter }}. {{ data.club.name }} {{ data.club.get_address }}
+                        </td>
+                        <td class="manager">{{ data.club.coordinator.surname|default_if_none:"" }}</td>
+                        {% for price in data.drinks_for_club %}
+                            {% if price.used %}
+                                <td>{{ price.sum }} {% comment %}{{ price.used }}{% endcomment %}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div style="float:right;">
+        <table>
+            <tr><td>123</td></tr>
+            <tr><td>123</td></tr>
+        </table>
+            </div>
+    </body>
+</html>

@@ -13,7 +13,7 @@ class Report(TimeStampedModel):
     discount = models.IntegerField('Сумма скидки', blank=True, null=True)
     comment = models.TextField(blank=True)
     filled_date = models.DateTimeField(null=True)
-    work_shift = models.ForeignKey(WorkShift, verbose_name='Рабочая смена')
+    work_shift = models.ForeignKey(WorkShift, verbose_name='Рабочая смена', related_name='reports')
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
 
     def get_shots_count(self):

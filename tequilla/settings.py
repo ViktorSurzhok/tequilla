@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'uniform',
     'penalty',
     'stats',
+    'statement',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
