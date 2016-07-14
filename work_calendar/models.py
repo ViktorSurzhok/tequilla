@@ -20,7 +20,7 @@ class WorkShift(TimeStampedModel):
     )
     club = models.ForeignKey(Club, verbose_name='Клуб')
     date = models.DateField('Дата')
-    employee = models.ForeignKey(ExtUser, verbose_name='Сотрудник')
+    employee = models.ForeignKey(ExtUser, verbose_name='Сотрудник', related_name='work_shifts')
     start_time = models.CharField('Время начала', max_length=6, default='00:00')
     end_time = models.CharField('Время окончания', max_length=6, default='00:00')
     comment = models.TextField('Дополнительно', blank=True)

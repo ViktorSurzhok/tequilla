@@ -42,6 +42,74 @@
                 background-color:#D09E00;
                 font-weight:bold;
             }
+
+            .drink-name {
+                line-height:12px;
+                text-align:center;
+                width:22px !important;
+                -webkit-transform: rotate(270deg);
+                transform: rotate(270deg);
+                -o-transform: rotate(270deg);
+                -moz-transform: rotate(270deg);
+                height:200px;
+            }
+            table.inside, table.inside th, table.inside td {
+                border: none;
+            }
+
+            table.drinks-count-table {
+                height:100%;
+                table-layout:fixed;
+            }
+
+            table.drinks-count-table td.cell-drink-count {
+                background-color:#FFFF00;
+                font-weight:bold;
+                width:24px !important;
+                text-align:center;
+            }
+
+            table.drinks-count-table td.sum-for-club {
+                background-color:#FFC000;
+                font-weight:bold;
+                text-align:center;
+                width:75px !important;
+            }
+
+            table.drinks-count-table td.sum-for-coordinator {
+                background-color:#92D050;
+                text-align:center;
+                width:75px !important;
+            }
+
+            tr.bottom-row-all td {
+                background-color:#E6B8B7;
+                font-weight:bold;
+            }
+            tr.bottom-row-pledge td {
+                background-color:#DA9694;
+                font-weight:bold;
+            }
+            tr.bottom-row-credit td {
+                background-color:#FF3366;
+                font-weight:bold;
+            }
+            tr.bottom-row-penalty td {
+                background-color:#FABF8F;
+                font-weight:bold;
+            }
+            tr.bottom-row-penalty-description td {
+                background-color:#FABF8F;
+                font-weight:bold;
+            }
+            tr.bottom-row-coordinator td {
+                background-color:#B1A0C7;
+                font-weight:bold;
+            }
+            tr.bottom-row-director td {
+                background-color:#92CDDC;
+                font-weight:bold;
+            }
         </style>
     </head>
     <body>
@@ -51,6 +119,10 @@
             <thead>
                 <tr>
                     <td colspan="{{ drinks_count|add:2 }}"></td>
+                    <td>Tequilla girl →</td>
+                    {% for employee in employees_table_header %}
+                        <td>{{ forloop.counter }}. {{ employee.get_full_name }}</td>
+                    {% endfor %}
                 </tr>
                 <tr>
                     <td colspan="2"></td>
@@ -59,18 +131,44 @@
                             <td>{{ drink_data.name }} {% comment %}{{ drink_data.used }}{% endcomment %}</td>
                         {% endif %}
                     {% endfor %}
+                    <td>Менеджер Tequilla girl →</td>
+                    {% for employee in employees_table_header %}
+                        <td>
+                            {% if employee.coordinator %}
+                                {{ employee.coordinator.get_full_name }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
                 </tr>
                 <tr>
                     <td class="club-header">Клуб</td>
                     <td class="manager-header">Менеджер клуба</td>
                     <td colspan="{{ drinks_count }}"></td>
+                    <td>Напитки →</td>
+                    {% for employee, drinks in header_drinks_for_employee.items %}
+                            <td>
+                                {{ employee }}
+                                <table class="inside">
+                                    <tr>
+                                        {% for drink in drinks  %}
+                                            <td class="drink-name">
+                                                <nobr>{{ drink }}</nobr>
+                                            </td>
+                                        {% endfor %}
+
+                                        <td>Всего клуб</td>
+                                        <td>Коорд-р</td>
+                                    </tr>
+                                </table>
+                            </td>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 {% for data in grid %}
                     <tr>
                         <td class="club-{% cycle 'even' 'odd' %}">
-                            {{ forloop.counter }}. {{ data.club.name }} {{ data.club.get_address }}
+                            <span >{{ forloop.counter }}. {{ data.club.name }} {{ data.club.get_address }}</span>
                         </td>
                         <td class="manager">{{ data.club.coordinator.surname|default_if_none:"" }}</td>
                         {% for price in data.drinks_for_club %}
@@ -78,16 +176,81 @@
                                 <td>{{ price.sum }} {% comment %}{{ price.used }}{% endcomment %}</td>
                             {% endif %}
                         {% endfor %}
+                        <td></td>
+                        {% for info in data.employees_info %}
+                            <td>
+                            <table class="drinks-count-table" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                <tr>
+                                    {% for drink in info.drinks_list  %}
+                                        <td class="cell-drink-count">
+                                            {{ drink.count }}
+                                        </td>
+                                    {% endfor %}
+                                    <td class="sum-for-club">{{ info.sum_for_club|floatformat:2  }} р.</td>
+                                    <td class="sum-for-coordinator"> {{ info.sum_for_coordinator|floatformat:2 }} р.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </td>
+                        {% endfor %}
                     </tr>
                 {% endfor %}
+                <tr class="bottom-row-all">
+                    <td>ВСЕГО (Перевод Tequilla girl)</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.all|floatformat:2 }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-pledge">
+                    <td>Залог Tequilla girl</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.pledge }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-credit">
+                    <td>ДОЛГ</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.credit }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-penalty">
+                    <td>Штраф</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.penalty }}</td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-penalty-description">
+                    <td>Причина штрафа</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>
+                            {% for description in info.penalty_description %}
+                                {{ description }}
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-coordinator">
+                    <td>Координатор (всего за клубы по каждой Tequilla Girl)</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.coordinator|floatformat:2 }} р.</td>
+                    {% endfor %}
+                </tr>
+                <tr class="bottom-row-director">
+                    <td>Ермакова (всего за клубы по каждой Tequilla Girl)</td>
+                    <td colspan="{{ drinks_count|add:2 }}"></td>
+                    {% for info in bottom_prices_for_employee.values %}
+                        <td>{{ info.director|floatformat:2 }} р.</td>
+                    {% endfor %}
+                </tr>
             </tbody>
         </table>
         </div>
-        <div style="float:right;">
-        <table>
-            <tr><td>123</td></tr>
-            <tr><td>123</td></tr>
-        </table>
-            </div>
     </body>
 </html>
