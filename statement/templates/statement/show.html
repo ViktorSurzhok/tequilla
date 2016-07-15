@@ -134,7 +134,7 @@
                     <td colspan="2"></td>
                     {% for drink_data in drinks_table_header %}
                         {% if drink_data.used %}
-                            <td>{{ drink_data.name }} {% comment %}{{ drink_data.used }}{% endcomment %}</td>
+                            <td>{{ drink_data.name }}</td>
                         {% endif %}
                     {% endfor %}
                     <td>Менеджер Tequilla girl →</td>
@@ -151,7 +151,7 @@
                     <td class="manager-header">Менеджер клуба</td>
                     <td colspan="{{ drinks_count }}"></td>
                     <td>Напитки →</td>
-                    {% for employee, drinks in header_drinks_for_employee.items %}
+                    {% for drinks in header_drinks_for_employee.values %}
                             <td>
                                 <table class="inside" style="table-layout: fixed;">
                                     <tr>
@@ -178,7 +178,7 @@
                         <td class="manager">{{ data.club.coordinator.surname|default_if_none:"" }}</td>
                         {% for price in data.drinks_for_club %}
                             {% if price.used %}
-                                <td>{{ price.sum }} {% comment %}{{ price.used }}{% endcomment %}</td>
+                                <td>{{ price.sum }}</td>
                             {% endif %}
                         {% endfor %}
                         <td></td>
