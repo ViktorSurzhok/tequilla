@@ -43,29 +43,32 @@
                 font-weight:bold;
             }
 
-            .drink-name {
-                line-height:12px;
-                text-align:center;
-                width:22px !important;
-                -webkit-transform: rotate(270deg);
-                transform: rotate(270deg);
-                -o-transform: rotate(270deg);
-                -moz-transform: rotate(270deg);
-                height:200px;
+            tbody td.drink-name {
+                height: 240px;
+                white-space: nowrap;
+                width: 38px;
+                box-sizing: border-box;
+                background: white;
             }
-            table.inside, table.inside th, table.inside td {
+            .drink-name nobr {
+                transform: /* Magic Numbers */ translate(0px, 100px) /* 45 is really 360 - 45 */ rotate(270deg);
+                width: 30px;
+                display: inline-block;
+            }
+            table.drinks-count-table, table.drinks-count-table th, table.drinks-count-table td, table.inside, table.inside th, table.inside td {
                 border: none;
             }
 
             table.drinks-count-table {
-                height:100%;
+                height: 100px;
                 table-layout:fixed;
+                width: 100%;
             }
 
             table.drinks-count-table td.cell-drink-count {
                 background-color:#FFFF00;
                 font-weight:bold;
-                width:24px !important;
+                width:37px !important;
                 text-align:center;
             }
 
@@ -73,13 +76,18 @@
                 background-color:#FFC000;
                 font-weight:bold;
                 text-align:center;
-                width:75px !important;
+                width:78px !important;
+            }
+
+            table tbody td.sum-for-header {
+                width: 78px;
+                background-color: white;
             }
 
             table.drinks-count-table td.sum-for-coordinator {
                 background-color:#92D050;
                 text-align:center;
-                width:75px !important;
+                width:78px !important;
             }
 
             tr.bottom-row-all td {
@@ -88,10 +96,6 @@
             }
             tr.bottom-row-pledge td {
                 background-color:#DA9694;
-                font-weight:bold;
-            }
-            tr.bottom-row-credit td {
-                background-color:#FF3366;
                 font-weight:bold;
             }
             tr.bottom-row-penalty td {
@@ -110,11 +114,13 @@
                 background-color:#92CDDC;
                 font-weight:bold;
             }
+            .admins-salary {
+                margin-top:10px;
+            }
         </style>
     </head>
     <body>
         <h1>{{ start_week }} - {{ end_week }}</h1>
-        <div style="float:left;">
         <table>
             <thead>
                 <tr>
@@ -147,8 +153,7 @@
                     <td>Напитки →</td>
                     {% for employee, drinks in header_drinks_for_employee.items %}
                             <td>
-                                {{ employee }}
-                                <table class="inside">
+                                <table class="inside" style="table-layout: fixed;">
                                     <tr>
                                         {% for drink in drinks  %}
                                             <td class="drink-name">
@@ -156,8 +161,8 @@
                                             </td>
                                         {% endfor %}
 
-                                        <td>Всего клуб</td>
-                                        <td>Коорд-р</td>
+                                        <td class="sum-for-header">Всего клуб</td>
+                                        <td class="sum-for-header">Коорд-р</td>
                                     </tr>
                                 </table>
                             </td>
@@ -210,13 +215,6 @@
                         <td>{{ info.pledge }}</td>
                     {% endfor %}
                 </tr>
-                <tr class="bottom-row-credit">
-                    <td>ДОЛГ</td>
-                    <td colspan="{{ drinks_count|add:2 }}"></td>
-                    {% for info in bottom_prices_for_employee.values %}
-                        <td>{{ info.credit }}</td>
-                    {% endfor %}
-                </tr>
                 <tr class="bottom-row-penalty">
                     <td>Штраф</td>
                     <td colspan="{{ drinks_count|add:2 }}"></td>
@@ -230,7 +228,7 @@
                     {% for info in bottom_prices_for_employee.values %}
                         <td>
                             {% for description in info.penalty_description %}
-                                {{ description }}
+                                {{ description }}<br>
                             {% endfor %}
                         </td>
                     {% endfor %}
@@ -251,6 +249,9 @@
                 </tr>
             </tbody>
         </table>
+        <div class="admins-salary">
+            <p style="background-color:#FF65A3;font-weight:bold;">Координатор(за все клубы и за всех tequila girls): {{ admins_salary.coordinator|floatformat:2 }} руб.</p>
+            <p style="background-color:#FF4747;font-weight:bold;">Ермакова(за все клубы и за всех tequila girls): {{ admins_salary.director|floatformat:2 }} руб.</p>
         </div>
     </body>
 </html>

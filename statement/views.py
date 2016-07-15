@@ -9,6 +9,7 @@ from django.utils.dateparse import parse_date
 
 from extuser.models import ExtUser
 from reports.models import Report
+from statement.utils import calculate_prices
 from tequilla.decorators import group_required
 
 
@@ -61,6 +62,7 @@ def show(request, week, start_date):
             employees_table_header.append(employee)
 
     employees_table_header.sort(key=lambda x: x.surname)
+    # инициализация словарей в которых будут храниться названия напитков привязанные к сотрудникам
     header_drinks_for_employee = OrderedDict()
     bottom_prices_for_employee = OrderedDict()
     for e in employees_table_header:
@@ -68,14 +70,13 @@ def show(request, week, start_date):
         bottom_prices_for_employee[e] = {
             'all': 0,
             'pledge': e.pledge,
-            'credit': 0,
             'penalty': 0,
             'penalty_description': [],
             'coordinator': 0,
             'director': 0
         }
 
-    # список клубов и проставление цен за напитки
+    # список клубов из отчетов за неделю
     clubs = []
     for report in reports:
         club = report.work_shift.club
@@ -106,6 +107,7 @@ def show(request, week, start_date):
         # сотрудники
         employees_info = []
         city_name = club.city.name if club.city else 'Москва'
+        club_coordinator = club.coordinator
         for employee in employees_table_header:
             drinks_for_employee = {
                 'employee': employee, 'drinks_dict': {}, 'sum_for_coordinator': 0, 'sum_for_club': 0, 'drinks_list': []
@@ -117,15 +119,14 @@ def show(request, week, start_date):
                 for report in work_shift.reports.all():
                     for report_drink in report.drinks.all():
                         drink = report_drink.drink
-                        if drink.name not in drinks_for_employee:
-                            drinks_for_employee[drink.name] = 0
-                        drinks_for_employee[drink.name] += report_drink.count
-                        if city_name == 'Москва':
-                            sum_for_club += report_drink.count * drink.price_in_bar * Decimal(0.2)
-                            sum_for_coordinator += report_drink.count * drink.price_in_bar * Decimal(0.05)
-                        else:
-                            sum_for_club += report_drink.count * drink.price_in_bar * Decimal(0.2)
-                            sum_for_coordinator += report_drink.count * drink.price_in_bar * Decimal(0.05)
+
+                        # цена за напитки
+                        price_for_club, price_for_coordinator = calculate_prices(
+                            city_name, report_drink, drink, club_coordinator, employee.coordinator
+                        )
+                        sum_for_club += price_for_club
+                        sum_for_coordinator += price_for_coordinator
+
                         # добавление каждого напитка для подсчета кол-ва
                         if drink.name not in drinks_dict:
                             drinks_dict[drink.name] = 0
@@ -166,18 +167,21 @@ def show(request, week, start_date):
     for temp in sorted(drinks_table_header):
         sorted_drinks_table_header.append({'name': temp, 'used': drinks_table_header[temp]})
 
-    #todo: надо обходить bottom и делать -penalty для all. Также проверить влияет ли penalty На сумму координатору\директору
+    # заполнение нижней части таблицы для сотрудников
     for employee, item in bottom_prices_for_employee.items():
         for penalty in employee.penalty_set.filter(date__range=[start_week, end_week], was_paid=False):
             penalty_type = penalty.type
             item['penalty'] += penalty_type.sum
             item['all'] += penalty_type.sum
-            item['all'] += penalty_type.sum
-            item['penalty_description'].append(penalty_type.description[:20] + '...')
+            item['penalty_description'].append(penalty_type.description[:35] + '...')
+
+    admins_salary = {'director': 0, 'coordinator': 0}
 
     for employee, item in bottom_prices_for_employee.items():
         item['director'] = item['all'] - item['coordinator']
-    
+        admins_salary['director'] += item['director']
+        admins_salary['coordinator'] += item['coordinator']
+
     return render(
         request,
         'statement/show.html',
@@ -190,5 +194,6 @@ def show(request, week, start_date):
             'header_drinks_for_employee': header_drinks_for_employee,
             'bottom_prices_for_employee': bottom_prices_for_employee,
             'grid': grid,
+            'admins_salary': admins_salary
         }
     )
