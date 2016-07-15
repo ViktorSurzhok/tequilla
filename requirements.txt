@@ -1,9 +1,12 @@
 beautifulsoup4==4.4.1
 Django==1.9.6
 django-cleanup==0.4.2
+django-formset-js==0.5.0
+django-jquery-js==2.1.4
 django-model-utils==2.5
 Pillow==3.2.0
 psycopg2==2.6.1
 redis==2.10.5
 requests==2.10.0
 sorl-thumbnail==12.3
+xlwt==1.1.2
