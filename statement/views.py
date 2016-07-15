@@ -82,6 +82,29 @@ def export_xls(request, week, start_date):
     wb.set_colour_RGB(0x25, 255, 255, 0)
     yellow_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_yellow')
 
+    xlwt.add_palette_colour("custom_pink", 0x26)
+    wb.set_colour_RGB(0x26, 230, 184, 183)
+    pink_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_pink')
+
+    xlwt.add_palette_colour("custom_dark_pink", 0x27)
+    wb.set_colour_RGB(0x27, 218, 150, 148)
+    dark_pink_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_dark_pink')
+
+    xlwt.add_palette_colour("custom_penalty", 0x28)
+    wb.set_colour_RGB(0x28, 218, 150, 148)
+    penalty_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_penalty')
+
+    xlwt.add_palette_colour("custom_purple", 0x29)
+    wb.set_colour_RGB(0x29, 177, 160, 199)
+    purple_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_purple')
+
+    xlwt.add_palette_colour("custom_red", 0x30)
+    wb.set_colour_RGB(0x30, 255, 71, 71)
+    red_style = xlwt.easyxf('pattern: pattern solid, fore_colour custom_red')
+
+    font_style_bold = xlwt.XFStyle()
+    font_style_bold.font.bold = True
+
     writer = Writer(wb.add_sheet('statement'))
     # ws = wb.add_sheet('statement')#, cell_overwrite_ok=True)
 
@@ -90,8 +113,6 @@ def export_xls(request, week, start_date):
     for i in xrange(len(data['drinks_table_header']) + 2):
         writer.write('', font_style)
 
-    font_style_bold = xlwt.XFStyle()
-    font_style_bold.font.bold = True
     writer.write('Tequilla Girl', font_style_bold)
     # имена сотрудников
     for idx, employee in enumerate(data['employees_table_header']):
@@ -106,7 +127,7 @@ def export_xls(request, week, start_date):
         if drink_data['used']:
             writer.write(drink_data['name'], font_style)
 
-    writer.write('Менеджер Tequilla girl', font_style)
+    writer.write('Менеджер Tequilla girl', font_style_bold)
 
     # координаторы
     for employee in data['employees_table_header']:
@@ -115,12 +136,12 @@ def export_xls(request, week, start_date):
 
     # ТРЕТЬЯ СТРОКА
     writer.new_row()
-    writer.write('Клуб', font_style)
-    writer.write('Менеджер клуба', font_style)
+    writer.write('Клуб', font_style_bold)
+    writer.write('Менеджер клуба', font_style_bold)
     for drink_data in data['drinks_table_header']:
         if drink_data['used']:
             writer.write('Цена', font_style)
-    writer.write('Напитки', font_style)
+    writer.write('Напитки', font_style_bold)
     # названия напитков
     for drinks in data['header_drinks_for_employee'].values():
         names = [drink for drink in drinks]
@@ -130,70 +151,78 @@ def export_xls(request, week, start_date):
     for idx, row in enumerate(data['grid']):
         writer.new_row()
         writer.write(
-            '{}. {} {}'.format(idx, row['club'].name, row['club'].get_address()),
+            '{}. {} {}'.format(idx + 1, row['club'].name, row['club'].get_address()),
             yellow_style if idx % 2 == 0 else orange_style
         )
         writer.write(row['club'].coordinator.surname if row['club'].coordinator else '', light_green_style)
-        for price in row['drinks_for_club']:
+        for ndx, price in enumerate(row['drinks_for_club']):
             if price['used']:
-                writer.write(price['sum'], font_style)
+                writer.write(
+                    price['sum'],
+                    blue_style if ndx % 2 == 0 else light_blue_style
+                )
         writer.write('', font_style)
         for info in row['employees_info']:
             count = [str(drink['count']) for drink in info['drinks_list']]
-            writer.write('{}, {:.2f}р., {:.2f}р.'.format(' '.join(count), info['sum_for_club'], info['sum_for_coordinator']), font_style)
+            writer.write(
+                '{}, {:.2f}р., {:.2f}р.'.format(' '.join(count), info['sum_for_club'], info['sum_for_coordinator']),
+                yellow_style
+            )
 
     # ФУТЕР
     writer.new_row()
-    writer.write('ВСЕГО (Перевод Tequilla girl)', font_style)
+    writer.write('ВСЕГО (Перевод Tequilla girl)', pink_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', pink_style)
     for info in data['bottom_prices_for_employee'].values():
-        writer.write('{:.2f}'.format(info['all']), font_style)
+        writer.write('{:.2f}'.format(info['all']), pink_style)
 
     writer.new_row()
-    writer.write('Залог Tequilla girl', font_style)
+    writer.write('Залог Tequilla girl', dark_pink_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', dark_pink_style)
     for info in data['bottom_prices_for_employee'].values():
-        writer.write(info['pledge'], font_style)
+        writer.write(info['pledge'], dark_pink_style)
 
     writer.new_row()
-    writer.write('Штраф', font_style)
+    writer.write('Штраф', penalty_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', penalty_style)
     for info in data['bottom_prices_for_employee'].values():
-        writer.write('{:.2f}'.format(info['penalty']), font_style)
+        writer.write('{:.2f}'.format(info['penalty']), penalty_style)
 
     writer.new_row()
-    writer.write('Причина штрафа', font_style)
+    writer.write('Причина штрафа', penalty_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', penalty_style)
     for info in data['bottom_prices_for_employee'].values():
         description = [description for description in info['penalty_description']]
-        writer.write('; '.join(description), font_style)
+        writer.write('; '.join(description), penalty_style)
 
     writer.new_row()
-    writer.write('Координатор (всего за клубы по каждой Tequilla Girl)', font_style)
+    writer.write('Координатор (всего за клубы по каждой Tequilla Girl)', purple_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', purple_style)
     for info in data['bottom_prices_for_employee'].values():
-        writer.write('{:.2f}'.format(info['coordinator']), font_style)
+        writer.write('{:.2f}'.format(info['coordinator']), purple_style)
 
     writer.new_row()
-    writer.write('Ермакова (всего за клубы по каждой Tequilla Girl)', font_style)
+    writer.write('Ермакова (всего за клубы по каждой Tequilla Girl)', light_blue_style)
     for i in xrange(len(data['drinks_table_header']) + 2):
-        writer.write('', font_style)
+        writer.write('', light_blue_style)
     for info in data['bottom_prices_for_employee'].values():
-        writer.write('{:.2f}'.format(info['director']), font_style)
+        writer.write('{:.2f}'.format(info['director']), light_blue_style)
 
     writer.new_row()
     writer.new_row()
     writer.write(
-        'Координатор(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['coordinator']), font_style
+        'Координатор(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['coordinator']),
+        pink_style
     )
     writer.new_row()
     writer.write(
-        'Ермакова(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['director']), font_style
+        'Ермакова(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['director']),
+        red_style
     )
 
     wb.save(response)

@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.utils.dateparse import parse_date
 
 from reports.models import Report
+from statement import arial10
 
 
 def calculate_prices(city_name, report_drink, drink, club_coordinator, employee_coordinator):
@@ -182,15 +183,20 @@ def get_statement_data(week, start_date):
 
 
 class Writer(object):
-    def __init__(self, ws):
+    def __init__(self, sheet):
         self.col_num = 0
         self.row_num = 0
-        self.ws = ws
+        self.sheet = sheet
+        self.widths = dict()
 
     def new_row(self):
         self.col_num = 0
         self.row_num += 1
 
     def write(self, text, font_style):
-        self.ws.write(self.row_num, self.col_num, text, font_style)
+        self.sheet.write(self.row_num, self.col_num, text, font_style)
+        width = arial10.fitwidth(str(text))
+        if width > self.widths.get(self.col_num, 0):
+            self.widths[self.col_num] = width
+            self.sheet.col(self.col_num).width = int(width)
         self.col_num += 1
