@@ -1,3 +1,4 @@
+{% load club_tags %}
 {% for club in clubs %}
     <tr>
         <td class="vert-align" scope="row">
@@ -15,7 +16,7 @@
         <td class="vert-align">{{ club.metro|default:'-' }}</td>
         <td class="vert-align">{{ club.street }}</td>
         <td class="vert-align">{{ club.house }}</td>
-        <td class="vert-align">{% if club.site %}<a href="{{ club.site }}" target="_blank">{{ club.site }}</a>{% else %}-{% endif %}</td>
+        <td class="vert-align">{% if club.site %}<a href="{{ club.site|add_http }}" target="_blank">{{ club.site }}</a>{% else %}-{% endif %}</td>
         <td class="vert-align">{{ club.rate }}</td>
         <td class="vert-align buttons-control">
             <a href="{% url 'club:club_edit' club.id %}">
