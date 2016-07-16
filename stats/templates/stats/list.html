@@ -2,8 +2,17 @@
 
 {% block title %}Статистика{% endblock %}
 
+{% block additional_css %}
+    <style type="text/css">
+        .send-on-wall {
+            margin-top: 15px;
+        }
+    </style>
+{% endblock %}
+
 {% block additional_js %}
     <script type="text/javascript">
+        // фильтры
         $('.use-filter-button').on('click', function(e) {
             e.preventDefault();
             location = '?start_date=' + reformat_date($('#calendar-from').val()) + '&end_date=' +
@@ -11,6 +20,69 @@
         });
 
         $('.calendar').daterangepicker(calendar_options);
+
+        // отправка на стену
+        $('.send-on-wall').on('click', function(e) {
+            e.preventDefault();
+            var items = [];
+            var type = $('.switch-btn.active').attr('id')
+            $('.for-wall-check:checked').each(function() {
+                if (type == 'by_night') {
+                    items.push({
+                        club: $(this).data('club-name'),
+                        employee: $(this).data('employee'),
+                        count: $(this).data('count'),
+                        discount: $(this).data('discount')
+                    });
+                } else if (type == 'by_sale') {
+                    items.push({
+                        employee: $(this).data('employee'),
+                        count: $(this).data('count'),
+                        discount: $(this).data('discount')
+                    });
+                } else {
+                    items.push({
+                        employee: $(this).data('employee'),
+                        sum: $(this).data('sum'),
+                        count: $(this).data('count'),
+                        active: $(this).data('active')
+                    });
+                }
+            });
+            var data = {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'items[]': JSON.stringify(items),
+                'type': type
+            };
+
+           $.ajax({
+                url: '{% url 'stats:send_stats_on_wall' %}',
+                data: data,
+                type: 'POST',
+                success: function(response) {
+                    if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                        new PNotify({
+                            title: 'Ура!',
+                            text: 'Статистика успешно отправлена на стену.',
+                            type: 'success',
+                            styling: 'bootstrap3'
+                        });
+
+                    } else {
+                        new PNotify({
+                            title: 'О нет!',
+                            text: 'Произошла ошибка при отправлении статистики на стену.',
+                            type: 'error',
+                            styling: 'bootstrap3'
+                        });
+                    }
+                    $('.ui-pnotify').fadeIn('slow');
+                    setTimeout(function () {
+                        $('.ui-pnotify').fadeOut('fast');
+                    }, 2000);
+                }
+            });
+        });
     </script>
 {% endblock %}
 
@@ -29,9 +101,9 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <a href="{% url 'stats:stats_by_night' %}" class="btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
-                <a href="{% url 'stats:stats_by_sale' %}" class="btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
-                <a href="{% url 'stats:stats_by_penalty' %}" class="btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
+                <a href="{% url 'stats:stats_by_night' %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
+                <a href="{% url 'stats:stats_by_sale' %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
+                <a href="{% url 'stats:stats_by_penalty' %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
                 <div class="small-margin-top">
                     <form class="form-inline">
                         <div class="form-group">
@@ -42,10 +114,12 @@
                         </div>
                         <button class="btn btn-info use-filter-button" style="margin-bottom: 0;">Показать</button>
                     </form>
+                    <button class="btn btn-dark send-on-wall">Отправить на стену</button>
                 </div>
                 <div id="stats-container" class="small-margin-top">
                     {{ data_table }}
                 </div>
+                <button class="btn btn-dark send-on-wall">Отправить на стену</button>
             </div>
         </div>
     </div>

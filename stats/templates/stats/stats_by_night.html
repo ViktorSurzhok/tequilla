@@ -1,6 +1,7 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
+            <th></th>
             <th>Заведение</th>
             <th>Больше всех продала</th>
             <th>Количество шотов</th>
@@ -10,10 +11,18 @@
     <tbody>
         {% for report in reports %}
             <tr>
-                {% with ws=report.work_shift %}
+                {% with ws=report.work_shift co=report.get_shots_count %}
+                    <td><input
+                            class="for-wall-check"
+                            data-club-name="{{ ws.club.name }}"
+                            data-employee="{{ ws.employee.get_full_name }}"
+                            data-count="{{ co }}"
+                            data-discount="{{ report.discount|default_if_none:"0" }}"
+                            type="checkbox">
+                    </td>
                     <td>{{ ws.club.name }} {{ ws.club.get_address }}</td>
                     <td>{{ ws.employee.get_full_name }}</td>
-                    <td>{{ report.get_shots_count }}</td>
+                    <td>{{ co }}</td>
                     <td>{{ report.discount|default_if_none:"0" }}</td>
                 {% endwith %}
             </tr>

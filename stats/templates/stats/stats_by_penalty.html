@@ -1,6 +1,7 @@
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
+            <th></th>
             <th>Работница</th>
             <th>Суммарный штраф</th>
             <th>Количество штрафов</th>
@@ -10,6 +11,14 @@
     <tbody>
         {% for item in grid %}
             <tr>
+                <td><input
+                        class="for-wall-check"
+                        data-employee="{{ item.employee.get_full_name }}"
+                        data-count="{{ item.total_count }}"
+                        data-sum="{{ item.total_sum }}"
+                        data-active="{% if item.employee.is_active %}Нет{% else %}Да{% endif %}"
+                        type="checkbox">
+                </td>
                 <td>{{ item.employee.get_full_name }}</td>
                 <td>{{ item.total_sum }}</td>
                 <td>{{ item.total_count }}</td>

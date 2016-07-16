@@ -1,0 +1,58 @@
+<table class="table table-bordered table-striped">
+    {% if type == 'by_night' %}
+    <thead>
+        <tr>
+            <th>Заведение</th>
+            <th>Больше всех продала</th>
+            <th>Количество шотов</th>
+            <th>Сумма скидки</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.club }}</td>
+                <td>{{ item.employee }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.discount }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    {% elif type == 'by_sale' %}
+        <thead>
+            <tr>
+                <th>Работница</th>
+                <th>Продано шотов</th>
+                <th>Сумма скидки</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.employee }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.discount }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    {% else %}
+        <thead>
+            <tr>
+                <th>Работница</th>
+                <th>Суммарный штраф</th>
+                <th>Количество штрафов</th>
+                <th>Уволена</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.employee }}</td>
+                    <td>{{ item.sum }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.active }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    {% endif %}
+</table>

@@ -255,7 +255,7 @@
                                                 </ul>
                                             {% endif %}
                                             {% autoescape off %}
-                                                <p class="excerpt">{{ post.text|linebreaks }}</p>
+                                                <p class="excerpt">{{ post.text }}</p>
                                             {% endautoescape %}
                                             {% if post.images %}
                                                 <div class="thumbnails" data-post-id="{{ post.id }}">
@@ -337,7 +337,7 @@
                                                                         </ul>
                                                                     {% endif %}
                                                                     {% autoescape off %}
-                                                                        <p class="excerpt">{{ ch_post.text|linebreaks }}</p>
+                                                                        <p class="excerpt">{{ ch_post.text }}</p>
                                                                     {% endautoescape %}
                                                                     {% if ch_post.images %}
                                                                         <div class="thumbnails"

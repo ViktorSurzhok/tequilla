@@ -1,12 +1,17 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 
 from penalty.models import Penalty
 from reports.models import Report
 from stats.utils import get_start_and_end_dates
 from tequilla.decorators import group_required
+from wall.models import Post
 
 
 @login_required
@@ -89,3 +94,18 @@ def stats_by_penalty(request):
             'current_stats': 'by_penalty'
         }
     )
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+@require_POST
+def send_stats_on_wall(request):
+    items = json.loads(request.POST.get('items[]', '[]'))
+    if not items:
+        return JsonResponse({'complete': 0})
+    info = render_to_string('stats/for_wall.html', {'items': items, 'type': request.POST.get('type', 'by_night')})
+    post = Post()
+    post.user = request.user
+    post.text = info
+    post.save()
+    return JsonResponse({'complete': 1})

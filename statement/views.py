@@ -17,7 +17,7 @@ from tequilla.decorators import group_required
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 def statement_by_week(request):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
@@ -43,7 +43,7 @@ def statement_by_week(request):
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 def show(request, week, start_date):
     return render(
         request,
@@ -52,6 +52,8 @@ def show(request, week, start_date):
     )
 
 
+@login_required
+@group_required('director', 'chief')
 def export_xls(request, week, start_date):
     import xlwt
     data = get_statement_data(week, start_date)
