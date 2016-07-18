@@ -101,9 +101,9 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <a href="{% url 'stats:stats_by_night' %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
-                <a href="{% url 'stats:stats_by_sale' %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
-                <a href="{% url 'stats:stats_by_penalty' %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
+                <a href="{% url 'stats:stats_by_night' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
+                <a href="{% url 'stats:stats_by_sale' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
+                <a href="{% url 'stats:stats_by_penalty' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
                 <div class="small-margin-top">
                     <form class="form-inline">
                         <div class="form-group">

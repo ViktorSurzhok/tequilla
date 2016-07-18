@@ -29,6 +29,8 @@ def stats_by_night(request):
             'data_table': data_table,
             'start_date': start_date,
             'end_date': end_date,
+            'start_date_f': request.GET.get('start_date', None),
+            'end_date_f': request.GET.get('end_date', None),
             'current_stats': 'by_night'
         }
     )
@@ -59,6 +61,8 @@ def stats_by_sale(request):
         {
             'data_table': data_table,
             'start_date': start_date,
+            'start_date_f': request.GET.get('start_date', None),
+            'end_date_f': request.GET.get('end_date', None),
             'end_date': end_date,
             'current_stats': 'by_sale'
         }
@@ -91,6 +95,8 @@ def stats_by_penalty(request):
             'data_table': data_table,
             'start_date': start_date,
             'end_date': end_date,
+            'start_date_f': request.GET.get('start_date', None),
+            'end_date_f': request.GET.get('end_date', None),
             'current_stats': 'by_penalty'
         }
     )
