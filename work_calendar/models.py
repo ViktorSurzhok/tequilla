@@ -30,4 +30,4 @@ class WorkShift(TimeStampedModel):
     )
 
     def __str__(self):
-        return self.club.name + self.employee.get_full_name()
+        return '{} {} ({}-{})'.format(self.club.name, self.employee.get_full_name(), self.start_time, self.end_time)
