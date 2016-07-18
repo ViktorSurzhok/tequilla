@@ -205,11 +205,7 @@
 
 
             // выбор недели по дате
-            $('#calendar').daterangepicker(calendar_options);
-            $('#calendar').on('apply.daterangepicker', function(e, picker) {
-                var date = picker.startDate.format('YYYY-MM-DD');
-                location = '{% url 'calendar:show_calendar' %}?start_date=' + date;
-            });
+            setCalendarForButton('{% url 'calendar:show_calendar' %}');
         });
     </script>
 {% endblock %}

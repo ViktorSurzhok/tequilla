@@ -3222,7 +3222,7 @@ ul.social li {
 /* Pnotify by Hunter Perrin :: 2.0.1 */
 
 .ui-pnotify {
-  top: 25px;
+  top: 25px !important;
   right: 25px;
   position: absolute;
   height: auto;

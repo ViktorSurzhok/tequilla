@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'penalty',
     'stats',
     'statement',
+    'week_plan',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
