@@ -7,6 +7,11 @@
         .not_read {
             background-color: rgba(100, 100, 100, 0.1);
         }
+
+        .dialog-item {
+            margin-top: 20px;
+            display: inherit;
+        }
     </style>
 {% endblock %}
 
@@ -36,7 +41,7 @@
                 <button class="btn btn-info" data-toggle="modal" data-target="#add-new-message-popup"><i class="fa fa-pencil"></i> Написать сообщение</button>
                 <div class="items small-margin-top">
                     {% for employee, dialog in dialogs.items %}
-                        <a href="{% url 'pm:show_dialog' dialog.to_user.id %}" class="clearfix">
+                        <a href="{% url 'pm:show_dialog' dialog.to_user.id %}" class="clearfix dialog-item">
                             <div class="col-md-1">
                                 <img src="{{ employee.get_small_avatar }}">
                             </div>
@@ -79,10 +84,10 @@
                           class="form-horizontal form-label-left"
                           action="{% url 'pm:send_message' %}">
                         {% csrf_token %}
-                        {% for field in send_message_form.hidden_fields %}
+                        {% for field in send_new_message_form.hidden_fields %}
                             {{ field }}
                         {% endfor %}
-                        {% for field in send_message_form.visible_fields %}
+                        {% for field in send_new_message_form.visible_fields %}
                             <div class="form-group{% if field.errors %} bad{% endif %}">
                                 <label class="control-label col-md-3 col-sm-4 col-xs-12">
                                     {{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}

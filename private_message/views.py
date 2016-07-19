@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from extuser.models import ExtUser
-from private_message.forms import SendMessageForm
+from private_message.forms import SendMessageForm, SendNewMessageForm
 from private_message.models import Message
 
 
@@ -34,7 +34,7 @@ def dialog_list(request):
         {
             'dialogs': dialogs,
             'my_messages': my_messages,
-            'send_message_form': SendMessageForm(initial={'from_user': request.user})
+            'send_new_message_form': SendNewMessageForm()
         }
     )
 
@@ -44,7 +44,9 @@ def dialog_list(request):
 def send_message(request):
     form = SendMessageForm(data=request.POST)
     if form.is_valid():
-        form.save()
+        obj = form.save(commit=False)
+        obj.from_user = request.user
+        obj.save()
     return redirect('pm:dialog_list')
 
 
@@ -66,6 +68,6 @@ def show_dialog(request, with_user_id):
         {
             'my_messages': my_messages,
             'to_user': to_user,
-            # 'send_message_form': SendMessageForm(initial={'from_user': request.user})
+            'send_message_form': SendMessageForm(initial={'to_user': to_user})
         }
     )

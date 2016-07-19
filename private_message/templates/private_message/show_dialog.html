@@ -62,11 +62,26 @@
                         <img src="{{ user.get_small_avatar }}" title="{{ user.get_full_name }} (Вы)">
                     </div>
                     <div class="col-md-6">
-                        <textarea class="form-control"></textarea>
+                        <form method="POST"
+                          id="add-new-message-form"
+                          data-parsley-validate=""
+                          class="form-horizontal form-label-left"
+                          action="{% url 'pm:send_message' %}">
+                            {% csrf_token %}
+                            {% for field in send_message_form %}
+                                {{ field }}
+                            {% endfor %}
+                        </form>
                     </div>
                     <div class="col-md-1">
                         <img src="{{ to_user.get_small_avatar }}" title="{{ to_user.get_full_name }}">
                     </div>
+                </div>
+                <hr>
+                <div>
+                    <button class="btn btn-info">Отправить</button>
+                    <button class="btn btn-warning"><i class="fa fa-file"></i> Отправить файлы</button>
+                    <button class="btn btn-success"><i class="fa fa-file"></i> Переслать сообщения</button>
                 </div>
             </div>
         </div>
