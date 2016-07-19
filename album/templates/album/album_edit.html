@@ -88,7 +88,7 @@
                             <div class="thumbnails" style="margin-top: 20px;">
                                 {% for photo in album.photos.all %}
                                     <div class="thumbnail-wrap photo-item-{{ photo.id }}">
-                                        <div class="thumbnail">
+                                        <div class="thumbnail x_content-thumbnail">
                                             <div class="image">
                                                 {% thumbnail photo.file "140x100" as im %}
                                                     <a class="group-{{ album.id }}" href="{{ photo.file.url }}">
@@ -98,8 +98,10 @@
                                                 {% endthumbnail %}
                                             </div>
                                         </div>
-                                        <a data-photo-item="{{ photo.id }}" class="remove-photo-link"
-                                           href="{% url 'album:photoremove' photo.id %}">Удалить</a>
+                                        <div class="capture x_content-capture">
+                                            <a data-photo-item="{{ photo.id }}" class="remove-photo-link"
+                                               href="{% url 'album:photoremove' photo.id %}">Удалить</a>
+                                        </div>
                                     </div>
                                 {% endfor %}
                             </div>

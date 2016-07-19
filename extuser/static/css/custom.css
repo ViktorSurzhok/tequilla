@@ -4740,6 +4740,12 @@ a:hover {
   float: right;
   margin-left: 15px;
 }
+.x_content-thumbnail{
+  margin-right: 20px;
+}
+.x_content-capture{
+  margin: 0 0 6px 0;
+}
 .clearfix:after, form:after {
   content: ".";
   display: block;
