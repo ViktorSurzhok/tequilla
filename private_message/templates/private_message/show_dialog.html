@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Диалог с {{ to_user.get_full_name }}{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .messages-container {
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+
+        .user-name {
+            color: dodgerblue;
+        }
+
+        .avatar-in-dialog {
+            max-width: 50px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12 col-xs-12 col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Диалог с {{ to_user.get_full_name }}
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="container">
+                    <div class="col-md-8 messages-container">
+                        {% for message in my_messages %}
+                            <div class="container">
+                                <div class="col-md-2">
+                                    <img src="{{ message.from_user.get_small_avatar }}" class="avatar-in-dialog">
+                                </div>
+                                <div class="col-md-7">
+                                    <div>
+                                        <a href="{% url 'user_detail' message.from_user.id %}">
+                                            <strong class="user-name">{{ message.from_user.get_full_name }}</strong>
+                                        </a>
+                                    </div>
+                                    <div class=" small-margin-top">
+                                        {{ message.text }}
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    {{ message.created }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <hr>
+                <div class="send-message-container container">
+                    <div class="col-md-1">
+                        <img src="{{ user.get_small_avatar }}" title="{{ user.get_full_name }} (Вы)">
+                    </div>
+                    <div class="col-md-6">
+                        <textarea class="form-control"></textarea>
+                    </div>
+                    <div class="col-md-1">
+                        <img src="{{ to_user.get_small_avatar }}" title="{{ to_user.get_full_name }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

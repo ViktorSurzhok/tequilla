@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Диалоги{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        .not_read {
+            background-color: rgba(100, 100, 100, 0.1);
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript">
+        $(function() {
+            $('#send-message-button').on('click', function() {
+                $('#add-new-message-form').submit();
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="col-sm-12 col-xs-12 col-md-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Диалоги
+                </h2>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <button class="btn btn-info" data-toggle="modal" data-target="#add-new-message-popup"><i class="fa fa-pencil"></i> Написать сообщение</button>
+                <div class="items small-margin-top">
+                    {% for employee, dialog in dialogs.items %}
+                        <a href="{% url 'pm:show_dialog' dialog.to_user.id %}" class="clearfix">
+                            <div class="col-md-1">
+                                <img src="{{ employee.get_small_avatar }}">
+                            </div>
+                            <div class="col-md-2">
+                                <h5>
+                                    <nobr>{{ employee.get_full_name }}</nobr>
+                                </h5>
+                                <nobr>{{ dialog.created }}</nobr>
+                            </div>
+                            <div class="col-md-6">
+                                {% if dialog.from_user == user %}
+                                    <div class="your_message {% if not dialog.was_read %}not_read{% endif %} clearfix">
+                                        <div class="col-md-1">
+                                            <div class="thumbnail" style="width: 40px; height: 40px;">
+                                                <img src="{{ user.get_small_avatar }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-10 col-md-offset-1">
+                                            <p>{{ dialog.text }}</p>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ dialog.text }}
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+                {% include 'pagination.html' with page=my_messages %}
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="add-new-message-popup" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 660px;">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <form method="POST"
+                          id="add-new-message-form"
+                          data-parsley-validate=""
+                          class="form-horizontal form-label-left"
+                          action="{% url 'pm:send_message' %}">
+                        {% csrf_token %}
+                        {% for field in send_message_form.hidden_fields %}
+                            {{ field }}
+                        {% endfor %}
+                        {% for field in send_message_form.visible_fields %}
+                            <div class="form-group{% if field.errors %} bad{% endif %}">
+                                <label class="control-label col-md-3 col-sm-4 col-xs-12">
+                                    {{ field.label }} {% if field.field.required %}<span class="required">*</span>{% endif %}
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    {{ field }}
+                                </div>
+                            </div>
+
+                        {% endfor %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="send-message-button">
+                        <i class="fa fa-check"></i> Отправить
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

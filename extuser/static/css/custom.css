@@ -4037,7 +4037,7 @@ ul.project_files li a i {
 .cropper-canvas {
   background-color: #fff;
   filter: alpha(opacity=0);
-  opacity: 0;
+  opacity: 1;
 }
 .cropper-modal {
   background-color: #000;
