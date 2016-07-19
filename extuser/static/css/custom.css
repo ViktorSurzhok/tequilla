@@ -4742,6 +4742,7 @@ a:hover {
 }
 .x_content-thumbnail{
   margin-right: 20px;
+  margin-bottom: 0;
 }
 .x_content-capture{
   margin: 0 0 6px 0;
