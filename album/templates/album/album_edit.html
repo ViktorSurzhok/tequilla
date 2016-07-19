@@ -44,9 +44,9 @@
                 dataType: 'json',
                 done: function (e, data) {
                     $.each(data.result.images, function (index, file) {
-                        var html = '<div class="thumbnail-wrap photo-item-' + file['id'] + '"><div class="thumbnail new-image" data-image-id=' + file['id'] +
-                                '><div class="image"><img src="' + file['url'] + '" style="max-width:140px; max-height:100px;"></div></div>' +
-                                '<a data-photo-item="' + file['id'] + '" class="remove-photo-link" href="' + file['remove_link'] + '">Удалить</a></div>';
+                        var html = '<div class="thumbnail-wrap photo-item-' + file['id'] + '"><div class="thumbnail new-image x_content-thumbnail" data-image-id=' + file['id'] +
+                                '><div class="image"><img src="' + file['url'] + '" style="max-width:140px; max-height:100px;"></div></div><div class="capture x_content-capture">' +
+                                '<a data-photo-item="' + file['id'] + '" class="remove-photo-link" href="' + file['remove_link'] + '">Удалить</a></div></div>';
                         $(html).appendTo('.thumbnails');
                     });
                 }
