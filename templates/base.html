@@ -10,6 +10,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <meta name="yandex-verification" content="640b06bf6bf25a2b" />
+    <meta name="robots" content="noindex,follow" />
+
   <title>{% block title %}{% endblock %} | Tequilla Girls!</title>
 
   <!-- Bootstrap core CSS -->
@@ -32,6 +35,8 @@
 
   <script src="{% static 'js/jquery.min.js' %}"></script>
   <script src="{% static 'js/nprogress.js' %}"></script>
+
+
 
 </head>
 
@@ -209,6 +214,10 @@
   <script type="text/javascript" src="{% static 'js/flot/curvedLines.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/flot/jquery.flot.resize.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/vendors/pnotify/dist/pnotify.js' %}"></script>
+
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter38608555 = new Ya.Metrika({ id:38608555, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true, trackHash:true, ut:"noindex" }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script>
+  <!-- /Yandex.Metrika counter -->
 
     {% block additional_js %}
     {% endblock %}

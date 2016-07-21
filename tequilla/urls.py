@@ -1,4 +1,5 @@
 from django.conf.urls import url, include
+from django.http import HttpResponse
 
 from tequilla import settings
 from wall.views import index
@@ -7,6 +8,7 @@ from club.views import club_list
 from album.views import user_albums
 
 urlpatterns = [
+    url(r'^robots.txt$', lambda r: HttpResponse("User-agent: *\nDisallow: /", content_type="text/plain")),
     url(r'^profile/', include('extuser.urls', namespace='profile')),
     url(r'^wall/', include('wall.urls', namespace='wall')),
     url(r'^clubs/', include('club.urls', namespace='club')),
