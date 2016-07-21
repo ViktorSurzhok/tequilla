@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'statement',
     'week_plan',
     'private_message',
-    'channels',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
