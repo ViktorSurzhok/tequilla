@@ -1,7 +1,7 @@
 from django import forms
 
 from extuser.models import ExtUser
-from private_message.models import Message
+from private_message.models import Message, FilesForMessage
 
 
 class SendNewMessageForm(forms.ModelForm):

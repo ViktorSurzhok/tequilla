@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'statement',
     'week_plan',
     'private_message',
+    'channels',
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
@@ -121,6 +122,8 @@ THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
 
 POST_COUNT_ON_WALL = 10
 ALBUMS_COUNT_ON_WALL = 5
+DIALOGS_COUNT = 10
+MESSAGES_IN_DIALOG_COUNT = 30
 
 
 # Static files (CSS, JavaScript, Images)

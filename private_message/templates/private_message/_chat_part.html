@@ -1,0 +1,29 @@
+{% for message in my_messages %}
+    <div class="container{% if forloop.last %} last-message{% endif %}" data-message-id="{{ message.id }}">
+        <div class="col-md-1">
+            <img src="{{ message.from_user.get_small_avatar }}" class="avatar-in-dialog">
+        </div>
+        <div class="col-md-9">
+            <div>
+                <a href="{% url 'user_detail' message.from_user.id %}">
+                    <strong class="user-name">{{ message.from_user.get_full_name }}</strong>
+                </a>
+            </div>
+            <div class="mt10">
+                {{ message.text|linebreaksbr }}
+
+                {% if message.files.count %}
+                    <br>
+                {% endif %}
+
+                {% for file in message.files.all %}
+                    <a target="_blank" class="btn btn-success btn-xs" href="{{ file.file.url }}">{{ file.get_file_name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-2">
+            {{ message.created }}
+        </div>
+    </div>
+    <hr>
+{% endfor %}

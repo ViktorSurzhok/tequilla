@@ -1,3 +1,6 @@
+import os
+import random
+
 from django.db import models
 from model_utils.models import TimeStampedModel
 
@@ -14,5 +17,12 @@ class Message(TimeStampedModel):
 class FilesForMessage(TimeStampedModel):
     """ Файлы привязываемые к личному сообщению
     """
-    file = models.FileField(verbose_name='Файл', upload_to='')
-    message = models.ForeignKey(Message)
+    def get_upload_path(self, filename):
+        usr = str(self.message.from_user.id)
+        return os.path.join('message_files', '%s' % usr, str(random.randint(1, 100000)) + '_' + filename)
+
+    file = models.FileField(verbose_name='Файл', upload_to=get_upload_path)
+    message = models.ForeignKey(Message, related_name='files')
+
+    def get_file_name(self):
+        return self.file.name.split('/')[-1]

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}Диалог с {{ to_user.get_full_name }}{% endblock %}
 
@@ -16,7 +17,67 @@
         .avatar-in-dialog {
             max-width: 50px;
         }
+
+        .mt10 {
+            margin-top: 10px;
+        }
+
+        hr {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        input.inline-file {
+            display: inline-block;
+        }
+        #show-next {
+            margin: 0 auto;
+            display: block;
+        }
     </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script src="//cdn.jsdelivr.net/jquery.scrollto/2.1.2/jquery.scrollTo.min.js"></script>
+    <script>
+        $(function() {
+            $('.messages-container').scrollTo("#last-message");
+
+            $('#show-next').on('click', function() {
+                var page = $(this).data('num');
+                $.ajax({
+                    url: '{% url 'pm:show_dialog' to_user.id %}?page=' + page,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.complete.has_next == true) {
+                            $('#show-next').data('num', response.complete.next_page_number);
+                        } else {
+                            $('#show-next').hide();
+                        }
+                        $('.messages').prepend(response.complete.messages);
+                    }
+                });
+            });
+
+            setInterval(function() {
+                var last_message_id = $('.messages .container:last').data('message-id');
+                 $.ajax({
+                    url: '{% url 'pm:get_last_messages' to_user.id %}?last_message_id=' + last_message_id,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.complete != 'undefined' && response.complete != 0) {
+                            var messages = response.complete.messages;
+                            if (messages.length) {
+                                $('#show-next').hide();
+                                $('.messages').append(messages);
+                                $('.messages-container').scrollTo("#last-message");
+                            }
+                        }
+                    }
+                 });
+            }, 6000);
+
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -32,57 +93,45 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <div class="container">
-                    <div class="col-md-8 messages-container">
-                        {% for message in my_messages %}
-                            <div class="container">
-                                <div class="col-md-2">
-                                    <img src="{{ message.from_user.get_small_avatar }}" class="avatar-in-dialog">
-                                </div>
-                                <div class="col-md-7">
-                                    <div>
-                                        <a href="{% url 'user_detail' message.from_user.id %}">
-                                            <strong class="user-name">{{ message.from_user.get_full_name }}</strong>
-                                        </a>
-                                    </div>
-                                    <div class=" small-margin-top">
-                                        {{ message.text }}
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    {{ message.created }}
-                                </div>
-                            </div>
-                        {% endfor %}
+                <div class="container c322">
+                    <div class="col-md-12 messages-container">
+                        {% if pag.has_next %}<button data-num="{{ pag.next_page_number }}" id="show-next" class="btn">Показать предыдущие сообщения</button>{% endif %}
+                        <div class="messages">
+                            {% include 'private_message/_chat_part.html' %}
+                        </div>
+                        <div id="last-message">&nbsp;</div>
                     </div>
                 </div>
                 <hr>
-                <div class="send-message-container container">
-                    <div class="col-md-1">
-                        <img src="{{ user.get_small_avatar }}" title="{{ user.get_full_name }} (Вы)">
-                    </div>
-                    <div class="col-md-6">
-                        <form method="POST"
+                <form method="POST"
                           id="add-new-message-form"
                           data-parsley-validate=""
+                          enctype="multipart/form-data"
                           class="form-horizontal form-label-left"
                           action="{% url 'pm:send_message' %}">
-                            {% csrf_token %}
-                            {% for field in send_message_form %}
-                                {{ field }}
-                            {% endfor %}
-                        </form>
+                    <div class="send-message-container container col-md-offset-1 small-margin-top">
+                        <div class="col-md-2">
+                            <img src="{{ user.get_small_avatar }}" title="{{ user.get_full_name }} (Вы)">
+                        </div>
+                        <div class="col-md-6">
+
+                                {% csrf_token %}
+                                <input type="hidden" name="redirect" value="{% url 'pm:show_dialog' to_user.id %}">
+                                {% for field in send_message_form %}
+                                    {{ field }}
+                                {% endfor %}
+                        </div>
+                        <div class="col-md-1">
+                            <img src="{{ to_user.get_small_avatar }}" title="{{ to_user.get_full_name }}">
+                        </div>
                     </div>
-                    <div class="col-md-1">
-                        <img src="{{ to_user.get_small_avatar }}" title="{{ to_user.get_full_name }}">
+                    <hr>
+                    <div class="col-md-offset-1">
+                        <input type="submit" class="btn btn-info" value="Отправить">
+                        <input type="file" name="files" class="btn btn-warning inline-file" multiple>
+                        <button class="btn btn-success"><i class="fa fa-file"></i> Переслать сообщения</button>
                     </div>
-                </div>
-                <hr>
-                <div>
-                    <button class="btn btn-info">Отправить</button>
-                    <button class="btn btn-warning"><i class="fa fa-file"></i> Отправить файлы</button>
-                    <button class="btn btn-success"><i class="fa fa-file"></i> Переслать сообщения</button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
