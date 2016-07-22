@@ -33,6 +33,12 @@
             margin: 0 auto;
             display: block;
         }
+        .fa-remove {
+            color: red;
+            margin-top: 10px;
+            float: right;
+            margin-right: 10px;
+        }
     </style>
 {% endblock %}
 
@@ -75,6 +81,43 @@
                     }
                  });
             }, 6000);
+
+            $('.messages').on('click', '.remove-message-link', function(e) {
+                e.preventDefault();
+                var message = $(this).closest('.container');
+                if (confirm('Подтвердите удаление сообщения')) {
+                    var url = $(this).attr('href');
+                    $.ajax({
+                        url: url,
+                        data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        type: 'POST',
+                        success: function(response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Сообщение успешно удалено.',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                                message.fadeOut('fast', function() {
+                                    message.remove();
+                                });
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при удалении сообщения',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                            }
+                            $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                            }, 2000);
+                        }
+                    });
+                }
+            });
 
         });
     </script>

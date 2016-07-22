@@ -1,0 +1,37 @@
+{% load humanize %}
+<li role="presentation" class="dropdown">
+    <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-envelope-o"></i>
+        {% if messages_count %}
+            <span class="badge bg-green">{{ messages_count }}</span>
+        {% endif %}
+    </a>
+    <ul id="menu1" class="dropdown-menu list-unstyled msg_list" role="menu">
+        {% for message in messages %}
+            <li>
+                <a href="{% url 'pm:show_dialog' message.from_user.id %}">
+                    {% with from_user=message.from_user %}
+                        <span class="image">
+                            <img src="{{ from_user.get_small_avatar }}" alt="Profile Image"/>
+                        </span>
+                        <span>
+                            <span>{{ from_user.get_full_name }}</span>
+                            <span class="time">{{ message.created|naturaltime }}</span>
+                        </span>
+                    {% endwith %}
+                    <span class="message">
+                {{ message.get_short_text }}
+            </span>
+                </a>
+            </li>
+        {% endfor %}
+        <li>
+            <div class="text-center">
+                <a href="{% url 'pm:dialog_list' %}">
+                    <strong>Посмотреть все сообщения</strong>
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+        </li>
+    </ul>
+</li>

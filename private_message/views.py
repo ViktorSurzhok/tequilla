@@ -114,3 +114,16 @@ def get_last_messages(request, with_user_id):
         return JsonResponse({'complete': data})
     except:
         return JsonResponse({'complete': 0})
+
+
+@login_required
+@require_POST
+def remove_message(request, message_id):
+    try:
+        message = Message.objects.get(id=message_id)
+    except Message.DoesNotExist:
+        return JsonResponse({'complete': 0})
+    if message.from_user != request.user:
+        return JsonResponse({'complete': 0})
+    message.delete()
+    return JsonResponse({'complete': 1})

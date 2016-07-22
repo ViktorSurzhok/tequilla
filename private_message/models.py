@@ -13,6 +13,9 @@ class Message(TimeStampedModel):
     text = models.TextField('Текст сообщения', blank=True)
     was_read = models.BooleanField('Было прочитано', default=False)
 
+    def get_short_text(self):
+        return self.text[:77] + '...' if len(self.text) > 80 else self.text
+
 
 class FilesForMessage(TimeStampedModel):
     """ Файлы привязываемые к личному сообщению

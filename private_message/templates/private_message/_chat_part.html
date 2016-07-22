@@ -23,6 +23,10 @@
         </div>
         <div class="col-md-2">
             {{ message.created }}
+            {% if message.from_user == user %}
+                <br>
+                <a href="{% url 'pm:remove_message' message.id %}" class="remove-message-link"><i class="fa fa-remove"></i></a>
+            {% endif %}
         </div>
     </div>
     <hr>
