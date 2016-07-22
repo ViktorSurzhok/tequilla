@@ -20,8 +20,12 @@
                         </span>
                     {% endwith %}
                     <span class="message">
-                {{ message.get_short_text }}
-            </span>
+                        {% if message.is_transfered %}
+                            &lt;Пересланные сообщения&gt;
+                        {% else %}
+                            {{ message.get_short_text }}
+                        {% endif %}
+                    </span>
                 </a>
             </li>
         {% endfor %}

@@ -60,12 +60,20 @@
                                             </div>
                                         </div>
                                         <div class="col-md-10 col-md-offset-1">
-                                            <p>{{ item.message.text }}</p>
+                                            <p>{% if item.message.is_transfered %}
+                                            &lt;Пересланные сообщения&gt;
+                                        {% else %}
+                                            {{ item.message.text }}
+                                        {% endif %}</p>
                                         </div>
                                     </div>
                                 {% else %}
                                     <div class="{% if not item.message.was_read %}not_read{% endif %}" style="min-height: 80px; padding: 10px">
-                                        {{ item.message.text }}
+                                        {% if item.message.is_transfered %}
+                                            &lt;Пересланные сообщения&gt;
+                                        {% else %}
+                                            {{ item.message.text }}
+                                        {% endif %}
                                     </div>
                                 {% endif %}
                             </div>

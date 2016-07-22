@@ -12,6 +12,7 @@ class Message(TimeStampedModel):
     to_user = models.ForeignKey(ExtUser, verbose_name='Получатель', related_name='messages_for_me')
     text = models.TextField('Текст сообщения', blank=True)
     was_read = models.BooleanField('Было прочитано', default=False)
+    is_transfered = models.BooleanField(default=False)
 
     def get_short_text(self):
         return self.text[:77] + '...' if len(self.text) > 80 else self.text

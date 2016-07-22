@@ -1,3 +1,4 @@
+import json
 from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
@@ -97,7 +98,8 @@ def show_dialog(request, with_user_id):
             'my_messages': reversed(my_messages),
             'pag': my_messages,
             'to_user': with_user,
-            'send_message_form': SendMessageForm(initial={'to_user': with_user})
+            'send_message_form': SendMessageForm(initial={'to_user': with_user}),
+            'users': ExtUser.objects.filter(is_active=True)
         }
     )
 
@@ -109,7 +111,7 @@ def get_last_messages(request, with_user_id):
         last_id = request.GET.get('last_message_id', 0)
         messages = Message.objects.filter(from_user=user, to_user=request.user, id__gt=last_id).order_by('created')
         data = {
-            'messages': render_to_string('private_message/_chat_part.html', {'my_messages': messages}),
+            'messages': render_to_string('private_message/_chat_part.html', {'my_messages': messages}).strip(),
         }
         return JsonResponse({'complete': data})
     except:
@@ -126,4 +128,18 @@ def remove_message(request, message_id):
     if message.from_user != request.user:
         return JsonResponse({'complete': 0})
     message.delete()
+    return JsonResponse({'complete': 1})
+
+
+@login_required
+@require_POST
+def resend_messages(request):
+    users_ids = json.loads(request.POST.get('users_ids[]', '[]'))
+    messages_ids = json.loads(request.POST.get('messages_ids[]', '[]'))
+    messages = Message.objects.filter(id__in=messages_ids)
+    users = ExtUser.objects.filter(id__in=users_ids)
+    rendered_data = render_to_string('private_message/_chat_part.html', {'my_messages': messages, 'transfered': True})
+    # отправка сообщения каждому пользователю
+    for user in users:
+        Message.objects.create(from_user=request.user, to_user=user, text=rendered_data, is_transfered=True)
     return JsonResponse({'complete': 1})

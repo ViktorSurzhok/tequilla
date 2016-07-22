@@ -1,16 +1,30 @@
+{% if transfered %}
+    <div class="transfered_message">
+{% endif %}
 {% for message in my_messages %}
-    <div class="container{% if forloop.last %} last-message{% endif %}" data-message-id="{{ message.id }}">
+    <div class="container {% if not transfered %}container-not-transfer{% endif %}" data-message-id="{{ message.id }}">
+        {% if not transfered %}
+        <div class="col-md-1">
+            <input type="checkbox" name="selected_messages[]" class="selected-messages" value="{{ message.id }}">
+        </div>
+        {% endif %}
         <div class="col-md-1">
             <img src="{{ message.from_user.get_small_avatar }}" class="avatar-in-dialog">
         </div>
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div>
                 <a href="{% url 'user_detail' message.from_user.id %}">
                     <strong class="user-name">{{ message.from_user.get_full_name }}</strong>
                 </a>
             </div>
             <div class="mt10">
-                {{ message.text|linebreaksbr }}
+                {% if message.is_transfered %}
+                    {% autoescape off %}
+                        {{ message.text }}
+                    {% endautoescape %}
+                {% else %}
+                    {{ message.text|linebreaksbr }}
+                {% endif %}
 
                 {% if message.files.count %}
                     <br>
@@ -23,7 +37,7 @@
         </div>
         <div class="col-md-2">
             {{ message.created }}
-            {% if message.from_user == user %}
+            {% if message.from_user == user and not transfered %}
                 <br>
                 <a href="{% url 'pm:remove_message' message.id %}" class="remove-message-link"><i class="fa fa-remove"></i></a>
             {% endif %}
@@ -31,3 +45,6 @@
     </div>
     <hr>
 {% endfor %}
+{% if transfered %}
+    </div>
+{% endif %}
