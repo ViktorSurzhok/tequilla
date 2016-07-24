@@ -149,7 +149,9 @@
                 <tr>
                     <td class="club-header">Клуб</td>
                     <td class="manager-header">Менеджер клуба</td>
-                    <td colspan="{{ drinks_count }}"></td>
+                    {% if drinks_count %}
+                        <td colspan="{{ drinks_count }}"></td>
+                    {% endif %}
                     <td>Напитки →</td>
                     {% for drinks in header_drinks_for_employee.values %}
                             <td>

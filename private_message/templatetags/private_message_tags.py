@@ -12,5 +12,4 @@ def show_new_messages(user):
             'FROM private_message_message WHERE was_read=FALSE AND to_user_id = {} GROUP BY from_user_id) ' \
             'ORDER BY private_message_message.created DESC'.format(user.id)
     messages = Message.objects.raw(query)
-    print(messages)
     return {'messages': messages, 'messages_count': len(list(messages))}

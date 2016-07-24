@@ -1,18 +1,14 @@
 import datetime
-from collections import OrderedDict
-from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import formats
 from django.utils.dateparse import parse_date
-from xlwt import easyxf
 from xlwt.compat import xrange
 
-from extuser.models import ExtUser
-from reports.models import Report
-from statement.utils import calculate_prices, get_statement_data, Writer
+from club.models import City
+from statement.utils import get_statement_data, Writer
 from tequilla.decorators import group_required
 
 
@@ -35,20 +31,23 @@ def statement_by_week(request):
             'prev_week': week_offset - 1,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
             'week_offset': week_offset,
+            'cities': City.objects.all()
         }
     )
-
-
-
 
 
 @login_required
 @group_required('director', 'chief')
 def show(request, week, start_date):
+    available_filters = ['city', 'only_users']
+    enabled_filters = {}
+    for f in available_filters:
+        if f in request.GET:
+            enabled_filters[f] = request.GET.get(f, None)
     return render(
         request,
         'statement/show.html',
-        get_statement_data(week, start_date)
+        get_statement_data(week, start_date, enabled_filters)
     )
 
 
