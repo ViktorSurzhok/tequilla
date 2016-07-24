@@ -88,10 +88,31 @@ $(function () {
     $SIDEBAR_MENU.find('a[href="' + URL + '"]').parent('li').addClass('current-page');
 
     $SIDEBAR_MENU.find('a').filter(function () {
-        if (URL.pathname == '/') {
-            return this.href == URL.origin + URL.pathname;
+        var pathname = URL.pathname;
+        if (pathname == '/album/add/') {
+            pathname = '/album/index/';
         }
-        return this.href.indexOf(URL.pathname) != -1;
+
+
+
+        if (pathname.indexOf('/dialog/show_dialog/') != -1) {
+            pathname = '/dialog/';
+        }
+        if (pathname.indexOf('/employee/') != -1) {
+            pathname = '/employee/';
+        }
+        if (pathname.indexOf('/stats/') != -1) {
+            pathname = '/stats/';
+        }
+        if (pathname.indexOf('/clubs/') != -1) {
+            pathname = '/clubs/';
+        }
+
+        if (pathname == '/' || pathname == '/profile/') {
+            return this.href == URL.origin + pathname;
+        }
+        console.log(this.href, pathname, this.href.indexOf(pathname) != -1);
+        return this.href.indexOf(pathname) != -1;
     }).parent('li').addClass('current-page').parent('ul').slideDown().parent().addClass('active');
 });
 
