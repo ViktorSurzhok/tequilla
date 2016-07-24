@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Расписание{% endblock %}
+
+{% block additional_css %}
+    <style type="text/css">
+        #loader {
+            width: 64px;
+            margin: 0 auto;
+        }
+        td.td_label {
+            text-align: right;
+            padding-right: 10px;
+            font-weight: bold;
+            vertical-align: top;
+            width: 197px;
+        }
+        table.detail-view tr td{
+           padding-top: 2px;
+            padding-bottom: 2px;
+            vertical-align: top;
+            border-bottom: 1px dashed #ccc;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script>
+        $(function() {
+             function openTestModal(options){
+                $('.work-shift-info-modal').modal({
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+                $('.work-shift-info-modal').one('shown.bs.modal', function (e) {
+                    var form = $(this).find('form');
+                    $.ajax({
+                        url: options.href,
+                        type: 'GET',
+                        success: function (response) {
+                            if (typeof response['complete'] != 'undefined' && typeof response['complete']['info'] != 'undefined') {
+                                $('#work-shift-info').html(response['complete']['info']);
+                                $('.work-shift-info-modal .modal-title').html(response['complete']['title']);
+                            } else {
+                                $('#work-shift-info').text('Произошла ошибка');
+                            }
+                            $('#loader').hide();
+                            $('#work-shift-info').show();
+                        }
+                    });
+                });
+            }
+
+            // нажатие на кнопку "Добавить" в календаре
+            $('.work-shift-item').on('click', function(e){
+                e.preventDefault();
+                $('#work-shift-info').hide();
+                $('#loader').css({display: 'block'});
+                openTestModal({
+                    href: $(this).data('url')
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Расписание
+                        <small>{{ start_week }} - {{ end_week }}</small>
+                    </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                <div class="container">
+                     <a href="{% url 'calendar:get_my_work_week' %}?week={{ prev_week }}">
+                        <button class="btn"><i class="fa fa-long-arrow-left"></i> Предыдущая неделя</button>
+                    </a>
+                    <a href="{% url 'calendar:get_my_work_week' %}?week={{ next_week }}">
+                        <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
+                    </a>
+                    <span class="btn btn-info" data-toggle="modal" data-target="#info-container" style="float:right;">
+                        <i class="fa fa-warning"></i> Справка
+                    </span>
+                </div>
+                    <table class="table table-bordered table-striped small-margin-top">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">Дата</th>
+                                <th>Мероприятие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in grid %}
+                                <tr>
+                                    <td><b>{{ item.date|date:"l" }}</b><br> {{ item.date|date:"d b Y" }}</td>
+                                    <td>
+                                        {% for shift in item.work_shifts %}
+                                            <span class="btn {{ item.color_class }} work-shift-item" data-url="{% url 'calendar:get_work_shift_info' shift.id %}">
+                                                <b>{{ shift.club.name }}</b><br>
+                                                {{ shift.start_time }} - {{ shift.end_time }}
+                                                {% if shift.probation %}
+                                                    <br><span style="color:darkslateblue;">(Стажировка)</span>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+               </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="info-container" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 660px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                     <h4 class="modal-title">Справка по расписанию</h4>
+                </div>
+                <div class="modal-body">
+                    <p>белым цветом обозначены отработанные рабочие дни</p>
+                    <p style="background-color: #d9534f; color:white;">красным цветом обозначены предстоящие рабочие дни</p>
+                    <p style="background-color: #26B99A; color:white;">зеленым цветом обозначены сегодняшние заведения</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade work-shift-info-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 675px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                     <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <img src="{% static 'img/heart.gif' %}" id="loader">
+                    <div id="work-shift-info"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

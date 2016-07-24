@@ -119,3 +119,9 @@ def club_delete(request, club_id):
     club.is_active = False
     club.save()
     return redirect('club:club_list')
+
+
+@login_required
+def club_info(request, club_id):
+    club = get_object_or_404(Club, id=club_id)
+    return render(request, 'clubs/club_info.html', {'club': club})

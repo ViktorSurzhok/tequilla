@@ -186,3 +186,59 @@ def get_employee_bisy(request, employee_id):
     except Exception as e:
         print(e)
         return JsonResponse({'complete': 0})
+
+
+@login_required
+def get_my_work_week(request):
+    week_offset = int(request.GET.get('week', 0))
+    date = datetime.date.today() + datetime.timedelta(week_offset * 7)
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(6)
+
+    work_shifts = WorkShift.objects.filter(date__range=[start_week, end_week], employee=request.user)
+    work_shifts_struct = {}
+    for work_shift in work_shifts:
+        date_format = formats.date_format(work_shift.date, "d.m.Y")
+        if date_format not in work_shifts_struct:
+            work_shifts_struct[date_format] = []
+        work_shifts_struct[date_format].append(work_shift)
+
+    grid = []
+    week_cursor = start_week
+    while week_cursor <= end_week:
+        date_cursor = formats.date_format(week_cursor, "d.m.Y")
+        shifts = work_shifts_struct[date_cursor] if date_cursor in work_shifts_struct else None
+        color_class = 'btn-default'
+        if week_cursor == date:
+            color_class = 'btn-success'
+        elif week_cursor > date:
+            color_class = 'btn-danger'
+        grid.append({'date': week_cursor, 'work_shifts': shifts, 'color_class': color_class})
+        week_cursor += datetime.timedelta(1)
+
+    return render(
+        request,
+        'calendar/show_my_calendar.html',
+        {
+            'next_week': week_offset + 1,
+            'prev_week': week_offset - 1,
+            'start_week': start_week,
+            'end_week': end_week,
+            'grid': grid,
+            'week_offset': week_offset,
+        }
+    )
+
+
+@login_required
+def get_work_shift_info(request, work_shift_id):
+    try:
+        work_shift = WorkShift.objects.get(id=work_shift_id)
+        rendered_data = {
+            'info': render_to_string('calendar/work_shift_info.html', {'work_shift': work_shift}),
+            'title': 'Расписание на {} г.'.format(formats.date_format(work_shift.date, "d b Y"))
+        }
+        return JsonResponse({'complete': rendered_data})
+    except Exception as e:
+        return JsonResponse({'complete': 0})
+
