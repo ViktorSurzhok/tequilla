@@ -15,8 +15,7 @@ class ExtUser(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
     )
     email = models.EmailField('Электронная почта', max_length=255, blank=True)
     avatar = models.ImageField('Аватар', blank=True, null=True, upload_to="avatar")
-    #avatar width
-    #avatar crop data
+
     avatar_cropped = models.ImageField('Обрезанный аватар', blank=True, null=True, upload_to="cr_avatar")
     name = models.CharField('Имя', max_length=40)
     surname = models.CharField('Фамилия', max_length=40)

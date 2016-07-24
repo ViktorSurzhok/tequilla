@@ -18,11 +18,11 @@
                         {% include '_user_admin_navigation.html' with active='info' %}
                     {% endif %}
                     <div class="row">
-                        <div class="col-md6 pull-left">
+                        <div class="col-md-6 pull-left">
                             <img src="
 
                                     {% if user_info.avatar %}{{ user_info.avatar.url }}{% else %}{{ user_info.get_default_avatar }}{% endif %}"
-                                 style="max-width: 500px;">
+                                 style="max-width: 100%;">
                         </div>
                         <div class="col-md-6">
                             <table class="table table-striped">
@@ -77,7 +77,7 @@
                                             <tbody>
                                             <tr>
                                                 <td>
-                                                    <a href="" data-toggle="modal">
+                                                    <a href="{% url 'pm:show_dialog' user_info.id %}" data-toggle="modal">
                                                         <button><i class="fa fa-envelope"></i> Написать сообщение
                                                         </button>
                                                     </a>

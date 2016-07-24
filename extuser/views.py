@@ -1,15 +1,19 @@
+import base64
 import json
+import random
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, update_session_auth_hash, logout
 from django.contrib.auth.decorators import login_required
+from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 
-
-from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm, UserEditAdminForm
+from extuser.forms import LoginForm, UserCreationForm, UserChangeForm, ChangePasswordForm, UserEditAdminForm, \
+    ChangeAvatarForm
 from extuser.models import ExtUser
 from django.contrib.auth.models import Group
 
@@ -112,10 +116,16 @@ def change_password(request):
 
 @login_required
 def change_avatar(request):
+    if request.method == 'POST':
+        form = ChangeAvatarForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+        else:
+            print(form.errors)
     return render(
         request,
         'profile/change_avatar.html',
-        {'user': request.user}
+        {}
     )
 
 
@@ -249,3 +259,15 @@ def user_create(request):
         'users/user_edit.html',
         {'user_info': None, 'form': form}
     )
+
+
+@csrf_exempt
+@login_required
+def upload_avatar(request):
+    img = request.POST.get('croppedImage', '')
+    imgdata = base64.b64decode(img.split(',')[-1])
+    request.user.avatar_cropped = ContentFile(
+        imgdata, str(random.randint(1, 100000)) + '_' + str(request.user.id) + '.png'
+    )
+    request.user.save()
+    return JsonResponse({'complete': 1})

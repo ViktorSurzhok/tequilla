@@ -8,6 +8,10 @@ $(document).ready(function () {
         var $dataScaleX = $('#dataScaleX');
         var $dataScaleY = $('#dataScaleY');
         var options = {
+            //scalable: false,
+            zoomable: false,
+            zoomOnWheel: false,
+            //cropBoxResizable: false,
             aspectRatio: 1,
             crop: function (e) {
                 $dataX.val(Math.round(e.x));
@@ -33,10 +37,39 @@ $(document).ready(function () {
         }).cropper(options);
 
         $('#super-button').on('click', function () {
-            console.log($image.cropper('getData'));
-            var img = $image.cropper('getCroppedCanvas', {width: 160, height: 90});
-            console.log(img.toDataURL());
+            var img = $image.cropper('getCroppedCanvas', {width: 200, height: 200});
+            var formData = new FormData();
+            formData.append('croppedImage', img.toDataURL());
+
+            $.ajax('/profile/upload_avatar/', {
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                         new PNotify({
+                                title: 'Ура!',
+                                text: 'Новый аватар успешно загружен',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                         $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                         }, 2000);
+                    },
+                    error: function () {
+                         new PNotify({
+                                title: 'Ура!',
+                                text: 'Произошла ошибка при загрузке нового аватара.',
+                                type: 'success',
+                                styling: 'bootstrap3'
+                            });
+                        $('.ui-pnotify').fadeIn('slow');
+                            setTimeout(function () {
+                                $('.ui-pnotify').fadeOut('fast');
+                        }, 2000);
+                    }
+                });
         });
-
-
-    });
+});

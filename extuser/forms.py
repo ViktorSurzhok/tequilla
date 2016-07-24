@@ -24,6 +24,16 @@ class UserImportForm(forms.ModelForm):
         exclude = ('avatar', 'password')
 
 
+class ChangeAvatarForm(forms.ModelForm):
+    """
+    Форма загрузки нового аватара
+    """
+
+    class Meta:
+        model = ExtUser
+        fields = ('avatar',)
+
+
 class UserCreationForm(forms.ModelForm):
     """
     Форма добавления пользователя которая используется на странице регистрации
