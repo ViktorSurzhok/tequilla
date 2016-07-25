@@ -32,7 +32,6 @@ class UniformByWeek(TimeStampedModel):
     def __str__(self):
         return self.uniform.name
 
-    # todo: Написать метод рассчета остатков формы
     @staticmethod
     def get_uniform_by_week(start_week):
         """Возвращает объекты униформы, если их нет в базе - создает и возвращает"""
@@ -60,10 +59,14 @@ class UniformForEmployee(TimeStampedModel):
 class UniformTransferByWeek(TimeStampedModel):
     """Перевод за форму за неделю"""
     employee = models.ForeignKey(ExtUser, verbose_name='Tequilla girl')
-    start_week = models.DateField('Дата начала недели за которую проставляется перевод')
+    uniform_for_employee = models.ForeignKey(UniformForEmployee)
+    #start_week = models.DateField('Дата начала недели за которую проставляется перевод')
     was_paid = models.BooleanField('Перевод', default=False)
 
+    # def get_sum(self):
+    #     end_week = self.start_week + datetime.timedelta(6)
+    #     uniforms = UniformForEmployee.objects.filter(date__range=[self.start_week, end_week], employee=self.employee)
+    #     return sum([i.count * i.uniform.price for i in uniforms])
+
     def get_sum(self):
-        end_week = self.start_week + datetime.timedelta(6)
-        uniforms = UniformForEmployee.objects.filter(date__range=[self.start_week, end_week], employee=self.employee)
-        return sum([i.count * i.uniform.price for i in uniforms])
+        return self.uniform_for_employee.count * self.uniform_for_employee.uniform.price

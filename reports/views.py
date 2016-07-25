@@ -31,12 +31,12 @@ def reports_by_week(request, user_id=None):
     if request.user.has_perm('extuser.can_edit_users'):
         employee = None
     elif user_id is None or int(user_id) != request.user.id:
-        return Http404
+        raise Http404
     else:
         try:
             employee = ExtUser.objects.get(id=request.user.id)
         except ExtUser.DoesNotExist:
-            return Http404
+            raise Http404
 
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])
     if employee:

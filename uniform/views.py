@@ -35,29 +35,51 @@ def uniform_list_by_week(request):
 
     uniform_for_employee = UniformForEmployee.objects.filter(date__range=[start_week, end_week])\
         .order_by('employee__surname', 'uniform__num')
-    # структурирование данных по сотрудникам
-    structed_employee = {}
-    transfer_price = 0
-    for ufe in uniform_for_employee:
-        if ufe.employee not in structed_employee:
-            transfer, new = UniformTransferByWeek.objects.get_or_create(employee=ufe.employee, start_week=start_week)
-            structed_employee[ufe.employee] = {'uniforms': {}, 'transfer': transfer}
-            if not transfer.was_paid:
-                transfer_price += transfer.get_sum()
-        structed_employee[ufe.employee]['uniforms'][ufe.uniform.id] = {'has_value': True, 'value': ufe}
 
-    for item in structed_employee.values():
-        values = item['uniforms']
+    # ЗАКОМЕНТИРОВАН КОД С ГРУППИРОВКОЙ ПО СОТРУДНИКАМ
+    # структурирование данных по сотрудникам
+    # structed_employee = {}
+    # transfer_price = 0
+    # for ufe in uniform_for_employee:
+    #     if ufe.employee not in structed_employee:
+    #         transfer, new = UniformTransferByWeek.objects.get_or_create(employee=ufe.employee, start_week=start_week)
+    #         structed_employee[ufe.employee] = {'uniforms': {}, 'transfer': transfer}
+    #         if not transfer.was_paid:
+    #             transfer_price += transfer.get_sum()
+    #     structed_employee[ufe.employee]['uniforms'][ufe.uniform.id] = {'has_value': True, 'value': ufe}
+    #
+    # for item in structed_employee.values():
+    #     values = item['uniforms']
+    #     index = 0
+    #     for ubw in uniform_by_week_ids:
+    #         if ubw in values:
+    #             minus_balance = values[ubw]['value'].count
+    #         else:
+    #             values[ubw] = {'has_value': False, 'value': ubw}
+    #             minus_balance = 0
+    #         # вычитаем из баланса использованные вещи
+    #         uniform_balance[index] -= minus_balance
+    #         index += 1
+
+    # код без группировки по сотрудникам
+    transfer_price = 0
+    for item in uniform_for_employee:
+        transfer, new = UniformTransferByWeek.objects.get_or_create(employee=item.employee, uniform_for_employee=item)
+        if not transfer.was_paid:
+            transfer_price += transfer.get_sum()
+        values = {}
         index = 0
         for ubw in uniform_by_week_ids:
-            if ubw in values:
-                minus_balance = values[ubw]['value'].count
+            if ubw == item.uniform.id:
+                minus_balance = item.count
+                values[ubw] = {'has_value': True, 'value': item}
             else:
-                values[ubw] = {'has_value': False, 'value': ubw}
                 minus_balance = 0
-            # вычитаем из баланса использованные вещи
+                values[ubw] = {'has_value': False, 'value': ubw}
             uniform_balance[index] -= minus_balance
             index += 1
+        item.grid = values
+        item.trans = transfer
 
     return render(
         request,
@@ -69,7 +91,8 @@ def uniform_list_by_week(request):
             'start_week': start_week,
             'end_week': end_week,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
-            'structed_employee': structed_employee,
+        #    'structed_employee': structed_employee,
+            'structed_employee': uniform_for_employee,
             'uniform_balance': uniform_balance,
             'transfer_price': transfer_price,
             'current_date': date
@@ -130,19 +153,30 @@ def save_uniform_for_employee(request):
     return JsonResponse({'complete': 0})
 
 
+# @login_required
+# @group_required('director', 'chief', 'coordinator')
+# def remove_for_employee(request, employee_id, start_date):
+#     start_date = parse_date(start_date)
+#     start_week = start_date - datetime.timedelta(start_date.weekday())
+#     end_week = start_week + datetime.timedelta(6)
+#     try:
+#         employee = ExtUser.objects.get(id=employee_id)
+#         items = UniformForEmployee.objects.filter(employee=employee, date__range=[start_week, end_week]).delete()
+#         return redirect('uniform:uniform_by_week')
+#     except Exception as e:
+#         print(e)
+#         return Http404
+
+
 @login_required
 @group_required('director', 'chief', 'coordinator')
-def remove_for_employee(request, employee_id, start_date):
-    start_date = parse_date(start_date)
-    start_week = start_date - datetime.timedelta(start_date.weekday())
-    end_week = start_week + datetime.timedelta(6)
+def remove_for_employee(request, object_id):
     try:
-        employee = ExtUser.objects.get(id=employee_id)
-        items = UniformForEmployee.objects.filter(employee=employee, date__range=[start_week, end_week]).delete()
+        UniformForEmployee.objects.get(id=object_id).delete()
         return redirect('uniform:uniform_by_week')
     except Exception as e:
         print(e)
-        return Http404
+        raise Http404
 
 
 @login_required

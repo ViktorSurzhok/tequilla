@@ -207,7 +207,7 @@ def user_edit(request, user_id):
     user = get_object_or_404(ExtUser, id=user_id)
     # директора может редактировать только он сам
     if user.groups.filter(name='director').exists() and user != request.user:
-        return Http404
+        raise Http404
     if request.method == 'POST':
         form = UserEditAdminForm(instance=user, data=request.POST)
         if form.is_valid():

@@ -86,7 +86,7 @@ def class_for_name(module_name, class_name):
 @group_required('director', 'chief', 'coordinator')
 def catalog_list(request, item_type):
     if item_type not in CATALOG_DATA:
-        return Http404
+        raise Http404
     data = CATALOG_DATA[item_type]
     Class = class_for_name(data['module_name'], data['class_name'])
     items = Class.objects.all()
@@ -217,7 +217,7 @@ def catalog_filter(request, item_type):
 @group_required('director', 'chief', 'coordinator')
 def catalog_edit(request, item_type, item_id=None):
     if item_type not in CATALOG_DATA:
-        return Http404
+        raise Http404
     data = CATALOG_DATA[item_type]
     Class = class_for_name(data['module_name'], data['class_name'])
     Form = class_for_name(data['form_module_name'], data['form_class_name'])
@@ -251,7 +251,7 @@ def catalog_edit(request, item_type, item_id=None):
 @group_required('director', 'chief', 'coordinator')
 def catalog_remove(request, item_type, item_id):
     if item_type not in CATALOG_DATA:
-        return Http404
+        raise Http404
     data = CATALOG_DATA[item_type]
     Class = class_for_name(data['module_name'], data['class_name'])
     try:
