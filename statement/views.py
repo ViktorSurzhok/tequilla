@@ -152,7 +152,9 @@ def export_xls(request, week, start_date):
     for idx, row in enumerate(data['grid']):
         writer.new_row()
         writer.write(
-            '{}. {} {}'.format(idx + 1, row['club'].name, row['club'].get_address()),
+            '{}. {} {}, {}'.format(
+                idx + 1, row['club'].name, row['club'].get_address(), row['club'].city if row['club'].city else ''
+            ),
             yellow_style if idx % 2 == 0 else orange_style
         )
         writer.write(row['club'].coordinator.surname if row['club'].coordinator else '', light_green_style)

@@ -60,7 +60,7 @@
             }
 
             table.drinks-count-table {
-                height: 100px;
+                height: 112px;
                 table-layout:fixed;
                 width: 100%;
             }
@@ -116,6 +116,12 @@
             }
             .admins-salary {
                 margin-top:10px;
+            }
+            .ct-clr {
+                color:red;
+                text-transform: uppercase;
+                display: block;
+                margin-top: 5px;
             }
         </style>
     </head>
@@ -175,7 +181,12 @@
                 {% for data in grid %}
                     <tr>
                         <td class="club-{% cycle 'even' 'odd' %}">
-                            <span >{{ forloop.counter }}. {{ data.club.name }} {{ data.club.get_address }}</span>
+                            <span>
+                                {{ forloop.counter }}. {{ data.club.name }} {{ data.club.get_address }}
+                            </span>
+                            <span class="ct-clr">
+                                {{ data.club.city.name }}
+                            </span>
                         </td>
                         <td class="manager">{{ data.club.coordinator.surname|default_if_none:"" }}</td>
                         {% for price in data.drinks_for_club %}

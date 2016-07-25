@@ -40,7 +40,8 @@
                     <a class="btn btn-success" href="{% url 'statement:statement_show' week_offset start_date %}">Показать (полная ведомость)</a>
                     <a class="btn btn-success" href="{% url 'statement:statement_show' week_offset start_date %}?only_users=1">Показать (без левой части)</a>
                     {% for city in cities %}
-                        <a class="btn btn-success" href="{% url 'statement:statement_show' week_offset start_date %}?city={{ city.id }}">Показать (только {{ city.name }})</a>
+                        <a class="btn btn-success" href="{% url 'statement:statement_show' week_offset start_date %}?city={{ city.id }}">Показать (только <b>{{ city.name }}</b>)</a>
+                        <a class="btn btn-success" href="{% url 'statement:statement_show' week_offset start_date %}?city={{ city.id }}&only_users=1">Показать (только <b>{{ city.name }}</b> без левой части)</a>
                     {% endfor %}
                     <hr>
                     <a class="btn btn-warning" href="{% url 'statement:export_xls' week_offset start_date %}">Загрузить .xls</a>
