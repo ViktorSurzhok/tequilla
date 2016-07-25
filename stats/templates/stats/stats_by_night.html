@@ -17,7 +17,6 @@
                             data-club-name="{{ ws.club.name }}"
                             data-employee="{{ ws.employee.get_full_name }}"
                             data-count="{{ co }}"
-                            data-discount="{{ report.discount|default_if_none:"0" }}"
                             type="checkbox">
                     </td>
                     <td>{{ ws.club.name }} {{ ws.club.get_address }}</td>

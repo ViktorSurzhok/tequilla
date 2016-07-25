@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
+from club.models import City
 from penalty.models import Penalty
 from reports.models import Report
 from stats.utils import get_start_and_end_dates
@@ -19,6 +20,9 @@ from wall.models import Post
 def stats_by_night(request):
     start_date, end_date = get_start_and_end_dates(request)
     reports = Report.objects.filter(work_shift__date__range=[start_date, end_date])
+    current_city = int(request.GET.get('city', 0))
+    if current_city:
+        reports = reports.filter(work_shift__club__city=current_city)
     reports = sorted(reports, key=lambda t: t.get_shots_count(), reverse=True)
     data_table = render_to_string('stats/stats_by_night.html', {'reports': reports})
 
@@ -31,7 +35,9 @@ def stats_by_night(request):
             'end_date': end_date,
             'start_date_f': request.GET.get('start_date', None),
             'end_date_f': request.GET.get('end_date', None),
-            'current_stats': 'by_night'
+            'current_stats': 'by_night',
+            'cities': City.objects.all(),
+            'current_city': current_city
         }
     )
 
@@ -43,8 +49,11 @@ def stats_by_sale(request):
 
     grid = []
     employees = Group.objects.get(name='employee').user_set.filter(is_active=True)
+    current_city = int(request.GET.get('city', 0))
     for employee in employees:
         reports = Report.objects.filter(work_shift__date__range=[start_date, end_date], work_shift__employee=employee)
+        if current_city:
+            reports = reports.filter(work_shift__club__city=current_city)
         shots_count = 0
         discount = 0
         for report in reports:
@@ -64,7 +73,9 @@ def stats_by_sale(request):
             'start_date_f': request.GET.get('start_date', None),
             'end_date_f': request.GET.get('end_date', None),
             'end_date': end_date,
-            'current_stats': 'by_sale'
+            'current_stats': 'by_sale',
+            'cities': City.objects.all(),
+            'current_city': current_city
         }
     )
 
@@ -97,7 +108,8 @@ def stats_by_penalty(request):
             'end_date': end_date,
             'start_date_f': request.GET.get('start_date', None),
             'end_date_f': request.GET.get('end_date', None),
-            'current_stats': 'by_penalty'
+            'current_stats': 'by_penalty',
+            'cities': City.objects.all()
         }
     )
 
@@ -109,7 +121,10 @@ def send_stats_on_wall(request):
     items = json.loads(request.POST.get('items[]', '[]'))
     if not items:
         return JsonResponse({'complete': 0})
-    info = render_to_string('stats/for_wall.html', {'items': items, 'type': request.POST.get('type', 'by_night')})
+    info = render_to_string(
+        'stats/for_wall.html',
+        {'items': items, 'type': request.POST.get('type', 'by_night'), 'city': request.POST.get('city', '')}
+    )
     post = Post()
     post.user = request.user
     post.text = info

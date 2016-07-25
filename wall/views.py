@@ -76,7 +76,7 @@ def send_post(request):
 @require_POST
 def remove_post(request):
     post = get_object_or_404(Post, id=request.POST.get('id', 0))
-    if post.user == request.user or request.user.groups.filter(name='director').exists():
+    if post.user == request.user or request.user.groups.filter(name__in=['director', 'chief']).exists():
         post.delete()
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})

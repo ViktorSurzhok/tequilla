@@ -16,7 +16,7 @@
         $('.use-filter-button').on('click', function(e) {
             e.preventDefault();
             location = '?start_date=' + reformat_date($('#calendar-from').val()) + '&end_date=' +
-                    reformat_date($('#calendar-to').val());
+                    reformat_date($('#calendar-to').val()) + '&city=' + $('#city-filter').val();
         });
 
         $('.calendar').daterangepicker(calendar_options);
@@ -25,20 +25,18 @@
         $('.send-on-wall').on('click', function(e) {
             e.preventDefault();
             var items = [];
-            var type = $('.switch-btn.active').attr('id')
+            var type = $('.switch-btn.active').attr('id');
             $('.for-wall-check:checked').each(function() {
                 if (type == 'by_night') {
                     items.push({
                         club: $(this).data('club-name'),
                         employee: $(this).data('employee'),
-                        count: $(this).data('count'),
-                        discount: $(this).data('discount')
+                        count: $(this).data('count')
                     });
                 } else if (type == 'by_sale') {
                     items.push({
                         employee: $(this).data('employee'),
-                        count: $(this).data('count'),
-                        discount: $(this).data('discount')
+                        count: $(this).data('count')
                     });
                 } else {
                     items.push({
@@ -54,6 +52,10 @@
                 'items[]': JSON.stringify(items),
                 'type': type
             };
+
+            if (parseInt($('#city-filter').val()) != 0) {
+                data['city'] = $('#city-filter option:selected').text();
+            }
 
            $.ajax({
                 url: '{% url 'stats:send_stats_on_wall' %}',
@@ -101,9 +103,9 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <a href="{% url 'stats:stats_by_night' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
-                <a href="{% url 'stats:stats_by_sale' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
-                <a href="{% url 'stats:stats_by_penalty' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
+                <a href="{% url 'stats:stats_by_night' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
+                <a href="{% url 'stats:stats_by_sale' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
+                <a href="{% url 'stats:stats_by_penalty' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
                 <div class="small-margin-top">
                     <form class="form-inline">
                         <div class="form-group">
@@ -111,6 +113,14 @@
                         </div>
                         <div class="form-group">
                             По: <input type="text" class="calendar form-control" id="calendar-to" value="{{ end_date|date:"d.m.Y" }}">
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" id="city-filter">
+                                <option {% if current_city == 0 %}selected{% endif %} value="0">Все города</option>
+                                {% for city in cities %}
+                                    <option {% if current_city == city.id %}selected{% endif %} value="{{ city.id }}">{{ city.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <button class="btn btn-info use-filter-button" style="margin-bottom: 0;">Показать</button>
                     </form>

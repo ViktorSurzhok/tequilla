@@ -14,7 +14,6 @@
                         class="for-wall-check"
                         data-employee="{{ item.employee.get_full_name }}"
                         data-count="{{ item.shots_count }}"
-                        data-discount="{{ item.discount|default_if_none:"0" }}"
                         type="checkbox">
                 </td>
                     <td>{{ item.employee.get_full_name }}</td>
