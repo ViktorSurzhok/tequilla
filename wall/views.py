@@ -1,5 +1,8 @@
+import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -11,12 +14,19 @@ from tequilla import settings
 from wall.models import Post, Photo
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from work_calendar.models import WorkShift
+
 
 @login_required
 def index(request):
     object_list = Post.objects.filter(parent=None)
     paginator = Paginator(object_list, settings.POST_COUNT_ON_WALL)
     page = request.GET.get('page')
+
+    # статистика
+    work_shift_count = WorkShift.objects.filter(employee=request.user).count()
+    shots_count = sum([report.get_shots_count() for report in Report.objects.filter(work_shift__employee=request.user)])
+
     try:
         posts = paginator.page(page)
     except PageNotAnInteger:
@@ -30,7 +40,12 @@ def index(request):
             'posts': posts,
             'user_groups': request.user.groups.all().values_list('name', flat=True),
             'main_employees_file': MainEmployees.get_file(),
-            'last_reports': Report.objects.filter(work_shift__employee=request.user).order_by('created')[:3]
+            'last_reports': Report.objects.filter(work_shift__employee=request.user).order_by('created')[:3],
+            'work_shift_count': work_shift_count,
+            'shots_count': shots_count,
+            'next_work_shifts': WorkShift.objects.filter(date__gte=datetime.date.today(), employee=request.user),
+            'director_id': Group.objects.get(name='director').user_set.first().id,
+            'chief_id': Group.objects.get(name='chief').user_set.first().id
         }
     )
 
