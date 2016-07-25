@@ -19,6 +19,9 @@ class Report(TimeStampedModel):
     def get_shots_count(self):
         return sum([drink.count for drink in self.drinks.all()])
 
+    def get_shots_sum(self):
+        return sum([drink.drink.price_for_sale for drink in self.drinks.all()])
+
 
 class ReportDrink(TimeStampedModel):
     drink = models.ForeignKey(Drink, verbose_name='Напиток')

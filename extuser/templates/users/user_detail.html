@@ -59,11 +59,11 @@
                                     </tr>
                                     <tr>
                                         <td>Всего продано:</td>
-                                        <td>Шотов: (руб.)</td>
+                                        <td>Шотов: {{ shots_sum }}(руб.)</td>
                                     </tr>
                                     <tr>
                                         <td>Всего штрафов:</td>
-                                        <td>0 на 0 руб.</td>
+                                        <td>{{ penalty_count }} на {{ penalty_sum }} руб.</td>
                                     </tr>
                                 {% endif %}
                                 </tbody>

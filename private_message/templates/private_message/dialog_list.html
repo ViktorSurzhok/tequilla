@@ -43,7 +43,7 @@
                     {% for item in dialogs %}
                         <a href="{% if item.message.from_user == user %}{% url 'pm:show_dialog' item.message.to_user.id %}{% else %}{% url 'pm:show_dialog' item.message.from_user.id %}{% endif %}" class="clearfix dialog-item">
                             <div class="col-md-2">
-                                <img src="{{ item.employee.get_small_avatar }}">
+                                <img src="{{ item.employee.get_small_avatar }}" style="width: 80px;">
                             </div>
                             <div class="col-md-2">
                                 <h5>

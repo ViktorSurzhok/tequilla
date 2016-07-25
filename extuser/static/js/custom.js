@@ -111,7 +111,6 @@ $(function () {
         if (pathname == '/' || pathname == '/profile/') {
             return this.href == URL.origin + pathname;
         }
-        console.log(this.href, pathname, this.href.indexOf(pathname) != -1);
         return this.href.indexOf(pathname) != -1;
     }).parent('li').addClass('current-page').parent('ul').slideDown().parent().addClass('active');
 });

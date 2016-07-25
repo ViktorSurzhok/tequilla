@@ -19,6 +19,8 @@ from django.contrib.auth.models import Group
 
 from django.db.models import Q
 
+from penalty.models import Penalty
+from reports.models import Report
 from tequilla.decorators import group_required
 
 
@@ -174,10 +176,16 @@ def user_filter(request):
 @login_required
 def user_detail(request, user_id):
     user = get_object_or_404(ExtUser, id=user_id)
+    penalties = Penalty.objects.filter(employee=user)
     return render(
         request,
         'users/user_detail.html',
-        {'user_info': user}
+        {
+            'user_info': user,
+            'shots_sum': sum([report.get_shots_sum() for report in Report.objects.filter(work_shift__employee=user)]),
+            'penalty_sum': sum([penalty.get_sum() for penalty in penalties]),
+            'penalty_count': penalties.count()
+        }
     )
 
 

@@ -17,7 +17,6 @@
                 dataType: 'jsonp',
                 crossDomain: true,
                 success: function (data) {
-                    console.log(data);
                     $('#list-content').html(data['items']);
                 }
             });
