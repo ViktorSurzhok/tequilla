@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'stats',
     'statement',
     'week_plan',
+    'calculator',
     'private_message',
     'sorl.thumbnail',
     'django_cleanup',

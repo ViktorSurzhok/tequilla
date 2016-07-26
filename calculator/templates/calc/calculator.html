@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Калькулятор{% endblock %}
+
+{% block additional_css %}
+    <link href="{% static 'css/jquery.timepicker.css' %}" rel="stylesheet">
+    <style>
+        #empty-form {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block additional_js %}
+    <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+    <script>
+        $(function() {
+            $('#calendar').daterangepicker(calendar_options);
+
+            var timepicker_options = { 'timeFormat': 'H:i', 'step': 15 };
+            $('#time-from').timepicker(timepicker_options);
+            $('#time-to').timepicker(timepicker_options);
+
+            // нажатие на кнопку добавления напитка
+            $('#add-drink').on('click', function() {
+                var new_panel = $('#empty-form').html();
+                $(new_panel).insertAfter('.panel-container:last');
+                var new_p = $('.containers .drink-container:last');
+                new_p.addClass('panel-container');
+                new_p.find('.x_title small').text('#' + $('.containers .drink-container').size());
+            });
+
+            // удаление напитка
+            $(document).on('click', '.close-link', function () {
+                var $BOX_PANEL = $(this).closest('.x_panel');
+                $BOX_PANEL.remove();
+            });
+
+            $('#club').on('change', function() {
+                $('.containers .drink-container').remove();
+                var club_href = $(this).find('option:selected').data('href');
+                $.ajax({
+                    url: club_href,
+                    type: 'GET',
+                    success: function (response) {
+                        $('.drink-select').html(response.complete);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="containers">
+        <div class="col-md-6 col-xs-12 panel-container">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Калькулятор</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form class="form-horizontal form-label-left">
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="club">
+                                Заведение
+                            </label>
+                            <div class="col-md-9 col-sm-6 col-xs-12">
+                                <select class="form-control" id="club">
+                                    {% for club in clubs %}
+                                        <option data-href="{% url 'calc:get_drinks_for_club' club.id %}" value="{{ club.id }}">{{ club }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="calendar">
+                                Дата
+                            </label>
+                            <div class="col-md-9 col-sm-6 col-xs-12">
+                                <input id="calendar" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-from">
+                                Время от
+                            </label>
+                            <div class="col-md-9 col-sm-6 col-xs-12">
+                                <input id="time-from" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
+                                Время до
+                            </label>
+                            <div class="col-md-9 col-sm-6 col-xs-12">
+                                <input id="time-to" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xs-12 panel-container">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Инфо</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="empty-form">
+        <div class="col-md-6 col-xs-12 drink-container">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Напиток <small></small></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li class="pull-right"><a class="close-link"><i class="fa fa-close"></i></a></li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form class="form-horizontal form-label-left">
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="drink-select">
+                                Напиток
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <select class="form-control drink-select">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="drink-price">
+                                Цена напитка в баре
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="text" class="drink-price form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="drink-val">
+                                Кол-во мл
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="text" class="drink-val form-control">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

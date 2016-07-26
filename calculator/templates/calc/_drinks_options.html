@@ -1,0 +1,3 @@
+{% for drink in club.drink_set.all %}
+    <option data-price="{{ drink.price_in_bar }}" value="{{ drink.id }}">{{ drink.name }}</option>
+{% endfor %}

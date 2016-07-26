@@ -212,11 +212,6 @@ body.nav-md .container.body .right_col {
     height: inherit;
   }
 }
-@media (max-width: 1270px) and (min-width: 192px) {
-  .x_title h2 small {
-    display: none
-  }
-}
 
 /**  ------------------------------------------  **/
 
