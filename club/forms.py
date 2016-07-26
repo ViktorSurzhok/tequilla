@@ -39,7 +39,6 @@ class ClubEditAdminForm(forms.ModelForm):
         required=False
     )
 
-
     class Meta:
         model = Club
         exclude = ('old_id',)

@@ -37,7 +37,7 @@ def statement_by_week(request):
 
 
 @login_required
-@group_required('director', 'chief')
+@group_required('director')
 def show(request, week, start_date):
     available_filters = ['city', 'only_users']
     enabled_filters = {}
@@ -52,7 +52,7 @@ def show(request, week, start_date):
 
 
 @login_required
-@group_required('director', 'chief')
+@group_required('director')
 def export_xls(request, week, start_date):
     import xlwt
     data = get_statement_data(week, start_date)

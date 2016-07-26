@@ -6,16 +6,17 @@ from django.utils.dateparse import parse_date
 
 from reports.models import Report
 from statement import arial10
+from club.models import Club
 
 
-def calculate_prices(city_name, report_drink, drink, club_coordinator, employee_coordinator):
-    """Высчитывает цены которые проставляются в ведомости в зависимости от города"""
-    if city_name == 'Москва':
-        # формула для Москвы
+def calculate_prices(formula, report_drink, drink, club_coordinator, employee_coordinator):
+    """Высчитывает цены которые проставляются в ведомости от формулы выбранной в настройках клуба"""
+    if formula == Club.SHOT_CHOICE:
+        # формула для шотов
         price_for_club = report_drink.count * drink.price_in_bar * Decimal(0.2)
         price_for_coordinator = report_drink.count * drink.price_in_bar * Decimal(0.05) if employee_coordinator else 0
     else:
-        # формула для Питера
+        # формула для мензурок
         price_for_club = (drink.price_for_sale - drink.price_in_bar) / Decimal(2) * report_drink.count
         if employee_coordinator:
             factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
@@ -94,7 +95,7 @@ def get_statement_data(week, start_date, enabled_filters=[]):
 
         # сотрудники
         employees_info = []
-        city_name = club.city.name if club.city else 'Москва'
+        formula = club.formula
         club_coordinator = club.coordinator
         for employee in employees_table_header:
             drinks_for_employee = {
@@ -110,7 +111,7 @@ def get_statement_data(week, start_date, enabled_filters=[]):
 
                         # цена за напитки
                         price_for_club, price_for_coordinator = calculate_prices(
-                            city_name, report_drink, drink, club_coordinator, employee.coordinator
+                            formula, report_drink, drink, club_coordinator, employee.coordinator
                         )
                         sum_for_club += price_for_club
                         sum_for_coordinator += price_for_coordinator

@@ -68,6 +68,14 @@ class DayOfWeek(TimeStampedModel):
 
 
 class Club(TimeStampedModel):
+
+    BEAKER_CHOICE = 'beaker'
+    SHOT_CHOICE = 'shot'
+    FORMULA_CHOICES = (
+        (BEAKER_CHOICE, 'Для мензурки'),
+        (SHOT_CHOICE, 'Для шотов'),
+    )
+
     is_active = models.BooleanField('Активен', default=False)
     name = models.CharField('Название', max_length=255)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
@@ -89,6 +97,7 @@ class Club(TimeStampedModel):
     w_start_time = models.CharField('Время начала работы на выходных', max_length=6, default='00:00')
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
+    formula = models.CharField('Формула рассчета', max_length=10, choices=FORMULA_CHOICES, default=SHOT_CHOICE)
     coordinator = models.ForeignKey(
         ExtUser, verbose_name='Координатор', related_name='coordinate_clubs', blank=True, null=True
     )
