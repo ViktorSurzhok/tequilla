@@ -76,6 +76,13 @@ class Club(TimeStampedModel):
         (SHOT_CHOICE, 'Для шотов'),
     )
 
+    SIZE_40_CHOICE = 40
+    SIZE_50_CHOICE = 50
+    SIZE_CHOICES = (
+        (SIZE_40_CHOICE, '40 мл.'),
+        (SIZE_50_CHOICE, '50 мл.')
+    )
+
     is_active = models.BooleanField('Активен', default=False)
     name = models.CharField('Название', max_length=255)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
@@ -98,6 +105,8 @@ class Club(TimeStampedModel):
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
     formula = models.CharField('Формула рассчета', max_length=10, choices=FORMULA_CHOICES, default=SHOT_CHOICE)
+    size_for_calc = models.PositiveSmallIntegerField(
+        'Размер мензурок (для калькулятора)', choices=SIZE_CHOICES, blank=True, null=True)
     coordinator = models.ForeignKey(
         ExtUser, verbose_name='Координатор', related_name='coordinate_clubs', blank=True, null=True
     )

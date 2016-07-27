@@ -1,3 +1,3 @@
 {% for drink in club.drink_set.all %}
-    <option data-price="{{ drink.price_in_bar }}" value="{{ drink.id }}">{{ drink.name }}</option>
+    <option data-price="{{ drink.price_in_bar }}" value="{{ drink.id }}" {% if selected_drink == drink.id %}selected{% endif %}>{{ drink.name }}</option>
 {% endfor %}
