@@ -158,11 +158,12 @@
                                     </div>
                                 </div>
                         </div>
-
+                        {% if not report.filled_date %}
                         <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}" class="btn btn-xs btn-success save-report-button"
                            title="Сохранить">
                             <i class="fa fa-check"></i> Сохранить
                         </a>
+                        {% endif %}
                         {% if can_edit_users %}
                             <a href=""
                                class="btn btn-xs btn-primary send_message_btn" target="_blank"
