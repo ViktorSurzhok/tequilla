@@ -51,6 +51,8 @@ def save_current_state(request):
         # добавление напитков
         state.drinks.all().delete()
         for drink in drinks:
+            if not drink:
+                continue
             drink_data = {d['name']: d['value'] for d in drink}
             drink_data['state'] = state
             drink_data['drink'] = Drink.objects.get(id=drink_data['drink'])
