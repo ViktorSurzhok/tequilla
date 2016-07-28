@@ -74,16 +74,28 @@
                                         <h5>
                                             <a href="{% url 'user_detail' item.employee.id %}" target="_blank">{{ item.employee.get_full_name }}</a>
                                         </h5>
-                                        {% for work_day in item.days %}
-                                            <div>
-                                                <strong>{{ work_day.date }}</strong>:
-                                                {% if work_day.cant_work %}<span class="red">Не работаю</span>{% else %}{{ work_day.get_time_display }}{% endif %}
-                                                {% if work_day.comment %}({{ work_day.comment }}){% endif %}
-                                                <span class="created-time">(Заполнил{% if item.employee.gender == 'female' %}а{% endif %}
-                                                    {{ work_day.created }}, последнее изменение:
-                                                    {{ work_day.modified }})</span>
-                                            </div>
-                                        {% endfor %}
+                                        {% if item.not_work_all_week %}
+                                            {% with work_day=item.days %}
+                                                <div>
+                                                    <span class="red">({{ start_week|date:"d.m" }} - {{ end_week|date:"d.m" }}) Не работаю</span>
+                                                    {% if work_day.comment %}({{ work_day.comment }}){% endif %}
+                                                    <span class="created-time">(Заполнил{% if item.employee.gender == 'female' %}а{% endif %}
+                                                        {{ work_day.created }}, последнее изменение:
+                                                        {{ work_day.modified }})</span>
+                                                </div>
+                                            {% endwith %}
+                                        {% else %}
+                                            {% for work_day in item.days %}
+                                                <div>
+                                                    <strong>{{ work_day.date }}</strong>:
+                                                    {% if work_day.cant_work %}<span class="red">Не работаю</span>{% else %}{{ work_day.get_time_display }}{% endif %}
+                                                    {% if work_day.comment %}({{ work_day.comment }}){% endif %}
+                                                    <span class="created-time">(Заполнил{% if item.employee.gender == 'female' %}а{% endif %}
+                                                        {{ work_day.created }}, последнее изменение:
+                                                        {{ work_day.modified }})</span>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
                                     </td>
                                     <td class="center-button-container">
                                         <a href="{% url 'schedule:edit_graph_for_user' item.employee.id %}?week={{ week_offset }}&start_date={{ start_date }}">

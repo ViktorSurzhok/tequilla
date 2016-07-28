@@ -142,7 +142,17 @@ def schedule_by_week_all_users(request):
         if len(work_days) == 0:
             users_without_graph.append(user)
         else:
-            work_days_struct_by_user.append({'employee': user, 'days': work_days})
+            # если не работает всю неделю - группировать в одну запись
+            not_work_all_week = len(list(filter(lambda x: not x.cant_work, work_days))) == 0
+            if not_work_all_week:
+                work_days = sorted(work_days, key=lambda x: x.modified, reverse=True)
+                work_days_struct_by_user.append(
+                    {'employee': user, 'days': work_days[0], 'not_work_all_week': not_work_all_week}
+                )
+            else:
+                work_days_struct_by_user.append(
+                    {'employee': user, 'days': work_days, 'not_work_all_week': not_work_all_week}
+                )
     return render(
         request,
         'schedule/all_users.html',
