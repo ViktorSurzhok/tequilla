@@ -98,11 +98,9 @@
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
                 </li>
-                {% if 'coordinator' not in user_groups %}
                     <li>
                         <a href="{% url 'penalty:show_calendar' %}"><i class="fa fa-frown-o"></i> Штрафы </a>
                     </li>
-                {% endif %}
                 <li>
                     <a href="{% url 'stats:stats_by_night' %}"><i class="fa fa-area-chart"></i> Статистика </a>
                 </li>

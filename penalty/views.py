@@ -123,7 +123,7 @@ def get_penalty_form(request, penalty_id=None):
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 def delete_penalty(request, penalty_id):
     penalty = get_object_or_404(Penalty, id=penalty_id)
     penalty.delete()
@@ -131,7 +131,7 @@ def delete_penalty(request, penalty_id):
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 @require_POST
 def save_penalty(request):
     id_penalty = request.POST.get('id_penalty', 0)

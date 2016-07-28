@@ -111,60 +111,61 @@
                     date: reformat_date($(this).data('date'))
                 });
             });
+            {% if perms.extuser.can_edit_penalty %}
+                // нажатие на кнопку сохранения на форме
+                $('#save-penalty').on('click', function() {
+                    var data = {
+                        employee: $('#id_employee').val(),
+                        type: $('#id_type').val(),
+                        date: reformat_date($('#id_date').val()),
+                        count: $('#id_count').val(),
+                        use_custom_sum: $('#penalty_custom_sum_check').prop('checked'),
+                        was_paid: $('#id_was_paid').prop('checked'),
+                        penalty_sum_custom: $('#penalty_sum_custom').val(),
+                        id_penalty: $('#id_penalty').val(),
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    };
 
-            // нажатие на кнопку сохранения на форме
-            $('#save-penalty').on('click', function() {
-                var data = {
-                    employee: $('#id_employee').val(),
-                    type: $('#id_type').val(),
-                    date: reformat_date($('#id_date').val()),
-                    count: $('#id_count').val(),
-                    use_custom_sum: $('#penalty_custom_sum_check').prop('checked'),
-                    was_paid: $('#id_was_paid').prop('checked'),
-                    penalty_sum_custom: $('#penalty_sum_custom').val(),
-                    id_penalty: $('#id_penalty').val(),
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                };
-
-                $.ajax({
-                    url: '{% url 'penalty:save_penalty' %}',
-                    data: data,
-                    type: 'POST',
-                    success: function(response) {
-                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
-                            new PNotify({
-                                title: 'Ура!',
-                                text: 'Рабочая штраф успешно сохранен.',
-                                type: 'success',
-                                styling: 'bootstrap3'
-                            });
-                            $('.ui-pnotify').fadeIn('slow');
-                            setTimeout(function () {
-                                location = window.location.search;
-                            }, 1000);
-
-                        } else {
-                            new PNotify({
-                                title: 'О нет!',
-                                text: 'Произошла ошибка при добавлении штрафа. Заполните все обязательные поля.',
-                                type: 'error',
-                                styling: 'bootstrap3'
-                            });
-                            $('.ui-pnotify').fadeIn('slow');
-                            setTimeout(function () {
-                                $('.ui-pnotify').fadeOut('fast', function() {
-                                    $(this).remove();
+                    $.ajax({
+                        url: '{% url 'penalty:save_penalty' %}',
+                        data: data,
+                        type: 'POST',
+                        success: function(response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Рабочая штраф успешно сохранен.',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
                                 });
-                            }, 2000);
-                        }
-                    }
-                });
-            });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    location = window.location.search;
+                                }, 1000);
 
-            // нажатие на кнопку удаления
-            $('.delete-penalty-link').on('click', function() {
-                return confirm('Вы действительно хотите удалить штраф?');
-            });
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при добавлении штрафа. Заполните все обязательные поля.',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    $('.ui-pnotify').fadeOut('fast', function() {
+                                        $(this).remove();
+                                    });
+                                }, 2000);
+                            }
+                        }
+                    });
+                });
+
+                // нажатие на кнопку удаления
+                $('.delete-penalty-link').on('click', function() {
+                    return confirm('Вы действительно хотите удалить штраф?');
+                });
+            {% endif %}
 
 
             // выбор недели по дате
@@ -222,6 +223,7 @@
                                 {% for day in item.data_for_employee %}
                                     <td>
                                         <div style="height: 30px;">
+                                            {% if perms.extuser.can_edit_penalty %}
                                             <a class="btn btn-warning btn-xs button-add"
                                                href="#user-add-modal"
                                                data-toggle="modal"
@@ -231,6 +233,7 @@
                                                 <i class="fa fa-plus-circle"></i>
                                                 Добавить
                                             </a>
+                                            {% endif %}
                                             &nbsp;
                                         </div>
                                         {% for penalty in day.penalties %}
@@ -242,9 +245,12 @@
                                                        class="btn {% if penalty.was_paid %}btn-info{% else %}btn-danger{% endif %} btn-xs main-penalty-info">
                                                         №{{ penalty.type.num }}
                                                     </a>
-                                                    <a href="{% url 'penalty:delete_penalty' penalty.id %}" title="Удалить" class="delete-penalty-link">
-                                                        <i class="fa fa-remove"></i>
-                                                    </a>
+
+                                                    {% if perms.extuser.can_edit_penalty %}
+                                                        <a href="{% url 'penalty:delete_penalty' penalty.id %}" title="Удалить" class="delete-penalty-link">
+                                                            <i class="fa fa-remove"></i>
+                                                        </a>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         {% endfor %}
@@ -270,9 +276,11 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
                         Закрыть
                     </button>
-                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="save-penalty">
-                        <i class="fa fa-check"></i> Сохранить
-                    </button>
+                    {% if perms.extuser.can_edit_penalty %}
+                        <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="save-penalty">
+                            <i class="fa fa-check"></i> Сохранить
+                        </button>
+                    {% endif %}
                 </div>
 
             </div>
