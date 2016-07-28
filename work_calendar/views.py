@@ -128,7 +128,7 @@ def get_work_shift_form(request, work_shift_id=None):
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 @require_POST
 def save_work_shift(request):
     id_work_shift = request.POST.get('id_work_shift', 0)
@@ -145,7 +145,7 @@ def save_work_shift(request):
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
+@group_required('director', 'chief')
 def delete_work_shift(request, work_shift_id):
     work_shift = get_object_or_404(WorkShift, id=work_shift_id)
     work_shift.delete()
