@@ -15,7 +15,6 @@ from week_plan.models import PlanForDay, PlanEmployees
 
 
 @login_required
-@group_required('director', 'chief', 'coordinator')
 def plan_by_week(request):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))

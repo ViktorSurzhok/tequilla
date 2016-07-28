@@ -4,137 +4,139 @@
 {% block title %}Недельный план{% endblock %}
 
 {% block additional_js %}
-    <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
-    <script type="text/javascript">
-        $(function() {
-            // выбор недели по дате
-            setCalendarForButton('');
+    {% if perms.extuser.can_edit_drinks %}
+        <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
+        <script type="text/javascript">
+            $(function() {
+                // выбор недели по дате
+                setCalendarForButton('');
 
-            // редактирование текста записи
-            function openTestModal(options){
-                $('.plan-form-popup').modal({
-                    keyboard: false,
-                    backdrop: 'static'
-                });
-                $('.plan-form-popup').one('shown.bs.modal', function () {
-                    $.ajax({
-                        url: typeof options.href != 'undefined' ? options.href : '{% url 'week_plan:get_empty_plan_form' %}',
-                        data: options,
-                        type: 'GET',
-                        success: function (response) {
+                // редактирование текста записи
+                function openTestModal(options){
+                    $('.plan-form-popup').modal({
+                        keyboard: false,
+                        backdrop: 'static'
+                    });
+                    $('.plan-form-popup').one('shown.bs.modal', function () {
+                        $.ajax({
+                            url: typeof options.href != 'undefined' ? options.href : '{% url 'week_plan:get_empty_plan_form' %}',
+                            data: options,
+                            type: 'GET',
+                            success: function (response) {
 
-                            if (response && typeof response['complete'] != 'undefined') {
-                                var form_container = $('#form-container');
-                                form_container.html(response['complete']);
-                                form_container.find('input').not(':checkbox').addClass('form-control');
-                                form_container.find('select, textarea').addClass('form-control');
+                                if (response && typeof response['complete'] != 'undefined') {
+                                    var form_container = $('#form-container');
+                                    form_container.html(response['complete']);
+                                    form_container.find('input').not(':checkbox').addClass('form-control');
+                                    form_container.find('select, textarea').addClass('form-control');
 
-                                form_container.find('#id_employee option:first').remove();
-                                form_container.find('#id_employee').prepend('<option value="-1">Стажер</option>');
+                                    form_container.find('#id_employee option:first').remove();
+                                    form_container.find('#id_employee').prepend('<option value="-1">Стажер</option>');
 
-                                // выбор сотрудников
-                                $('.add-user').off('click').on('click', function(e) {
-                                    e.preventDefault();
-                                    var id = $('#id_employee').val(),
-                                        name = $('#id_employee option[value=' + id + ']').text(),
-                                        html = '<a href="#" class="remove_selected_user" title="Удалить"><button class="btn btn-dark btn-xs">' +
-                                                name + ' <input type="hidden" name="employees[]" value="' + id + '">' + '<i class="fa fa-remove"></i></button></a>';
-                                        form_container.find('.employees-container').append(html);
-                                });
-                                form_container.find('.employees-container').on('click', '.remove_selected_user', function() {
-                                    $(this).remove();
-                                });
+                                    // выбор сотрудников
+                                    $('.add-user').off('click').on('click', function(e) {
+                                        e.preventDefault();
+                                        var id = $('#id_employee').val(),
+                                            name = $('#id_employee option[value=' + id + ']').text(),
+                                            html = '<a href="#" class="remove_selected_user" title="Удалить"><button class="btn btn-dark btn-xs">' +
+                                                    name + ' <input type="hidden" name="employees[]" value="' + id + '">' + '<i class="fa fa-remove"></i></button></a>';
+                                            form_container.find('.employees-container').append(html);
+                                    });
+                                    form_container.find('.employees-container').on('click', '.remove_selected_user', function() {
+                                        $(this).remove();
+                                    });
 
-                                var timepicker_options = { 'timeFormat': 'H:i', 'step': 15 };
-                                form_container.find('#id_start_time').timepicker(timepicker_options);
-                                form_container.find('#id_end_time').timepicker(timepicker_options);
+                                    var timepicker_options = { 'timeFormat': 'H:i', 'step': 15 };
+                                    form_container.find('#id_start_time').timepicker(timepicker_options);
+                                    form_container.find('#id_end_time').timepicker(timepicker_options);
 
-                                form_container.find('textarea').attr('rows', 4);
-                                form_container.find('#id_date').prop('disabled', true);
-                            } else {
-                                $('#form-container').text('Произошла ошибка');
+                                    form_container.find('textarea').attr('rows', 4);
+                                    form_container.find('#id_date').prop('disabled', true);
+                                } else {
+                                    $('#form-container').text('Произошла ошибка');
+                                }
+                                $('#loader').hide();
+                                $('#form-container').show();
                             }
-                            $('#loader').hide();
-                            $('#form-container').show();
+                        });
+                    });
+                }
+
+                // нажатие на кнопку "Добавить" в календаре
+                $('.button-add').on('click', function(e){
+                    e.preventDefault();
+                    $('#form-container').hide();
+                    $('#loader').css({display: 'block'});
+                    openTestModal({
+                        date: $(this).data('date')
+                    });
+                });
+
+                // редактирование рабочей смены
+                $('.edit-plan-button').on('click', function(e) {
+                    e.preventDefault();
+                    $('#form-container').hide();
+                    $('#loader').css({display: 'block'});
+                    openTestModal({
+                        href: $(this).data('href')
+                    });
+                });
+
+
+                // нажатие на кнопку сохранения на форме
+                $('#save-plan').on('click', function() {
+                    var data_from_form = $('#form-container form').serializeArray();
+
+                    var data = [
+                        {name: 'csrfmiddlewaretoken', value:'{{ csrf_token }}'},
+                        {name: 'date', value: $('#form-container #id_date').val()},
+                        {name: 'id_week_plan', value: $('#form-container #id_week_plan').val()}
+                    ];
+                    for (var i in data_from_form) {
+                        if (data_from_form[i].name != 'employee') {
+                            data.push(data_from_form[i]);
+                        }
+                    }
+                    $.ajax({
+                        url: '{% url 'week_plan:save_plan_for_day' %}',
+                        data: data,
+                        type: 'POST',
+                        success: function(response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'План успешно сохранен.',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    location = '' + window.location.search;
+                                }, 1000);
+
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при сохранении плана',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                                $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    $('.ui-pnotify').fadeOut('fast');
+                                }, 2000);
+                            }
                         }
                     });
                 });
-            }
 
-            // нажатие на кнопку "Добавить" в календаре
-            $('.button-add').on('click', function(e){
-                e.preventDefault();
-                $('#form-container').hide();
-                $('#loader').css({display: 'block'});
-                openTestModal({
-                    date: $(this).data('date')
+                // нажатие на кнопку удаления
+                $('.delete-plan-link').on('click', function() {
+                    return confirm('Вы действительно хотите план на день?');
                 });
             });
-
-            // редактирование рабочей смены
-            $('.edit-plan-button').on('click', function(e) {
-                e.preventDefault();
-                $('#form-container').hide();
-                $('#loader').css({display: 'block'});
-                openTestModal({
-                    href: $(this).data('href')
-                });
-            });
-
-
-            // нажатие на кнопку сохранения на форме
-            $('#save-plan').on('click', function() {
-                var data_from_form = $('#form-container form').serializeArray();
-
-                var data = [
-                    {name: 'csrfmiddlewaretoken', value:'{{ csrf_token }}'},
-                    {name: 'date', value: $('#form-container #id_date').val()},
-                    {name: 'id_week_plan', value: $('#form-container #id_week_plan').val()}
-                ];
-                for (var i in data_from_form) {
-                    if (data_from_form[i].name != 'employee') {
-                        data.push(data_from_form[i]);
-                    }
-                }
-                $.ajax({
-                    url: '{% url 'week_plan:save_plan_for_day' %}',
-                    data: data,
-                    type: 'POST',
-                    success: function(response) {
-                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
-                            new PNotify({
-                                title: 'Ура!',
-                                text: 'План успешно сохранен.',
-                                type: 'success',
-                                styling: 'bootstrap3'
-                            });
-                            $('.ui-pnotify').fadeIn('slow');
-                            setTimeout(function () {
-                                location = '' + window.location.search;
-                            }, 1000);
-
-                        } else {
-                            new PNotify({
-                                title: 'О нет!',
-                                text: 'Произошла ошибка при сохранении плана',
-                                type: 'error',
-                                styling: 'bootstrap3'
-                            });
-                            $('.ui-pnotify').fadeIn('slow');
-                            setTimeout(function () {
-                                $('.ui-pnotify').fadeOut('fast');
-                            }, 2000);
-                        }
-                    }
-                });
-            });
-
-            // нажатие на кнопку удаления
-            $('.delete-plan-link').on('click', function() {
-                return confirm('Вы действительно хотите план на день?');
-            });
-        });
-    </script>
+        </script>
+    {% endif %}
 {% endblock %}
 
 {% block additional_css %}
@@ -184,11 +186,13 @@
                     <a href="{% url 'week_plan:plan_by_week' %}?week={{ next_week }}&start_date={{ start_date }}">
                         <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
                     </a>
-                    <div class="small-margin-top">
-                        {% if perms.extuser.can_edit_users %}
-                            <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
-                        {% endif %}
-                    </div>
+                    {% if perms.extuser.can_edit_drinks %}
+                        <div class="small-margin-top">
+                            {% if perms.extuser.can_edit_users %}
+                                <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <div id="plans-by-week">
                         {% for item in grid %}
                             <h3>{{ item.date|date:"d.m.Y" }}</h3>
@@ -200,7 +204,9 @@
                                         <th>Заведение</th>
                                         <th>Tequilla girl</th>
                                         <th>Комментарий</th>
-                                        <th>Операции</th>
+                                        {% if perms.extuser.can_edit_drinks %}
+                                            <th>Операции</th>
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -215,27 +221,31 @@
                                                 {% endfor %}
                                             </td>
                                             <td class="comment-part">{{ plan.comment|linebreaksbr }}</td>
-                                            <td>
-                                                <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
-                                                <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
-                                                    <i class="fa fa-close"></i>
-                                                </a>
-                                            </td>
+                                            {% if perms.extuser.can_edit_drinks %}
+                                                <td>
+                                                    <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                    <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
+                                                        <i class="fa fa-close"></i>
+                                                    </a>
+                                                </td>
+                                            {% endif %}
                                         </tr>
                                     {% empty %}
                                         <tr>
                                             <td colspan="6">Нет результатов</td>
                                         </tr>
                                     {% endfor %}
-                                    <tr>
-                                        <td colspan="6">
-                                            <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
-                                                <i class="fa fa-check"></i> Добавить
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    {% if perms.extuser.can_edit_drinks %}
+                                        <tr>
+                                            <td colspan="6">
+                                                <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
+                                                    <i class="fa fa-check"></i> Добавить
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         {% endfor %}
@@ -244,24 +254,25 @@
             </div>
         </div>
     </div>
+    {% if perms.extuser.can_edit_drinks %}
+        <div class="modal fade plan-form-popup" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" style="width: 660px;">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <img src="{% static 'img/heart.gif' %}" id="loader">
+                        <div id="form-container"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                            Закрыть
+                        </button>
+                        <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="save-plan">
+                            <i class="fa fa-check"></i> Сохранить
+                        </button>
+                    </div>
 
-    <div class="modal fade plan-form-popup" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" style="width: 660px;">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <img src="{% static 'img/heart.gif' %}" id="loader">
-                    <div id="form-container"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
-                        Закрыть
-                    </button>
-                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="save-plan">
-                        <i class="fa fa-check"></i> Сохранить
-                    </button>
-                </div>
-
             </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
