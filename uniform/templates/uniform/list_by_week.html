@@ -365,7 +365,10 @@
                             </tr>
                             {% for data in structed_employee %}
                                 <tr>
-                                    <td>{{ data.employee.get_full_name }}</td>
+                                    <td>
+                                        {{ data.employee.get_full_name }}
+                                        {% if data.is_probation %}<br><span style="color:orangered;">(Стажировка)</span>{% endif %}
+                                    </td>
                                     {% for item in data.grid.values %}
                                         <td>
                                             {% if item.has_value %}
@@ -400,13 +403,13 @@
                                                     <div class="modal-body">
                                                         <form class="form-horizontal" action="#" method="post">
                                                             {% csrf_token %}
-                                                            <input type="hidden" name="id_employee" value="{{ employee.id }}">
+                                                            <input type="hidden" name="id_employee" value="{{ data.employee.id }}">
                                                             <div class="form-group">
                                                                 <label class="control-label col-md-4 col-sm-4 col-xs-12">
                                                                     Tequilla girl
                                                                 </label>
                                                                 <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 3px;">
-                                                                    <span>{{ employee.get_full_name }}</span>
+                                                                    <span>{{ data.employee.get_full_name }}</span>
                                                                 </div>
                                                             </div>
 
