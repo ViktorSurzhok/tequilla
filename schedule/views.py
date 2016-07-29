@@ -12,6 +12,7 @@ from django.contrib.auth import models
 from extuser.models import ExtUser
 from schedule.forms import WorkDayForm
 from schedule.models import WorkDay
+from schedule.utils import send_message_cant_work_full_week
 from tequilla.decorators import group_required
 
 
@@ -100,13 +101,14 @@ def edit_work_day(request):
         while week_cursor <= end_week:
             WorkDay.objects.update_or_create(date=str(week_cursor), defaults=defaults)
             week_cursor += datetime.timedelta(1)
+        send_message_cant_work_full_week(request.user, start_week, end_week, request.POST.get('comment', ''))
         return JsonResponse({'complete': 1})
     else:
         # сохранили данные для одной даты
         form = WorkDayForm(data=request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            WorkDay.objects.update_or_create(date=cd['date'], defaults=cd)
+            obj, created = WorkDay.objects.update_or_create(date=cd['date'], employee=cd['employee'], defaults=cd)
             return JsonResponse({'complete': 1})
         else:
             return JsonResponse({'complete': 0})

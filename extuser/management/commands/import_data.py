@@ -439,8 +439,9 @@ class Command(BaseCommand):
     def get_transfer(self, url, session, work_shift):
         parsed_html = self.get_parsed_html(session, 'http://tequilla.gosnomer.info/' + url)
         transfer_id = url.split('/')[4]
+        start_week = work_shift.date - datetime.timedelta(work_shift.date.weekday())
         try:
-            ReportTransfer.objects.get(old_id=transfer_id)
+            ReportTransfer.objects.get(Q(old_id=transfer_id) | Q(employee=work_shift.employee, start_week=start_week))
             return 1
         except ReportTransfer.DoesNotExist:
             pass
@@ -453,7 +454,7 @@ class Command(BaseCommand):
             'is_accepted': form.find('input', attrs={'id': 'ReportPay_confirmed', 'checked': 'checked'}) is not None,
             'old_id': transfer_id,
             'employee': work_shift.employee,
-            'start_week': work_shift.date - datetime.timedelta(work_shift.date.weekday())
+            'start_week': start_week
         }
         ReportTransfer.objects.create(**data)
 
