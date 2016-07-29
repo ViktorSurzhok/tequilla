@@ -1,0 +1,18 @@
+{% if not old_obj %}ЗАПОЛНИЛА{% else %}ИЗМЕНИЛА{% endif %} график за день {{ obj.date|date:"d.m (l)" }}
+{% if obj.cant_work %}
+    Не могу работать
+{% else %}
+    Время работы: {{ obj.get_time_display }}
+{% endif %}
+Комментарий: {{ obj.comment|default:"---" }}
+
+{% if old_obj %}
+    Данные до изменения:
+    {% if old_obj.cant_work %}
+        Не могу работать
+    {% else %}
+        Время работы: {{ old_obj.get_time_display }}
+    {% endif %}
+    Комментарий: {{ old_obj.comment|default:"---" }}
+{% endif %}
+

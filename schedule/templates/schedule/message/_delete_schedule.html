@@ -1,0 +1,8 @@
+УДАЛИЛА график за день {{ obj.date|date:"d.m (l)" }}.
+Данные у удаленного графика:
+{% if obj.cant_work %}
+    Не могу работать
+{% else %}
+    Время работы: {{ obj.get_time_display }}
+{% endif %}
+Комментарий: {{ obj.comment|default:"---" }}

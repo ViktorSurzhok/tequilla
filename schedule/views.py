@@ -12,7 +12,7 @@ from django.contrib.auth import models
 from extuser.models import ExtUser
 from schedule.forms import WorkDayForm
 from schedule.models import WorkDay
-from schedule.utils import send_message_cant_work_full_week
+from schedule.utils import send_message_cant_work_full_week, send_message_update_schedule, send_message_delete_schedule
 from tequilla.decorators import group_required
 
 
@@ -108,7 +108,12 @@ def edit_work_day(request):
         form = WorkDayForm(data=request.POST)
         if form.is_valid():
             cd = form.cleaned_data
+            try:
+                old_obj = WorkDay.objects.get(date=cd['date'], employee=cd['employee'])
+            except WorkDay.DoesNotExist:
+                old_obj = None
             obj, created = WorkDay.objects.update_or_create(date=cd['date'], employee=cd['employee'], defaults=cd)
+            send_message_update_schedule(request.user, obj, old_obj)
             return JsonResponse({'complete': 1})
         else:
             return JsonResponse({'complete': 0})
@@ -118,6 +123,7 @@ def edit_work_day(request):
 def workday_delete(request, workday_id):
     try:
         workday = WorkDay.objects.get(id=workday_id)
+        send_message_delete_schedule(request.user, workday)
         workday.delete()
         return JsonResponse({'complete': 1})
     except:
