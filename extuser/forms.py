@@ -59,7 +59,7 @@ class UserCreationForm(forms.ModelForm):
         widgets = {
             'surname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Фамилия', 'required': True}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя', 'required': True}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'E-mail', 'required': True}),
             'phone': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Мобильный телефон (Без +7 и 8)', 'required': True}
             ),
@@ -70,6 +70,9 @@ class UserCreationForm(forms.ModelForm):
         if 'confirm_password' in self.cleaned_data:
             if self.cleaned_data['password'] != self.cleaned_data['confirm_password']:
                 self.add_error('confirm_password', 'Введённые пароли не совпадают')
+        # email обязательное поле
+        if 'email' not in self.cleaned_data or not self.cleaned_data['email']:
+            self.add_error('email', 'Обязательное поле')
 
         return super().clean()
 

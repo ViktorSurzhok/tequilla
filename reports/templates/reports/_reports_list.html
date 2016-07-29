@@ -165,7 +165,7 @@
                         </a>
                         {% endif %}
                         {% if can_edit_users %}
-                            <a href=""
+                            <a href="{% url 'pm:show_dialog' report.work_shift.employee.id %}"
                                class="btn btn-xs btn-primary send_message_btn" target="_blank"
                                title="Сохранить">
                                 <i class="fa fa-envelope"></i> Сообщение
