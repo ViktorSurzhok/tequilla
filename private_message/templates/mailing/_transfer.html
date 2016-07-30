@@ -1,0 +1,4 @@
+Новое сообщене от {{ user.get_full_name }}<br>
+Сумма перевода: {{ transfer.total_sum }}<br>
+За неделю: {{ transfer.start_week }} - {{ transfer.get_end_week }}<br>
+Комментарий: {{ transfer.comment|default:"---" }}

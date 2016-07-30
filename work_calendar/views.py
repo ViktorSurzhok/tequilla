@@ -9,6 +9,7 @@ from django.utils import formats
 from django.views.decorators.http import require_POST
 
 from club.models import Club
+from private_message.utils import send_message_about_new_work_shift
 from reports.models import Report
 from tequilla.decorators import group_required
 from work_calendar.forms import WorkShiftForm
@@ -140,6 +141,7 @@ def save_work_shift(request):
     if form.is_valid():
         work_shift = form.save()
         Report.objects.get_or_create(work_shift=work_shift)
+        send_message_about_new_work_shift(request.user, work_shift)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
 

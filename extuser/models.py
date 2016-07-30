@@ -65,3 +65,6 @@ class UserActivityLog(TimeStampedModel):
     Статистику по времени входа каждого пользователя может просматривать руководство в профиле сотрудника.
     """
     user = models.ForeignKey(ExtUser, related_name='activity_logs')
+
+    class Meta:
+        ordering = ('-modified',)

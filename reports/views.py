@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from club.models import Drink, Club, City
 from extuser.models import ExtUser
 from penalty.models import Penalty
-from private_message.utils import send_message_about_fill_report
+from private_message.utils import send_message_about_fill_report, send_message_about_transfer
 from reports.forms import UpdateReportForm, ReportTransferForm, ReportTransferFormForAdmin
 from reports.models import Report, ReportDrink, ReportTransfer
 from tequilla.decorators import group_required
@@ -277,8 +277,9 @@ def report_transfer_save(request):
         else:
             report_transfer_form = ReportTransferForm(data=request.POST)
     if report_transfer_form.is_valid():
-        report_transfer_form.save()
-        # todo: отправка уведомления директору
+        report_transfer = report_transfer_form.save()
+        # отправка уведомления директору
+        send_message_about_transfer(request.user, report_transfer)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
 

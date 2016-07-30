@@ -1,0 +1,4 @@
+Новое сообщене от {{ user.get_full_name }}<br>
+Вам назначена рабочая смена на {{ work_shift.date|date:"d b (l)" }}.<br>
+Заведение: {{ work_shift.club }}<br>
+Ваше время работы: {{ work_shift.start_time }} - {{ work_shift.end_time }}

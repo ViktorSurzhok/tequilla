@@ -20,7 +20,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Q
 
 from penalty.models import Penalty
-from private_message.utils import send_message_user_register
+from private_message.utils import send_message_user_register, send_message_about_new_password
 from reports.models import Report
 from tequilla.decorators import group_required
 
@@ -232,8 +232,11 @@ def reset_password(request, user_id):
     user = get_object_or_404(ExtUser, id=user_id)
     if user.groups.filter(name='director').exists():
         return JsonResponse({'complete': 0})
-    user.set_password('12345')
+    new_password = '12345'
+    user.set_password(new_password)
     user.save()
+    # отправка уведомления
+    send_message_about_new_password(request.user, user, new_password)
     return JsonResponse({'complete': 1})
 
 

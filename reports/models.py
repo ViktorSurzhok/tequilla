@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from model_utils.models import TimeStampedModel
 
@@ -42,3 +44,6 @@ class ReportTransfer(TimeStampedModel):
     employee = models.ForeignKey(ExtUser)
     is_accepted = models.BooleanField('Оплату подтверждаю', default=False)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
+
+    def get_end_week(self):
+        return self.start_week + datetime.timedelta(days=6)

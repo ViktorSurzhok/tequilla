@@ -55,11 +55,14 @@ class UniformForEmployee(TimeStampedModel):
     def __str__(self):
         return '{}: {}, {}({}шт)'.format(self.date, self.employee.get_full_name(), self.uniform.name, self.count)
 
+    # def get_sum(self):
+    #     return self.count * self.uniform.price
+
 
 class UniformTransferByWeek(TimeStampedModel):
     """Перевод за форму за неделю"""
     employee = models.ForeignKey(ExtUser, verbose_name='Tequilla girl')
-    uniform_for_employee = models.ForeignKey(UniformForEmployee)
+    uniform_for_employee = models.ForeignKey(UniformForEmployee, related_name='transfer')
     #start_week = models.DateField('Дата начала недели за которую проставляется перевод')
     was_paid = models.BooleanField('Перевод', default=False)
 

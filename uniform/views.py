@@ -1,4 +1,5 @@
 import datetime
+from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
@@ -10,6 +11,7 @@ from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 from extuser.models import ExtUser
+from private_message.utils import send_message_about_take_uniform
 from tequilla.decorators import group_required
 from uniform.forms import CreateUniformForEmployee
 from uniform.models import UniformByWeek, UniformForEmployee, UniformTransferByWeek
@@ -67,7 +69,7 @@ def uniform_list_by_week(request):
         transfer, new = UniformTransferByWeek.objects.get_or_create(employee=item.employee, uniform_for_employee=item)
         if not transfer.was_paid:
             transfer_price += transfer.get_sum()
-        values = {}
+        values = OrderedDict()
         index = 0
         for ubw in uniform_by_week_ids:
             if ubw == item.uniform.id:
@@ -148,7 +150,8 @@ def save_uniform_for_employee(request):
     except UniformForEmployee.DoesNotExist:
         form = CreateUniformForEmployee(data=request.POST)
     if form.is_valid():
-        form.save()
+        obj = form.save()
+        send_message_about_take_uniform(request.user, obj)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
 
