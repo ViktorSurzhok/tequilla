@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from catalog.models import MainEmployees
+from private_message.utils import send_message_about_new_post
 from reports.models import Report
 from tequilla import settings
 from wall.models import Post, Photo
@@ -68,6 +69,10 @@ def send_post(request):
             for image in images:
                 photo_object = Photo(file=image, post=post)
                 photo_object.save()
+
+            # отправить уведомление о записи всем пользователям
+            if 'with-notify' in request.POST:
+                send_message_about_new_post(request.user, post)
 
     return redirect('wall_index')
 

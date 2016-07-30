@@ -1,0 +1,5 @@
+Вам новое сообщение от {{ user.get_full_name }}<br>
+<b>Вам назначен штраф за {{ penalty.date|date:"d b (l)" }}.</b><br>
+Тип штрафа: {{ penalty.type }}<br>
+Кол-во штрафов: {{ penalty.count }}<br>
+Сумма штрафа: {{ penalty.get_sum }}

@@ -20,6 +20,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Q
 
 from penalty.models import Penalty
+from private_message.utils import send_message_user_register
 from reports.models import Report
 from tequilla.decorators import group_required
 
@@ -85,6 +86,9 @@ def register(request):
             user.save()
             registered = True
             register_form = UserCreationForm()
+
+            # отправка сообщения админу о регистрации нового юзера
+            send_message_user_register(user)
     else:
         register_form = UserCreationForm()
 

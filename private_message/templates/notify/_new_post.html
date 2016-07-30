@@ -1,0 +1,6 @@
+{% autoescape off %}{{ post.text }}{% endautoescape %}
+{% if post.images %}
+    {% for img in post.images.all %}
+        <img src="{{ img.file.url }}" style="max-width: 100px;">
+    {% endfor %}
+{% endif %}

@@ -1,0 +1,2 @@
+Зарегистрировался новый пользователь: {{ user.get_full_name }}<br>
+Для просмотра и активации пользователя <a href="{{ request.host }}{% url 'user_edit' user.id %}" target="_blank">перейдите по ссылке</a>

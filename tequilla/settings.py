@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'django_cleanup',
     'djangoformsetjs',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -140,6 +140,12 @@ STATIC_DIR = os.path.join(BASE_DIR, 'static/')
 
 STATIC_ROOT = STATIC_DIR
 
-
+# CELERY STUFF
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 
 from tequilla.settings_local import *

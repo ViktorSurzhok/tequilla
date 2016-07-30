@@ -223,6 +223,9 @@
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
                                 <button type="submit" class="btn btn-primary">Отправить</button>
+                                {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
+                                    <input type="submit" name="with-notify" value="Отправить и уведомить всех" class="btn btn-warning">
+                                {% endif %}
                                 <input style="display: inline;" type="file" name="images[]" multiple
                                        class="btn btn-primary" value="Отправить файлы">
                             </div>

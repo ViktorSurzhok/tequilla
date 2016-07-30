@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 from extuser.models import ExtUser
 from penalty.forms import PenaltyForm
 from penalty.models import Penalty, PenaltyType
+from private_message.utils import send_message_about_new_penalty
 from tequilla import settings
 from tequilla.decorators import group_required
 
@@ -145,6 +146,8 @@ def save_penalty(request):
         penalty.custom_sum = int(request.POST.get('penalty_sum_custom'), 0)
         penalty.use_custom_sum = request.POST.get('use_custom_sum', 'false') == 'true'
         penalty.save()
+        # отправка уведомления
+        send_message_about_new_penalty(request.user, penalty)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
 

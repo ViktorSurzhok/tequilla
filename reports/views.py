@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 from club.models import Drink, Club, City
 from extuser.models import ExtUser
 from penalty.models import Penalty
+from private_message.utils import send_message_about_fill_report
 from reports.forms import UpdateReportForm, ReportTransferForm, ReportTransferFormForAdmin
 from reports.models import Report, ReportDrink, ReportTransfer
 from tequilla.decorators import group_required
@@ -176,7 +177,6 @@ def reports_filter(request):
 
 @login_required
 @require_POST
-@group_required('director', 'chief', 'coordinator')
 def save_comment_for_report(request):
     report_id = int(request.POST.get('id', 0))
     try:
@@ -200,9 +200,15 @@ def save_report(request, report_id):
     form = UpdateReportForm(instance=report, data=request.POST)
     if form.is_valid():
         report = form.save()
+        need_send_message = False
         if not report.filled_date:
             report.filled_date = now()
+            need_send_message = True
         report.save()
+
+        # если отчет был заполнен в первый раз - отправить уведомление админам
+        if need_send_message:
+            send_message_about_fill_report(request.user, report)
         return JsonResponse({'complete': 1})
     else:
         print(form.errors)
