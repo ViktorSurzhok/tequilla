@@ -6,9 +6,6 @@ body.nav-sm .container.body .left_col {
   position: absolute;
 }
 
-
-
-
 body.nav-sm .container.body .right_col {
   padding: 10px 20px;
   margin-left: 70px;
@@ -5371,4 +5368,10 @@ ul.notifications {
 a.has-penalty {
     background: #b10821 !important;
     color: white !important;
+}
+
+@media (max-width: 360px){
+	input[type=file] {
+		width: 240px !important;
+	}
 }

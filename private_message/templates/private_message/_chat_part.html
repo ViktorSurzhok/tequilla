@@ -4,7 +4,7 @@
 {% for message in my_messages %}
     <div class="container {% if not transfered %}container-not-transfer{% endif %}" data-message-id="{{ message.id }}">
         {% if not transfered %}
-        <div class="col-md-1">
+        <div class="col-md-1 hidden-xs">
             <input type="checkbox" name="selected_messages[]" class="selected-messages" value="{{ message.id }}">
         </div>
         {% endif %}
