@@ -148,4 +148,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
+from celery.schedules import crontab
+
+# CELERYBEAT_SCHEDULE = {
+#     # Executes every minute
+#     'penalty-every-minute': {
+#         'task': 'tasks.set_penalty',
+#         'schedule': crontab(),
+#     }
+# }
+
 from tequilla.settings_local import *

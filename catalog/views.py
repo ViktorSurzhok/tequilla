@@ -128,7 +128,12 @@ def main_penalty_schedule(request):
     if request.method == 'POST':
         item_type = request.POST.get('type', MainPenaltySchedule.SCHEDULE_TYPE_CHOICE)
         item, created = MainPenaltySchedule.objects.get_or_create(type=item_type, start_week=None)
-        data = {'type': item.type, 'day_of_week': request.POST.get('day_of_week', 0)}
+        data = {
+            'type': item.type,
+            'day_of_week': request.POST.get('day_of_week', 0),
+            'time': request.POST.get('time', '00:00'),
+            'is_active': request.POST.get('is_active', False)
+        }
         form = MainPenaltyScheduleForm(instance=item, data=data)
         if form.is_valid():
             form.save()
@@ -159,7 +164,12 @@ def week_penalty_schedule(request):
     if request.method == 'POST':
         item_type = request.POST.get('type', MainPenaltySchedule.SCHEDULE_TYPE_CHOICE)
         item, created = MainPenaltySchedule.objects.get_or_create(type=item_type, start_week=start_week)
-        data = {'type': item.type, 'day_of_week': request.POST.get('day_of_week', 0)}
+        data = {
+            'type': item.type,
+            'day_of_week': request.POST.get('day_of_week', 0),
+            'time': request.POST.get('time', '00:00'),
+            'is_active': request.POST.get('is_active', False)
+        }
         form = MainPenaltyScheduleForm(instance=item, data=data)
         if form.is_valid():
             form.save()

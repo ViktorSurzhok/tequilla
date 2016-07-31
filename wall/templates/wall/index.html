@@ -159,8 +159,8 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                        <a href="{% url 'pm:show_dialog' director_id %}" class="btn btn-warning"><i class="fa fa-envelope"></i> Написать директору Ермаковой Ольге</a>
-                        <a href="{% url 'pm:show_dialog' chief_id %}" class="btn btn-success"><i class="fa fa-envelope"></i> Написать руководителю Бабуриной Надежде</a>
+                        <a href="{% url 'pm:show_dialog' director_id %}" class="btn btn-warning"><i class="fa fa-envelope"></i> Написать директору</a>
+                        <a href="{% url 'pm:show_dialog' chief_id %}" class="btn btn-success"><i class="fa fa-envelope"></i> Написать руководителю</a>
                         {% if main_employees_file.file %}
                             <h2>Фото девушек основного состава</h2>
                             <a href="{{ main_employees_file.file.url }}" target="_blank">

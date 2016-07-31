@@ -151,7 +151,7 @@ def schedule_by_week_all_users(request):
             users_without_graph.append(user)
         else:
             # если не работает всю неделю - группировать в одну запись
-            not_work_all_week = len(list(filter(lambda x: not x.cant_work, work_days))) == 0
+            not_work_all_week = len(list(filter(lambda x: not x.cant_work, work_days))) == 0 and len(work_days) == 7
             if not_work_all_week:
                 work_days = sorted(work_days, key=lambda x: x.modified, reverse=True)
                 work_days_struct_by_user.append(

@@ -165,7 +165,8 @@ def reports_filter(request):
                 {
                     'reports_by_dates': sorted(reports_struct.items(), reverse=True),
                     'can_edit_users': True,
-                    'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer')
+                    'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer'),
+                    'is_admin': bool(request.user.groups.filter(name__in=['coordinator', 'director', 'chief'])) | request.user.is_superuser
                 }
             ),
         }

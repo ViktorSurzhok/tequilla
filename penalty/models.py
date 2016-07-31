@@ -34,6 +34,8 @@ class MainPenaltySchedule(TimeStampedModel):
     type = models.CharField('Тип', max_length=10, choices=TYPE_CHOICES)
     day_of_week = models.ForeignKey('club.DayOfWeek', verbose_name='День недели', blank=True, null=True)
     start_week = models.DateField('Дата начала недели за которую написан перевод', blank=True, null=True)
+    time = models.TimeField('Время проверки', blank=True, null=True)
+    is_active = models.BooleanField('Включено', default=False)
 
     def type_verbose(self):
         return dict(MainPenaltySchedule.TYPE_CHOICES)[self.type]

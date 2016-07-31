@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load extuser_tags %}
+{% load staticfiles %}
+
 {% block title %}
     График проставления штрафов по умолчанию
 {% endblock %}
@@ -18,6 +20,7 @@
 
 
 {% block additional_js %}
+    <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
     <script type="text/javascript">
         $(function() {
             // выбор недели по дате
@@ -26,6 +29,9 @@
                 var date = picker.startDate.format('YYYY-MM-DD');
                 location = '{% url 'catalog:week_penalty_schedule' %}?start_date=' + date;
             });
+
+            var timepicker_options = { 'timeFormat': 'H:i', 'step': 30 };
+            $('input[name="time"]').timepicker(timepicker_options);
         });
     </script>
 {% endblock %}
@@ -71,37 +77,38 @@
                         {% for form in forms %}
                             <div class="small-margin-top">
                                 <form data-parsley-validate=""
-                                  class="form-label-left form-inline"
+                                  class="form-horizontal form-label-left small-margin-top"
                                   action="{% if start_week %}{% url 'catalog:week_penalty_schedule' %}?week={{ week_offset }}{% else %}{% url 'catalog:main_penalty_schedule' %}{% endif %}"
                                   method="POST">
                                     {% csrf_token %}
                                     {% for field in form %}
                                         {% if field.name != 'type' %}
-                                        <div class="form-group col-md-3">
-                                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                            <div class="form-group">
+                                            <label class="control-label col-md-2 col-sm-2 col-xs-12" for="{{ field.name }}">
                                                 {{ field.label }}
                                             </label>
-                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12">
                                                 {{ field }}
                                             </div>
                                         </div>
                                         {% else %}
-                                            <div class="form-group col-md-2">
-                                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="{{ field.name }}">
+                                            <div class="form-group">
+                                            <label class="control-label col-md-2 col-sm-2 col-xs-12" for="{{ field.name }}">
                                                 {{ field.label }}
                                             </label>
-                                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <div class="col-md-3 col-sm-3 col-xs-12">
                                                 {{ field }}
-                                                {{ field|display }}
+                                                <span style="margin-top: 7px; display: inline-block;">{{ field|display }}</span>
                                             </div>
                                         </div>
                                         {% endif %}
                                         {% endfor %}
-                                        <div class="form-group col-md-2">
-                                            <input type="submit" class="btn btn-success" value="Сохранить">
+                                        <div class="form-group">
+                                            <input type="submit" class="btn btn-success col-md-offset-2" value="Сохранить">
                                         </div>
                                 </form>
                             </div>
+                            {% if not forloop.last %}<hr>{% endif %}
                         {% endfor %}
 
                     </form>

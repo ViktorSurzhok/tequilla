@@ -2932,6 +2932,12 @@ ul.timeline li {
   margin-left: 105px;
   min-height: 110px;
 }
+@media (max-width: 480px) {
+  .timeline .block {
+    margin-left: 0;
+  }
+}
+
 .timeline.widget {
   min-width: 0;
   max-width: inherit;
@@ -2945,6 +2951,13 @@ ul.timeline li {
   left: 0;
   width: 84px;
 }
+
+@media (max-width: 480px) {
+  .timeline .tags {
+    position: relative;
+  }
+}
+
 .timeline .tag {
   display: block;
   height: 30px;

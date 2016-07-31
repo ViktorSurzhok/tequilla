@@ -1,6 +1,7 @@
 {% for date, reports in reports_by_dates %}
     <div class="small-margin-top">
         <h2>{{ date|date:"d M Y" }} г.</h2>
+        <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead>
             <tr style="background-color:#eee">
@@ -158,7 +159,7 @@
                                     </div>
                                 </div>
                         </div>
-                        {% if not report.filled_date %}
+                        {% if not report.filled_date or perms.extuser.can_edit_weekplan or is_admin %}
                         <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}" class="btn btn-xs btn-success save-report-button"
                            title="Сохранить">
                             <i class="fa fa-check"></i> Сохранить
@@ -219,6 +220,7 @@
         {% endfor %}
         </tbody>
         </table>
+        </div>
     </div>
 {% empty %}
     <h4>

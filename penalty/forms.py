@@ -13,7 +13,7 @@ class PenaltyTypeForm(forms.ModelForm):
 class MainPenaltyScheduleForm(forms.ModelForm):
     class Meta:
         model = MainPenaltySchedule
-        fields = ('type', 'day_of_week')
+        fields = ('type', 'day_of_week', 'time', 'is_active')
         widgets = {
             'type': forms.HiddenInput(
                 attrs={'required': False, 'readonly': True}
@@ -21,6 +21,9 @@ class MainPenaltyScheduleForm(forms.ModelForm):
             'day_of_week': forms.Select(
                 attrs={'required': True, 'class': 'form-control'}
             ),
+            'time': forms.TextInput(
+                attrs={'required': False, 'class': 'form-control'}
+            )
         }
 
 
