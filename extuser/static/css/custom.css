@@ -5382,3 +5382,9 @@ a.has-penalty {
     background: #b10821 !important;
     color: white !important;
 }
+
+@media (max-width: 360px){
+	input[type=file] {
+		width: 240px !important;
+	}
+}
