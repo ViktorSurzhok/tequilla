@@ -189,11 +189,11 @@ def change_transfer(request, transfer_id):
     """Изменение перевода за форму"""
     try:
         uniform_transfer = UniformTransferByWeek.objects.get(id=transfer_id)
-        if 'was_paid' in request.POST:
-            uniform_transfer.was_paid = request.POST.get('was_paid', 'false') == 'true'
-            uniform_transfer.save()
-            return JsonResponse({'complete': 1})
-        return JsonResponse({'complete': 0})
+        uniform_transfer.was_paid = request.POST.get('was_paid', 'false') == 'true'
+        uniform_transfer.cash = request.POST.get('cash', 'false') == '1'
+        uniform_transfer.comment = request.POST.get('comment', '')
+        uniform_transfer.save()
+        return JsonResponse({'complete': 1})
     except UniformByWeek.DoesNotExist:
         return JsonResponse({'complete': 0})
 
