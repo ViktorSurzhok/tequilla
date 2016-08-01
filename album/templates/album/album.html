@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Мои фотоотчеты{% endblock %}
 {% block content %}
-    <div class="row">
+    <div class="row album-row">
         <a href="{% url 'album:add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новый фотоотчет</button></a>
         {% include 'album/_album_part.html' with albums=user.albums.all admin_mode=False %}
     </div>

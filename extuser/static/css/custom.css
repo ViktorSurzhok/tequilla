@@ -5388,3 +5388,53 @@ a.has-penalty {
 		width: 240px !important;
 	}
 }
+
+#copy-to-next-week{
+	white-space: normal;
+}
+.m10{
+	margin: 10px 0;
+}
+.reference-btn{
+	float: right;
+}
+@media (max-width: 560px){
+	.reference-btn{
+		float: none;
+	}
+}
+
+@media (max-width: 480px){
+	.timeline h2.title {
+		margin-top: 20px;
+	}
+	.album-row{
+		padding: 0 10px;
+	}
+	.avatar {
+		margin-right: 0;
+		margin-left: 0;
+	}
+	.right_col {
+		padding: 0;
+	}
+	ul.bar_tabs{
+		height: auto;
+		margin: 0;
+		padding-left: 0;
+	}
+	.nav-tabs>li {
+		float: none;
+		margin-bottom: 0;
+	}
+	ul.bar_tabs > li{
+		margin-top: 0;
+		margin-left: 0;
+	}
+	ul.bar_tabs > li.active{
+		margin-top: 0;
+	}
+	#myTabContent .tab-pane p {
+		padding: 10px 0;
+	}
+}
