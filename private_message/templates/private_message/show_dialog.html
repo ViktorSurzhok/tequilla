@@ -207,7 +207,7 @@
     <div class="col-sm-12 col-xs-12 col-md-12">
         <div class="x_panel">
             <div class="x_title">
-                <h2>Диалог с {{ to_user.get_full_name }}
+                <h2>{{ to_user.get_full_name }}
                 </h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -225,7 +225,7 @@
                         <div id="last-message">&nbsp;</div>
                     </div>
                 </div>
-                <hr>
+                <!--<hr>-->
                 <form method="POST"
                           id="add-new-message-form"
                           data-parsley-validate=""
@@ -233,10 +233,10 @@
                           class="form-horizontal form-label-left"
                           action="{% url 'pm:send_message' %}">
                     <div class="send-message-container container col-md-offset-1 small-margin-top">
-                        <div class="col-md-2">
+                        <div class="col-md-2 hidden-xs">
                             <img src="{{ user.get_small_avatar }}" title="{{ user.get_full_name }} (Вы)" style="width: 80px;">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-xs-12">
 
                                 {% csrf_token %}
                                 <input type="hidden" name="redirect" value="{% url 'pm:show_dialog' to_user.id %}">
@@ -244,7 +244,7 @@
                                     {{ field }}
                                 {% endfor %}
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-1 hidden-xs">
                             <img src="{{ to_user.get_small_avatar }}" title="{{ to_user.get_full_name }}" style="width: 80px;">
                         </div>
                     </div>
