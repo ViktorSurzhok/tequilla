@@ -5424,4 +5424,11 @@ a.has-penalty {
 	#myTabContent .tab-pane p {
 		padding: 10px 0;
 	}
+    .club-td{
+	    white-space: pre-line;
+    }
+    .btn-statement{
+	    white-space: pre-line;
+    }
+
 }
