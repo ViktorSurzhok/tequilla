@@ -34,6 +34,12 @@ def index(request):
         posts = paginator.page(1)
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
+
+    director_id = Group.objects.get(name='director').user_set.first().id
+    try:
+        chief_id = Group.objects.get(name='chief').user_set.first().id
+    except:
+        chief_id = director_id
     return render(
         request,
         'wall/index.html',
@@ -45,8 +51,8 @@ def index(request):
             'work_shift_count': work_shift_count,
             'shots_count': shots_count,
             'next_work_shifts': WorkShift.objects.filter(date__gte=datetime.date.today(), employee=request.user),
-            'director_id': Group.objects.get(name='director').user_set.first().id,
-            'chief_id': Group.objects.get(name='chief').user_set.first().id
+            'director_id': director_id,
+            'chief_id': chief_id
         }
     )
 

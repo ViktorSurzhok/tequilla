@@ -38,6 +38,7 @@ class Command(BaseCommand):
 
         parser.add_argument('--last_page', default=274, help='last photos page')
         parser.add_argument('--count_page', default=2, help='pages count for download photos or reports')
+        parser.add_argument('--from_page', default=-1, help='starting page for download reports')
 
     # возвращает залогиненую сессию
     def get_session(self):
@@ -459,9 +460,9 @@ class Command(BaseCommand):
         ReportTransfer.objects.create(**data)
 
     # загружает отчеты
-    def get_reports(self, count_page):
+    def get_reports(self, from_page, count_page):
         s = self.get_session()
-        week = -1
+        week = int(from_page)
         reports_count = 0
         while count_page:
             count_page -= 1
@@ -641,8 +642,8 @@ class Command(BaseCommand):
             elif options['type'][0] == 'photos':
                 self.get_photos(int(options['last_page']), int(options['count_page']))
             elif options['type'][0] == 'reports':
-                self.get_reports(int(options['count_page']))
+                self.get_reports(int(options['from_page']), int(options['count_page']))
             else:
-                self.stdout.write(self.style.SUCCESS('Wrong argument. Try "girls" or "photos"'))
+                self.stdout.write(self.style.SUCCESS('Wrong argument. Try "girls" or "photos" or "clubs" or "reports"'))
         except Exception as e:
             print(e)
