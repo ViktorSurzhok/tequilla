@@ -202,7 +202,7 @@
     <!-- Создание модальных окон с формами -->
 
     <div class="modal fade cant-work-on-this-week-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" style="width: 600px;">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
@@ -236,7 +236,7 @@
     {% for item in grid %}
         <div class="modal fade edit-schedule-form-{{ item.date|date:'dmy' }}" tabindex="-1" role="dialog"
              aria-hidden="true">
-            <div class="modal-dialog modal-lg" style="width: 600px;">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
 
                     <div class="modal-header">
