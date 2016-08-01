@@ -29,7 +29,7 @@ def reports_by_week(request, user_id=None):
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
-    if request.user.has_perm('extuser.can_edit_users'):
+    if request.user.has_perm('extuser.can_manage_reports'):
         employee = None
     elif user_id is None or int(user_id) != request.user.id:
         raise Http404

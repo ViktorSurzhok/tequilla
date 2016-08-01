@@ -77,7 +77,7 @@ def set_schedule_penalty(start_week):
     except PenaltyType.DoesNotExist:
         pass
     else:
-        for user in users[:3]:
+        for user in users:
             # проверка заполнил ли сотрудник график
             if WorkDay.objects.filter(employee=user, date__range=[start_week, end_week]).count() != DAYS_IN_WEEK:
                 # назначение штрафа
@@ -95,7 +95,7 @@ def check_penalties(start_week):
     except PenaltyType.DoesNotExist:
         pass
     else:
-        for user in users[:3]:
+        for user in users:
             set_report_penalty(start_week, end_week, user, penalty_type_14)
             set_transfer_penalty(start_week, end_week, user, penalty_type_15)
 
