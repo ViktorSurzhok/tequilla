@@ -90,8 +90,8 @@
                         beakers_count = shots_count * 2,
                         sale_price = parseFloat($(this).find('.sale-price').text()),
                         price_in_bar = parseFloat($(this).find('.drink-price').val()),
-                        markup = sale_price - price_in_bar;
-                    sum_for_bar += shots_count * sale_price;
+                        markup = sale_price - price_in_bar / 2;
+                    sum_for_bar += shots_count * price_in_bar;
                     sum_for_agency += markup / 2 * beakers_count;
                     total_beakers_count += beakers_count;
                     drinks.push($(this).find('.drink-select option:selected').text() + ':' + (price_in_bar / 2) + ':' + sale_price);
