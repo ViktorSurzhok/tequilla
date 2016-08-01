@@ -145,7 +145,8 @@ def main_penalty_schedule(request):
         'catalog/penalty_schedule.html',
         {
             'forms': forms,
-            'work_days': DayOfWeek.objects.all()
+            'work_days': DayOfWeek.objects.all(),
+            'title': 'График проставления штрафов по умолчанию'
         }
     )
 
@@ -187,7 +188,8 @@ def week_penalty_schedule(request):
             'start_week': start_week,
             'end_week': end_week,
             'week_offset': week_offset,
-            'start_date': formats.date_format(start_date, 'Y-m-d')
+            'start_date': formats.date_format(start_date, 'Y-m-d'),
+            'title': 'График проставления штрафов по неделям (приоритет выше)'
         }
     )
 

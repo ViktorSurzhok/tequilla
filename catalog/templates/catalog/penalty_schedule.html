@@ -3,7 +3,7 @@
 {% load staticfiles %}
 
 {% block title %}
-    График проставления штрафов по умолчанию
+    {{ title }}
 {% endblock %}
 
 {% block additional_css %}
@@ -42,7 +42,7 @@
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
                 <div class="x_title">
-                    <h2>График проставления штрафов по умолчанию
+                    <h2>{{ title }}
                         {% if start_week %}
                             <small>{{ start_week }} - {{ end_week }}</small>
                         {% endif %}
