@@ -3,6 +3,7 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.forms import model_to_dict
 from django.http import JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -193,7 +194,7 @@ def save_comment_for_report(request):
 def save_report(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
-        old_report = report
+        old_report = model_to_dict(report, exclude=['id'])
         # защита от редактирования чужих отчетов
         if not (not request.user.groups.filter(name='employee').exists() or report.work_shift.employee == request.user):
             return JsonResponse({'complete': 0})
