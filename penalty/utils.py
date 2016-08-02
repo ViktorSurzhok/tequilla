@@ -20,8 +20,8 @@ def init_set_penalties():
 
 def set_penalties(type_choice):
     now = datetime.datetime.now()
-    minus_min = (now - datetime.timedelta(minutes=1)).time()
-    plus_min = (now + datetime.timedelta(minutes=1)).time()
+    minus_min = (now - datetime.timedelta(seconds=30)).time()
+    plus_min = (now + datetime.timedelta(seconds=30)).time()
     start_week = now - datetime.timedelta(now.weekday())
     params_pack = {
         'type': type_choice,
