@@ -5438,10 +5438,13 @@ a.has-penalty {
 		padding: 10px 0;
 	}
     .club-td{
-	    white-space: pre-line;
+	    white-space: pre-line !important;
     }
     .btn-statement{
 	    white-space: pre-line;
+    }
+    .top_nav .navbar-right {
+       width: 75%;
     }
 
 }
