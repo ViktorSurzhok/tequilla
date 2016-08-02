@@ -54,7 +54,7 @@
 {% endblock %}
 {% block content %}
     <a href="{% url 'club:club_add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новое заведение</button></a>
-    <div class="col-md-12">
+    <div class="col-md-12 col-xs-12">
         <div class="x_panel">
             <div class="x_title">
                 <h2>Заведения
@@ -72,7 +72,8 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <table class="table table-hover">
+                <div class="table-responsive">
+                    <table class="table table-hover">
                     <thead>
                     <tr>
                         <th>#</th>
@@ -153,7 +154,7 @@
                         {% include 'clubs/_club_list.html' %}
                     </tbody>
                 </table>
-
+                </div>
             </div>
         </div>
     </div>
