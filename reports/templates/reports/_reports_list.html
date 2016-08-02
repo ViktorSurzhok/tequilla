@@ -159,12 +159,11 @@
                                     </div>
                                 </div>
                         </div>
-                        {% if not report.filled_date or perms.extuser.can_edit_weekplan or is_admin %}
-                        <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}" class="btn btn-xs btn-success save-report-button"
+                        <a href="{% url 'reports:save_report' report.id %}" data-report-id="{{ report.id }}"
+                           class="btn btn-xs btn-success save-report-button{% if report.drinks.count or perms.extuser.can_edit_weekplan or is_admin %}{% else %} hide{% endif %}"
                            title="Сохранить">
                             <i class="fa fa-check"></i> Сохранить
                         </a>
-                        {% endif %}
                         {% if can_edit_users %}
                             <a href="{% url 'pm:show_dialog' report.work_shift.employee.id %}"
                                class="btn btn-xs btn-primary send_message_btn" target="_blank"

@@ -28,8 +28,8 @@ def send_message_about_new_post(from_user, post):
     send_message_for_all_users(from_user, text)
 
 
-def send_message_about_fill_report(from_user, report):
-    text = render_to_string('notify/_fill_report.html', {'report': report})
+def send_message_about_fill_report(from_user, report, old_report):
+    text = render_to_string('notify/_fill_report.html', {'report': report, 'old_report': old_report})
     # отправка писем админу о заполнении отчета
     tasks.send_message_about_fill_report.delay(from_user.id, report.id)
     send_message_for_admins(from_user, text, ['director'])

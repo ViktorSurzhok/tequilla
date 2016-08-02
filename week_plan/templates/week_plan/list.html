@@ -4,7 +4,6 @@
 {% block title %}Недельный план{% endblock %}
 
 {% block additional_js %}
-    {% if perms.extuser.can_edit_drinks %}
         <script type="text/javascript" src="{% static 'js/jquery.timepicker.min.js' %}"></script>
         <script type="text/javascript">
             $(function() {
@@ -90,7 +89,8 @@
                     var data = [
                         {name: 'csrfmiddlewaretoken', value:'{{ csrf_token }}'},
                         {name: 'date', value: $('#form-container #id_date').val()},
-                        {name: 'id_week_plan', value: $('#form-container #id_week_plan').val()}
+                        {name: 'id_week_plan', value: $('#form-container #id_week_plan').val()},
+                        {name: 'who', value: '{{ who }}'}
                     ];
                     for (var i in data_from_form) {
                         if (data_from_form[i].name != 'employee') {
@@ -132,11 +132,10 @@
 
                 // нажатие на кнопку удаления
                 $('.delete-plan-link').on('click', function() {
-                    return confirm('Вы действительно хотите план на день?');
+                    return confirm('Вы действительно хотите удалить план на день?');
                 });
             });
         </script>
-    {% endif %}
 {% endblock %}
 
 {% block additional_css %}
@@ -186,13 +185,11 @@
                     <a href="{% url 'week_plan:plan_by_week' %}?week={{ next_week }}&start_date={{ start_date }}">
                         <button class="btn">Следующая неделя <i class="fa fa-long-arrow-right"></i></button>
                     </a>
-                    {% if perms.extuser.can_edit_drinks %}
                         <div class="small-margin-top">
                             {% if perms.extuser.can_edit_users %}
                                 <button class="btn btn-primary" id="calendar">Выбрать неделю по дате</button>
                             {% endif %}
                         </div>
-                    {% endif %}
                     <div id="plans-by-week">
                         {% for item in grid %}
                             <h3>{{ item.date|date:"d.m.Y" }}</h3>
@@ -205,9 +202,7 @@
                                         <th>Заведение</th>
                                         <th>Tequilla girl</th>
                                         <th>Комментарий</th>
-                                        {% if perms.extuser.can_edit_drinks %}
                                             <th>Операции</th>
-                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -222,23 +217,20 @@
                                                 {% endfor %}
                                             </td>
                                             <td class="comment-part">{{ plan.comment|linebreaksbr }}</td>
-                                            {% if perms.extuser.can_edit_drinks %}
-                                                <td>
-                                                    <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
-                                                        <i class="fa fa-edit"></i>
-                                                    </button>
-                                                    <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
-                                                        <i class="fa fa-close"></i>
-                                                    </a>
-                                                </td>
-                                            {% endif %}
+                                            <td>
+                                                <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
+                                                    <i class="fa fa-close"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     {% empty %}
                                         <tr>
                                             <td colspan="6">Нет результатов</td>
                                         </tr>
                                     {% endfor %}
-                                    {% if perms.extuser.can_edit_drinks %}
                                         <tr>
                                             <td colspan="6">
                                                 <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
@@ -246,7 +238,6 @@
                                                 </button>
                                             </td>
                                         </tr>
-                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -256,7 +247,6 @@
             </div>
         </div>
     </div>
-    {% if perms.extuser.can_edit_drinks %}
         <div class="modal fade plan-form-popup" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -276,5 +266,4 @@
                 </div>
             </div>
         </div>
-    {% endif %}
 {% endblock %}

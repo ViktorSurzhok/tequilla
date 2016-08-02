@@ -84,6 +84,8 @@ def wall(request):
                 filter_pack = {filter_name: filter_value}
                 object_list = object_list.filter(**filter_pack)
                 was_filtered = True
+        if 'user__is_active' in request.GET:
+            object_list = object_list.filter(user__is_active=(request.GET['user__is_active'] == 'True'))
         if not was_filtered:
             object_list = object_list.all()
     else:

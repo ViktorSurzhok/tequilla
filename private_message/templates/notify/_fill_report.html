@@ -1,2 +1,26 @@
-Этот сотрудник заполнил отчет за {{ report.work_shift.date|date:"d.m (l)" }}
+Этот сотрудник {% if old_report %}ИЗМЕНИЛ{% else %}ЗАПОЛНИЛ{% endif %} отчет за {{ report.work_shift.date|date:"d.m (l)" }}
 Для заведения {{ report.work_shift.club }}
+
+{% if old_report %}
+    Данные нового отчета:
+    Приступила: {{ report.start_time }}
+    Закончила: {{ report.end_time }}
+    Сумма в бар: {{ report.sum_for_bar|default_if_none:"" }}
+    Сумма скидки: {{ report.discount|default_if_none:"" }}
+    Комментарий: {{ report.comment }}
+    Напитки:
+    {% for drink in report.drinks.all %}
+        {{ drink.drink.name }} - {{ drink.count }} шт
+    {% endfor %}
+    -----------------------------------------------
+    Данные старого отчета:
+    Приступила: {{ old_report.start_time }}
+    Закончила: {{ old_report.end_time }}
+    Сумма в бар: {{ old_report.sum_for_bar|default_if_none:"" }}
+    Сумма скидки: {{ old_report.discount|default_if_none:"" }}
+    Комментарий: {{ old_report.comment }}
+    Напитки:
+    {% for drink in old_report.drinks.all %}
+        {{ drink.drink.name }} - {{ drink.count }} шт
+    {% endfor %}
+{% endif %}

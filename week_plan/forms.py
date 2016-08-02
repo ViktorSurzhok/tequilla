@@ -15,11 +15,8 @@ class PlanForDayForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(PlanForDayForm, self).__init__(*args, **kwargs)
-        # в выборку загрузить рабочие смены только для выбранного дня
-        if 'initial' in kwargs:
-            self.fields['work_shift'].queryset = WorkShift.objects.filter(date=kwargs['initial']['date'])
         self.fields['club'].queryset = Club.objects.filter(is_active=True)
 
     class Meta:
         model = PlanForDay
-        fields = ('club', 'employee', 'date', 'work_shift', 'start_time', 'end_time', 'comment')
+        fields = ('club', 'employee', 'date', 'start_time', 'end_time', 'comment')

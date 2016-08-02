@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}Фотолента{% endblock %}
+
+{% block additional_css %}
+    <style>
+        .has-feedback .form-control  {
+            padding-right: 0;
+        }
+    </style>
+{% endblock %}
+
 {% block additional_js %}
     <script type="text/javascript">
         $(document).ready(function () {
@@ -23,11 +32,15 @@
                 // сбор данных фильтров
                 var user = $('#filter-user').val(),
                     calendar_from = $('#calendar_from').val(),
-                    calendar_to = $('#calendar_to').val();
+                    calendar_to = $('#calendar_to').val(),
+                    is_active = $('#filter-active').val();
 
 
-                 var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +
+                var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +
                          reformat_date(calendar_from);
+                if (is_active) {
+                    filters += '&user__is_active=' + is_active;
+                }
                 // запрос нового контента
                 $.ajax({
                     url: '{{ filter_link }}' + filters,
@@ -37,6 +50,10 @@
                     success: function (data) {
                         $('#albums-container').html(data['albums']);
                         $('#paginator-container').html(data['paginator']);
+                         $('.thumbnails').each(function() {
+                            var group = $(this).data('post-id');
+                            $(".group-" + group).colorbox({rel:'group-' + group, maxWidth:'850px', maxHeight:'700px'});
+                        });
                     }
                 });
             }
@@ -95,6 +112,13 @@
                                           aria-hidden="true"></span>
                                 </div>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" id="filter-active">
+                                <option value="">Альбомы всех пользователей</option>
+                                <option value="True">Альбомы активных пользователей</option>
+                                <option value="False">Альбомы удаленных пользователей</option>
+                            </select>
                         </div>
                         <button style="margin-bottom: 0px;" type="submit" class="btn btn-default" id="get-new-content">Показать</button>
                     </form>

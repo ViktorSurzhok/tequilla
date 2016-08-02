@@ -193,6 +193,7 @@ def save_comment_for_report(request):
 def save_report(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
+        old_report = report
         # защита от редактирования чужих отчетов
         if not (not request.user.groups.filter(name='employee').exists() or report.work_shift.employee == request.user):
             return JsonResponse({'complete': 0})
@@ -201,15 +202,13 @@ def save_report(request, report_id):
     form = UpdateReportForm(instance=report, data=request.POST)
     if form.is_valid():
         report = form.save()
-        need_send_message = False
         if not report.filled_date:
             report.filled_date = now()
-            need_send_message = True
+            old_report = None
         report.save()
 
-        # если отчет был заполнен в первый раз - отправить уведомление админам
-        if need_send_message:
-            send_message_about_fill_report(request.user, report)
+        # если отчет был заполнен или изменен отчет - отправить уведомление админам
+        send_message_about_fill_report(request.user, report, old_report)
         return JsonResponse({'complete': 1})
     else:
         print(form.errors)

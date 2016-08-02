@@ -3,16 +3,21 @@ from model_utils.models import TimeStampedModel
 
 from club.models import Club
 from extuser.models import ExtUser
-from work_calendar.models import WorkShift
 
 
 class PlanForDay(TimeStampedModel):
+    COORDINATOR_CHOICES = 'coordinator'
+    CHIEF_CHOICES = 'chief'
+    WHO_CHOICES = (
+        (COORDINATOR_CHOICES, 'Координатор'),
+        (CHIEF_CHOICES, 'Руководитель')
+    )
     club = models.ForeignKey(Club, verbose_name='Клуб')
     date = models.DateField('Дата')
-    work_shift = models.ForeignKey(WorkShift, verbose_name='Мероприятие', null=True, blank=True)
     start_time = models.CharField('Время начала', max_length=6, default='00:00')
     end_time = models.CharField('Время окончания', max_length=6, default='00:00')
     comment = models.TextField('Комментарий', blank=True)
+    who = models.CharField('Чей план', max_length=15, default=CHIEF_CHOICES, choices=WHO_CHOICES)
 
     def __str__(self):
         return '{}, {}, {}'.format(self.club.name, self.employee.surname, self.date)
