@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 
 from calculator.forms import CalculatorStateForm, DrinkForStateForm
 from calculator.models import CalculatorState, DrinkForState
-from club.models import Club, Drink
+from club.models import Club, Drink, DrinkClub
 
 
 @login_required
@@ -18,12 +18,16 @@ def calculator(request):
         state = CalculatorState.objects.get(employee=request.user)
     except CalculatorState.DoesNotExist:
         state = None
+    all_drinks = Drink.actual_objects.all()
+    drinks_options = render_to_string('calc/_drinks_options.html', {'club': clubs[0], 'all_drinks': all_drinks}) if len(clubs) else ''
     return render(
         request,
         'calc/calculator.html',
         {
             'clubs': clubs,
-            'drinks_options': render_to_string('calc/_drinks_options.html', {'club': clubs[0]}) if len(clubs) else '',
+            'drinks_options': drinks_options,
+            'drink_types': DrinkForState.TYPE_CHOICES,
+            'all_drinks': all_drinks,
             'state': state
         }
     )
@@ -55,8 +59,14 @@ def save_current_state(request):
                 continue
             drink_data = {d['name']: d['value'] for d in drink}
             drink_data['state'] = state
-            drink_data['drink'] = Drink.objects.get(id=drink_data['drink'])
-            drink_data['volume'] = drink_data['volume'].replace(',', '.')
+            if drink_data['drink'].startswith('_'):
+                drink_data['drink'] = DrinkClub.objects.get(id=drink_data['drink'][1:])
+            else:
+                drink_data['drink'] = Drink.objects.get(id=drink_data['drink'])
+            if 'volume' in drink_data:
+                drink_data['volume'] = drink_data['volume'].replace(',', '.')
+            if 'count' in drink_data:
+                drink_data['count'] = drink_data['count'].replace(',', '.')
             data = {key: value for (key, value) in drink_data.items() if value}
             DrinkForState.objects.create(**data)
     return JsonResponse({'complete': 1})

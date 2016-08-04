@@ -1,7 +1,7 @@
 from django import forms
 from django.forms.models import inlineformset_factory
 
-from club.models import Club, ClubType, DayOfWeek, Drink, Metro
+from club.models import Club, ClubType, DayOfWeek, Drink, Metro, DrinkClub
 from extuser.models import ExtUser
 
 
@@ -56,8 +56,14 @@ class MetroForm(forms.ModelForm):
         fields = ('name',)
 
 
-DrinkFormSet = inlineformset_factory(Club, Drink, fields='__all__', extra=0, widgets={
-    'name': forms.TextInput(attrs={'class': 'form-control'}),
+class DrinkForm(forms.ModelForm):
+    class Meta:
+        model = Drink
+        fields = ('name', 'price_in_bar', 'price_for_sale')
+
+
+DrinkFormSet = inlineformset_factory(Club, DrinkClub, fields='__all__', extra=0, widgets={
+    #'drink': forms.ChoiceField(attrs={'class': 'form-control'}),
     'price_in_bar': forms.TextInput(attrs={'class': 'form-control'}),
     'price_for_sale': forms.TextInput(attrs={'class': 'form-control'}),
 })

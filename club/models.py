@@ -128,11 +128,37 @@ class Club(TimeStampedModel):
         ordering = ('order',)
 
 
+class DrinkManager(models.Manager):
+    def get_queryset(self):
+        return super(DrinkManager, self).get_queryset().filter(club__isnull=True)
+
+
 class Drink(TimeStampedModel):
     """
-    Напитки в заведении
+    Все напитки
     """
     name = models.CharField(max_length=255, verbose_name='Название')
+    price_in_bar = models.IntegerField(verbose_name='Цена в баре')
+    price_for_sale = models.IntegerField(verbose_name='Цена продажи')
+    # Если есть ссылка на клуб - значит напиток заимпортирован
+    club = models.ForeignKey(Club, verbose_name='Заведение', blank=True, null=True)
+
+    actual_objects = DrinkManager()
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
+
+
+class DrinkClub(TimeStampedModel):
+    """
+    Напитки в заведении.
+    Для каждого заведения цена напитка в баре и цена продажи может отличаться.
+    """
+    drink = models.ForeignKey(Drink, verbose_name='Название')
     price_in_bar = models.IntegerField(verbose_name='Цена в баре')
     price_for_sale = models.IntegerField(verbose_name='Цена продажи')
     club = models.ForeignKey(Club, verbose_name='Заведение')

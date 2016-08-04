@@ -33,6 +33,8 @@ def get_statement_data(week, start_date, enabled_filters=[]):
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
+    coordninators = {}
+
     reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])
     if enabled_filters and 'city' in enabled_filters:
         reports = reports.filter(work_shift__club__city=enabled_filters['city'])
@@ -130,6 +132,10 @@ def get_statement_data(week, start_date, enabled_filters=[]):
             bottom_prices_for_employee[employee]['all'] += sum_for_club
             if employee.coordinator and not employee.coordinator.groups.filter(name='director').exists():
                 bottom_prices_for_employee[employee]['coordinator'] += sum_for_coordinator
+                if employee.coordinator not in coordninators:
+                    coordninators[employee.coordinator] = 0
+                coordninators[employee.coordinator] += sum_for_coordinator
+
 
             # bottom_prices_for_employee[employee]['director'] += (sum_for_club - sum_for_coordinator)
 
@@ -170,6 +176,8 @@ def get_statement_data(week, start_date, enabled_filters=[]):
         item['director'] = item['all'] - item['coordinator']
         admins_salary['director'] += item['director']
         admins_salary['coordinator'] += item['coordinator']
+
+    print(coordninators)
 
     return {
         'start_week': start_week,

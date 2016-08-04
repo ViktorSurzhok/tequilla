@@ -43,6 +43,20 @@ CATALOG_DATA = {
             {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
         ]
     },
+    'drink': {
+        'title': 'Напитки',
+        'new_item_text': 'Добавить новый напиток',
+        'class_name': 'Drink',
+        'module_name': 'club.models',
+        'form_class_name': 'DrinkForm',
+        'form_module_name': 'club.forms',
+        'filters': [
+            {'name': 'id__exact', 'type': 'text', 'prop': 'id', 'label': 'ID'},
+            {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
+            {'name': 'price_in_club__exact', 'type': 'text', 'prop': 'price_in_bar', 'label': 'Цена в баре'},
+            {'name': 'price_for_sale__exact', 'type': 'text', 'prop': 'price_for_sale', 'label': 'Цена для продажи'},
+        ]
+    },
     'attribute': {
         'title': 'Форма',
         'new_item_text': 'Добавить новую форму',
@@ -89,8 +103,10 @@ def catalog_list(request, item_type):
         raise Http404
     data = CATALOG_DATA[item_type]
     Class = class_for_name(data['module_name'], data['class_name'])
-    items = Class.objects.all()
-
+    if item_type == 'drink':
+        items = Class.actual_objects.all()
+    else:
+        items = Class.objects.all()
     return render(
         request,
         'catalog/list.html',

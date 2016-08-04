@@ -37,6 +37,7 @@
                 new_p.addClass('panel-container');
                 new_p.find('.x_title small').text('#' + $('.containers .drink-container').size());
                 new_p.find('.drink-select').trigger('change');
+                new_p.find('.drink-type-select').trigger('change');
             });
 
             // удаление напитка
@@ -85,9 +86,16 @@
                     total_beakers_count = 0,
                     drinks = [];
                 $('.containers .drink-container').each(function() {
-                    var volume = parseFloat($(this).find('.drink-val').val()),
-                        shots_count = volume / size_for_calc,
-                        beakers_count = shots_count * 2,
+                    var volume = 0,
+                        shots_count = 0;
+                    if ($(this).find('.drink-type-select').val() == 'shot') {
+                        shots_count =  parseFloat($(this).find('.drink-count').val())
+                    } else {
+                        volume = parseFloat($(this).find('.drink-val').val());
+                        shots_count = volume / size_for_calc;
+                    }
+
+                    var beakers_count = shots_count * 2,
                         sale_price = parseFloat($(this).find('.sale-price').text()),
                         price_in_bar = parseFloat($(this).find('.drink-price').val()),
                         markup = sale_price - price_in_bar / 2;
@@ -153,6 +161,21 @@
                             }, 2000);
                     }
                 });
+            });
+
+            // переключение типа рассчета
+            $('.containers').on('change', '.drink-type-select', function() {
+                var form = $(this).closest('form'),
+                    val = $(this).val(),
+                    beakers = form.find('.beakers-volume'),
+                    shots = form.find('.shots-count');
+                if (val == 'shot') {
+                    shots.show();
+                    beakers.hide();
+                } else {
+                    beakers.show();
+                    shots.hide();
+                }
             });
         });
     </script>
@@ -265,7 +288,19 @@
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
                                         <select class="form-control drink-select" name="drink">
-                                            {% include 'calc/_drinks_options.html' with selected_drink=drink.drink.id club=state.club %}
+                                            {% include 'calc/_drinks_options.html' with selected_drink=drink.drink.id club=state.club all_drinks=all_drinks %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                        Тип
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <select class="form-control drink-type-select" name="type">
+                                            {% for type in drink_types %}
+                                                <option {% if drink.type == type.0 %}selected{% endif %} value="{{ type.0 }}">{{ type.1 }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -277,12 +312,20 @@
                                         <input type="text" class="drink-price form-control" name="price_in_bar" value="{{ drink.price_in_bar }}">
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group beakers-volume" {% if drink.type == 'shot' %}style="display: none;" {% endif %}>
                                     <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
                                         Кол-во мл
                                     </label>
                                     <div class="col-md-6 col-sm-6 col-xs-12">
                                         <input type="text" class="drink-val form-control" name="volume" value="{{ drink.volume|default_if_none:"" }}">
+                                    </div>
+                                </div>
+                                <div class="form-group shots-count" {% if drink.type == 'beaker' %}style="display: none;" {% endif %}>
+                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                        Кол-во шотов
+                                    </label>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <input type="text" class="drink-count form-control" name="count" value="{{ drink.count|default_if_none:"" }}">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -320,18 +363,38 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                Тип
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <select class="form-control drink-type-select" name="type">
+                                    {% for type in drink_types %}
+                                        <option value="{{ type.0 }}">{{ type.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
                                 Цена напитка в баре
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" class="drink-price form-control" name="price_in_bar">
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group beakers-volume">
                             <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
                                 Кол-во мл
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 <input type="text" class="drink-val form-control" name="volume">
+                            </div>
+                        </div>
+                        <div class="form-group shots-count">
+                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                Кол-во шотов
+                            </label>
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+                                <input type="text" class="drink-count form-control" name="count">
                             </div>
                         </div>
                         <div class="form-group">
