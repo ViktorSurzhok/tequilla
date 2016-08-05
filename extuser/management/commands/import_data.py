@@ -582,50 +582,37 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS('Drinks for this report "%s" ' % drink_count_stats))
         self.stdout.write(self.style.SUCCESS('Total reports added "%s" ' % reports_count))
 
-    # def get_faq(self):
-    #     s = self.get_session()
-    #     parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/faq')
-    #     rows = parsed_html.body.find('div', attrs={'class': 'items'}).find_all('div', attrs={'class': 'panel'})
-    #     for row in rows:
-    #         post_id = row.find('a', attrs={'class': 'btn-success'})['href']
-    #         post_id = post_id.split('/')[-1]
-    #         try:
-    #             FaqPost.objects.get(old_id=post_id)
-    #             continue
-    #         except FaqPost.DoesNotExist:
-    #             pass
-    #         parsed_html = self.get_parsed_html(s, 'http://tequilla.gosnomer.info/faq/' + str(post_id))
-    #         panel = parsed_html.body.find('div', attrs={'class': 'panel'})
-    #         name = panel.find('h2').text
-    #         text = str(panel.find('p'))
-    #         post = FaqPost.objects.create(name=name, content=text, old_id=post_id, description='Описание')
-    #         print('post {} {} {}'.format(post_id, name, text))
-    #         if int(post_id) > 3:
-    #             continue
-    #         comments_content = parsed_html.find_all('p')
-    #         current_comment = 1
-    #         for comment in parsed_html.find_all('li')[37:]:
-    #             comment_id = comment.find('a', attrs={'class': 'close'})['href']
-    #             comment_id = comment_id.split('/')[-1]
-    #             try:
-    #                 FaqComment.objects.get(old_id=comment_id)
-    #                 continue
-    #             except FaqComment.DoesNotExist:
-    #                 pass
-    #             employee_id = comment.find_all('a')[1]['href']
-    #             employee_id = employee_id.split('/')[-1]
-    #             employee = self.get_employee_info(employee_id, s)
-    #             date = comment.find('span').text
-    #             date = date.split()
-    #             date[1] = self.month_names[date[1]]
-    #             date = ' '.join(date)
-    #             parsed_date = datetime.datetime.strptime(date, "%d %m %Y в %H:%M")
-    #             content = comments_content[current_comment]
-    #             current_comment += 1
-    #             print('comment {} {} {} {}'.format(comment_id, employee, parsed_date, content))
-    #             FaqComment.objects.create(
-    #                 post=post, employee=employee, content=content, old_id=post_id, created=parsed_date
-    #             )
+    # получение 50 самых популярных напитков за последние 50 дней
+    def popular_drinks(self):
+        now = datetime.datetime.now()
+        many_weeks_ago = now - datetime.timedelta(days=50)
+        reports = Report.objects.filter(work_shift__date__range=[many_weeks_ago, now], old_id__isnull=False)
+        drinks_counter = {}
+        for report in reports:
+            for drink in report.drinks.all():
+                drink_name = drink.drink.name
+                if drink_name not in drinks_counter:
+                    drinks_counter[drink_name] = {
+                        'count': 0,
+                        'price_in_bar': drink.drink.price_in_bar,
+                        'price_for_sale': drink.drink.price_for_sale,
+                        'name': drink_name
+                    }
+                drinks_counter[drink_name]['count'] += drink.count
+        # сортировка по популярности
+        drinks_counter = sorted(drinks_counter.values(), key=lambda x: x['count'], reverse=True)
+        counter = 0
+        for d in drinks_counter:
+            Drink.objects.create(
+                name=d['name'],
+                price_in_bar=d['price_in_bar'],
+                price_for_sale=d['price_for_sale']
+            )
+            counter += 1
+            if counter > 50:
+                break
+        self.stdout.write(self.style.SUCCESS('Added "%s" drinks' % counter))
+
 
     def handle(self, *args, **options):
         try:
@@ -637,6 +624,8 @@ class Command(BaseCommand):
                 self.get_clubs()
             elif options['type'][0] == 'wall':
                 self.get_wall()
+            elif options['type'][0] == 'popular_drinks':
+                self.popular_drinks()
             # elif options['type'][0] == 'faq':
             #     self.get_faq()
             elif options['type'][0] == 'photos':
