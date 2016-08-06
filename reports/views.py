@@ -12,7 +12,7 @@ from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
-from club.models import Drink, Club, City
+from club.models import Drink, Club, City, DrinkClub
 from extuser.models import ExtUser
 from penalty.models import Penalty
 from private_message.utils import send_message_about_fill_report, send_message_about_transfer
@@ -220,7 +220,12 @@ def save_report(request, report_id):
 def get_report_drinks(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
-        data = {'complete': render_to_string('reports/_drinks.html', {'report': report})}
+        all_drinks = Drink.objects.all() if report.old_id else Drink.actual_objects.all()
+        data = {
+            'complete': render_to_string(
+                'reports/_drinks.html', {'report': report, 'all_drinks': all_drinks}
+            )
+        }
         return JsonResponse(data)
     except Report.DoesNotExist:
         return JsonResponse({'complete': 0})
@@ -230,7 +235,11 @@ def get_report_drinks(request, report_id):
 def get_report_drink_template(request, report_id):
     try:
         report = Report.objects.get(id=report_id)
-        data = {'complete': render_to_string('reports/_drink.html', {'report': report})}
+        data = {
+            'complete': render_to_string(
+                'reports/_drink.html', {'report': report, 'all_drinks': Drink.actual_objects.all()}
+            )
+        }
         return JsonResponse(data)
     except Report.DoesNotExist:
         return JsonResponse({'complete': 0})
@@ -247,11 +256,31 @@ def save_report_drinks(request, report_id):
             return JsonResponse({'complete': 0})
         drinks = json.loads(request.POST.get('drinks[]', '[]'))
         ReportDrink.objects.filter(report=report_id).delete()
+        club = report.work_shift.club
         for item in drinks:
             if item['count']:
                 try:
-                    drink = Drink.objects.get(id=item['id'])
-                    ReportDrink.objects.create(report=report, drink=drink, count=item['count'].replace(',', '.'))
+                    #drink = Drink.objects.get(id=item['id'])
+                    if item['id'].startswith('_'):
+                        drink = Drink.objects.get(id=item['id'][1:])
+                    else:
+                        drink = Drink.objects.get(id=item['id'])
+                        # добавление напитка в популярные напитки клуба если он не был добавлен ранее
+                        if not DrinkClub.objects.filter(drink=drink, club=club).exists():
+                            DrinkClub.objects.create(
+                                drink=drink,
+                                price_in_bar=item['price_in_bar'],
+                                price_for_sale=item['price_for_sale'],
+                                club=club
+                            )
+
+                    ReportDrink.objects.create(
+                        report=report,
+                        drink=drink,
+                        count=item['count'].replace(',', '.'),
+                        price_in_bar=item['price_in_bar'],
+                        price_for_sale=item['price_for_sale'],
+                    )
                 except Drink.DoesNotExist:
                     pass
 

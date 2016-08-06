@@ -155,13 +155,15 @@ class Drink(TimeStampedModel):
 
 class DrinkClub(TimeStampedModel):
     """
-    Напитки в заведении.
+    Напитки полуряные в заведении.
+
+    Данные добавляются сюда при сохранении отчета.
     Для каждого заведения цена напитка в баре и цена продажи может отличаться.
     """
     drink = models.ForeignKey(Drink, verbose_name='Название')
     price_in_bar = models.IntegerField(verbose_name='Цена в баре')
     price_for_sale = models.IntegerField(verbose_name='Цена продажи')
-    club = models.ForeignKey(Club, verbose_name='Заведение')
+    club = models.ForeignKey(Club, verbose_name='Заведение', related_name='drink_club')
 
     def __str__(self):
         return self.name

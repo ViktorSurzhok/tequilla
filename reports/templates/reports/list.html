@@ -182,7 +182,12 @@
                 var report_id = $(this).data('report-id');
                 var drinks = [];
                 $('#drinks_' + report_id + ' .drink-line').each(function() {
-                    drinks.push({id: $(this).find('.drink-line-id').val(), count: $(this).find('.drink-line-count').val()});
+                    drinks.push({
+                        id: $(this).find('.drink-line-id').val(),
+                        count: $(this).find('.drink-line-count').val(),
+                        price_in_bar: $(this).find('.drink-line-price-in-bar').val(),
+                        price_for_sale: $(this).find('.drink-line-price-for-sale').val(),
+                    });
                 });
                 drinks = JSON.stringify(drinks);
                 $.ajax({

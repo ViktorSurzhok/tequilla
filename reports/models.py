@@ -26,9 +26,14 @@ class Report(TimeStampedModel):
 
 
 class ReportDrink(TimeStampedModel):
+    """
+    Используется для рассчета ведомости
+    """
     drink = models.ForeignKey(Drink, verbose_name='Напиток')
     report = models.ForeignKey(Report, verbose_name='Отчет', related_name='drinks')
     count = models.DecimalField(verbose_name='Количество', decimal_places=1, max_digits=5)
+    price_in_bar = models.IntegerField(verbose_name='Цена в баре')
+    price_for_sale = models.IntegerField(verbose_name='Цена продажи')
 
     def __str__(self):
         return self.drink.name

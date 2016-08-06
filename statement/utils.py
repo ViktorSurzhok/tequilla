@@ -9,15 +9,20 @@ from statement import arial10
 from club.models import Club
 
 
-def calculate_prices(formula, report_drink, drink, club_coordinator, employee_coordinator):
+def calculate_prices(formula, report_drink, club_coordinator, employee_coordinator):
     """Высчитывает цены которые проставляются в ведомости от формулы выбранной в настройках клуба"""
+
+    # для импортированных отчетов цена берется из объекта напитка
+    price_in_bar = report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar
+    price_for_sale = report_drink.price_for_sale if report_drink.price_for_sale else report_drink.drink.price_for_sale
+
     if formula == Club.SHOT_CHOICE:
         # формула для шотов
-        price_for_club = report_drink.count * drink.price_in_bar * Decimal(0.2)
-        price_for_coordinator = report_drink.count * drink.price_in_bar * Decimal(0.05) if employee_coordinator else 0
+        price_for_club = report_drink.count * price_in_bar * Decimal(0.2)
+        price_for_coordinator = report_drink.count * price_in_bar * Decimal(0.05) if employee_coordinator else 0
     else:
         # формула для мензурок
-        price_for_club = (drink.price_for_sale - drink.price_in_bar) / Decimal(2) * report_drink.count
+        price_for_club = (price_for_sale - price_in_bar) / Decimal(2) * report_drink.count
         if employee_coordinator:
             factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
             price_for_coordinator = price_for_club * factor
@@ -40,14 +45,8 @@ def get_statement_data(week, start_date, enabled_filters=[]):
         reports = reports.filter(work_shift__club__city=enabled_filters['city'])
 
     # названия доступных напитков
-    drinks_table_header = {}
     employees_table_header = []
     for report in reports:
-        # напитки
-        for report_drink in report.drinks.all():
-            drink = report_drink.drink
-            if drink.name not in drinks_table_header:
-                drinks_table_header[drink.name] = False
         # сотрудники
         employee = report.work_shift.employee
         if employee not in employees_table_header:
@@ -78,23 +77,6 @@ def get_statement_data(week, start_date, enabled_filters=[]):
     # заполнение сетки
     grid = []
     for club in clubs:
-        work_shifts = club.workshift_set.filter(date__range=[start_week, end_week])
-        drinks_for_club = []
-        if 'only_users' not in enabled_filters:
-            club_drinks_names = club.drink_set.all().values_list('name', flat=True)
-            for drink_name in sorted(drinks_table_header):
-                item_in_grid = {'sum': 0, 'used': False, 'name': drink_name}
-                if drink_name in club_drinks_names:
-                    # подсчет сколько денег затрачено на напиток
-                    for shift in work_shifts:
-                        for report in shift.reports.all():
-                            report_drinks = report.drinks.filter(drink__name=drink_name)
-                            if report_drinks:
-                                item_in_grid['sum'] += sum([d.count for d in report_drinks]) * \
-                                                       report_drinks.first().drink.price_for_sale
-                    drinks_table_header[drink_name] = True
-                drinks_for_club.append(item_in_grid)
-
         # сотрудники
         employees_info = []
         formula = club.formula
@@ -109,22 +91,23 @@ def get_statement_data(week, start_date, enabled_filters=[]):
             for work_shift in employee.work_shifts.filter(date__range=[start_week, end_week], club=club):
                 for report in work_shift.reports.all():
                     for report_drink in report.drinks.all():
-                        drink = report_drink.drink
+                        drink_name = report_drink.drink.name
 
                         # цена за напитки
                         price_for_club, price_for_coordinator = calculate_prices(
-                            formula, report_drink, drink, club_coordinator, employee.coordinator
+                            formula, report_drink, club_coordinator, employee.coordinator
                         )
+                        print(price_for_club, price_for_coordinator)
                         sum_for_club += price_for_club
                         sum_for_coordinator += price_for_coordinator
 
                         # добавление каждого напитка для подсчета кол-ва
-                        if drink.name not in drinks_dict:
-                            drinks_dict[drink.name] = 0
-                        drinks_dict[drink.name] += report_drink.count
+                        if drink_name not in drinks_dict:
+                            drinks_dict[drink_name] = 0
+                        drinks_dict[drink_name] += report_drink.count
                         # добавление напитка в header
-                        if drink.name not in header_drinks_for_employee[employee]:
-                            header_drinks_for_employee[employee].append(drink.name)
+                        if drink_name not in header_drinks_for_employee[employee]:
+                            header_drinks_for_employee[employee].append(drink_name)
             drinks_for_employee['drinks_dict'] = drinks_dict
             drinks_for_employee['sum_for_coordinator'] = sum_for_coordinator
             drinks_for_employee['sum_for_club'] = sum_for_club
@@ -136,11 +119,8 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                     coordninators[employee.coordinator] = 0
                 coordninators[employee.coordinator] += sum_for_coordinator
 
-
-            # bottom_prices_for_employee[employee]['director'] += (sum_for_club - sum_for_coordinator)
-
             employees_info.append(drinks_for_employee)
-        grid.append({'club': club, 'drinks_for_club': drinks_for_club, 'employees_info': employees_info})
+        grid.append({'club': club, 'drinks_for_club': [], 'employees_info': employees_info})
 
     # проставляем пустые значения для незаполненных напитков
     for item in grid:
@@ -151,16 +131,6 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                     info['drinks_list'].append({'count': 0, 'name': h})
                 else:
                     info['drinks_list'].append({'count': info['drinks_dict'][h], 'name': h})
-
-    # обходим сетку еще раз чтобы пометить использованные напитки
-    for item in grid:
-        for drink_data in item['drinks_for_club']:
-            drink_data['used'] = drinks_table_header.get(drink_data['name'], False)
-
-    # сортировка шапки таблицы с названием напитков
-    sorted_drinks_table_header = []
-    for temp in sorted(drinks_table_header):
-        sorted_drinks_table_header.append({'name': temp, 'used': drinks_table_header[temp]})
 
     # заполнение нижней части таблицы для сотрудников
     for employee, item in bottom_prices_for_employee.items():
@@ -182,8 +152,8 @@ def get_statement_data(week, start_date, enabled_filters=[]):
     return {
         'start_week': start_week,
         'end_week': end_week,
-        'drinks_count': len(drinks_table_header) if 'only_users' not in enabled_filters else 0,
-        'drinks_table_header': sorted_drinks_table_header,
+        'drinks_count': 0,
+        'drinks_table_header': [],
         'employees_table_header': employees_table_header,
         'header_drinks_for_employee': header_drinks_for_employee,
         'bottom_prices_for_employee': bottom_prices_for_employee,

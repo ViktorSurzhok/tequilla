@@ -63,7 +63,7 @@ class DrinkForm(forms.ModelForm):
 
 
 DrinkFormSet = inlineformset_factory(Club, DrinkClub, fields='__all__', extra=0, widgets={
-    #'drink': forms.ChoiceField(attrs={'class': 'form-control'}),
+    'drink': forms.Select(attrs={'class': 'form-control'}),
     'price_in_bar': forms.TextInput(attrs={'class': 'form-control'}),
     'price_for_sale': forms.TextInput(attrs={'class': 'form-control'}),
 })

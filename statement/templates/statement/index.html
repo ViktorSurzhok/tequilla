@@ -38,13 +38,10 @@
                 <hr>
                 <div class="small-margin-top">
                     <a class="btn btn-success btn-statement"
-                       href="{% url 'statement:statement_show' week_offset start_date %}">Показать (полная ведомость)</a>
-                    <a class="btn btn-success btn-statement"
-                       href="{% url 'statement:statement_show' week_offset start_date %}?only_users=1">Показать (без левой части)</a>
+                       href="{% url 'statement:statement_show' week_offset start_date %}">Показать</a>
                     {% for city in cities %}
                         <a class="btn btn-success btn-statement"
                            href="{% url 'statement:statement_show' week_offset start_date %}?city={{ city.id }}">Показать (только <b>{{ city.name }}</b>)</a>
-                        <a class="btn btn-success btn-statement" href="{% url 'statement:statement_show' week_offset start_date %}?city={{ city.id }}&only_users=1">Показать (только <b>{{ city.name }}</b> без левой части)</a>
                     {% endfor %}
                     <hr>
                     <a class="btn btn-warning btn-statement"

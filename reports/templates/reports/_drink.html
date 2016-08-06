@@ -1,13 +1,26 @@
 <tr class="drink-line">
-    <td class="col-md-9">
+    <td class="col-md-5">
         <select class="form-control drink-line-id">
-            {% for club_drink in report.work_shift.club.drink_set.all %}
-                <option value="{{ club_drink.id }}" {% if drink.drink.id == club_drink.id %}selected{% endif %}>{{ club_drink.name }}</option>
-            {% endfor %}
+            <optgroup label="Популярные напитки для этого заведения">
+                {% for club_drink in report.work_shift.club.drink_club.all %}
+                    <option value="_{{ club_drink.drink.id }}" {% if drink.drink.id == club_drink.drink.id %}selected{% endif %}>{{ club_drink.drink.name }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Все напитки">
+                {% for a_drink in all_drinks %}
+                    <option value="{{ a_drink.id }}" {% if drink.drink.id == a_drink.id %}selected{% endif %}>{{ a_drink.name }}</option>
+                {% endfor %}
+            </optgroup>
         </select>
     </td>
     <td class="col-md-2">
         <input type="text" name="drink-count" class="form-control drink-line-count" {% if drink %}value="{{ drink.count }}"{% endif %}>
+    </td>
+    <td class="col-md-2">
+        <input type="text" name="drink-price-in-bar" class="form-control drink-line-price-in-bar" {% if drink %}value="{{ drink.price_in_bar }}"{% endif %}>
+    </td>
+    <td class="col-md-2">
+        <input type="text" name="drink-price-for-sale" class="form-control drink-line-price-for-sale" {% if drink %}value="{{ drink.price_for_sale }}"{% endif %}>
     </td>
     <td class="col-md-1">
         <button class="btn btn-danger drink-remove-line"><i class="fa fa-remove"></i></button>
