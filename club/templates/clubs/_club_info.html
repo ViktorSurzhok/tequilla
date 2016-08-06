@@ -54,16 +54,12 @@
                 <thead>
                 <tr style="height:0;">
                     <th>Напиток</th>
-                    <th>Цена в баре</th>
-                    <th>Цена продажи</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for drink in club.drink_set.all %}
                     <tr style="height:0;">
                         <td>{{ drink.name }}</td>
-                        <td>{{ drink.price_in_bar }} руб.</td>
-                        <td>{{ drink.price_for_sale }} руб.</td>
                     </tr>
                 {% endfor %}
                 </tbody>
