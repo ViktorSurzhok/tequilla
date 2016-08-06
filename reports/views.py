@@ -204,9 +204,12 @@ def save_report(request, report_id):
     if form.is_valid():
         report = form.save()
         if not report.filled_date:
-            report.filled_date = now()
+            # проверка что все данные отчёта заполнены
+            if report.start_time and report.start_time != '--:--' and report.end_time and report.end_time != '--:--' \
+                    and report.sum_for_bar is not None and report.discount is not None:
+                report.filled_date = now()
+                report.save()
             old_report = None
-        report.save()
 
         # если отчет был заполнен или изменен отчет - отправить уведомление админам
         send_message_about_fill_report(request.user, report, old_report)
