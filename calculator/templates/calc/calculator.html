@@ -11,6 +11,10 @@
         }
 
         #sms-message {display: none;}
+
+    #import-to-report, #import-to-report-error {
+        display: none;
+    }
     </style>
 {% endblock %}
 
@@ -77,14 +81,14 @@
                 });
             });
 
-            // генерация смс отчета
-            $('#start-calc').on('click', function() {
+            function get_current_data() {
                 var club_option = $('#club option:selected'),
                     size_for_calc = parseFloat(club_option.data('volume')),
                     sum_for_bar = 0,
                     sum_for_agency = 0,
                     total_beakers_count = 0,
-                    drinks = [];
+                    drinks = [],
+                    drinks_sms = [];
                 $('.containers .drink-container').each(function() {
                     var volume = 0,
                         shots_count = 0;
@@ -98,24 +102,137 @@
                     var beakers_count = shots_count * 2,
                         sale_price = parseFloat($(this).find('.sale-price').text()),
                         price_in_bar = parseFloat($(this).find('.drink-price').val()),
-                        markup = sale_price - price_in_bar / 2;
+                        markup = sale_price - price_in_bar / 2,
+                        selected_option = $(this).find('.drink-select option:selected');
                     sum_for_bar += shots_count * price_in_bar;
                     sum_for_agency += markup / 2 * beakers_count;
                     total_beakers_count += beakers_count;
-                    drinks.push($(this).find('.drink-select option:selected').text() + ':' + (price_in_bar / 2) + ':' + sale_price);
+                    var text = selected_option.text() + ' (цена половины барного шота:' + (price_in_bar / 2) + ',' +
+                        ' цена продажи:' + sale_price + ')';
+                    drinks_sms.push(text);
+                    drinks.push({
+                        'price_for_sale': sale_price,
+                        'price_in_bar': price_in_bar,
+                        'id': selected_option.attr('value'),
+                        'count': shots_count
+                    });
                 });
-                $('#price-for-bar').text(sum_for_bar.toFixed(2));
-                $('#price-for-agency').text(sum_for_agency.toFixed(2));
+                return {
+                    club_option: club_option,
+                    sum_for_bar: sum_for_bar,
+                    sum_for_agency: sum_for_agency,
+                    total_beakers_count: total_beakers_count,
+                    drinks_sms: drinks_sms,
+                    drinks: drinks,
+                    time_from: $('#time-from').val(),
+                    time_to: $('#time-to').val(),
+                    date: $('#calendar').val(),
+                    discount: $('#discount').val()
+                }
+            }
+
+            // импорт в отчет
+            $('#import-to-report').on('click', function() {
+                // проверка что все заполнено
+                var error = false,
+                    data = get_current_data();
+                for (var i in data) {
+                    if (!data[i]) {
+                        error = true;
+                        console.log(i);
+                        break;
+                    }
+                }
+                for (var i in data['drinks']) {
+                    if (!data['drinks'][i]) {
+                        error = true;
+                        console.log(i);
+                        break;
+                    }
+                }
+                if (error) {
+                    new PNotify({
+                        title: 'О нет!',
+                        text: 'Произошла ошибка при сохранении данных. НЕОБХОДИМО ЗАПОЛНИТЬ ВСЕ ДАННЫЕ',
+                        type: 'error',
+                        styling: 'bootstrap3'
+                    });
+                    $('.ui-pnotify').fadeIn('slow');
+                    setTimeout(function () {
+                        $('.ui-pnotify').fadeOut('fast');
+                    }, 3000);
+                } else {
+                    $.ajax({
+                        url: '{% url 'calc:import_to_report' %}',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            club: data['club_option'].val(),
+                            drinks: JSON.stringify(data['drinks']),
+                            date: reformat_date(data['date']),
+                            discount: data['discount'],
+                            start_time: data['time_from'],
+                            end_time: data['time_to'],
+                            sum_for_bar: data['sum_for_bar']
+                        },
+                        type: 'POST',
+                        success: function(response) {
+                            if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                                new PNotify({
+                                    title: 'Ура!',
+                                    text: 'Данные успешно импортированы',
+                                    type: 'success',
+                                    styling: 'bootstrap3'
+                                });
+                            } else {
+                                new PNotify({
+                                    title: 'О нет!',
+                                    text: 'Произошла ошибка при импортировании данных',
+                                    type: 'error',
+                                    styling: 'bootstrap3'
+                                });
+                            }
+                            $('.ui-pnotify').fadeIn('slow');
+                                setTimeout(function () {
+                                    $('.ui-pnotify').fadeOut('fast');
+                                }, 2000);
+                        }
+                    });
+                }
+            });
+
+            // генерация смс отчета
+            $('#start-calc').on('click', function() {
+                var data = get_current_data();
+                $('#price-for-bar').text(data['sum_for_bar'].toFixed(2));
+                $('#price-for-agency').text(data['sum_for_agency'].toFixed(2));
 
                 // заполнение смс отчета
-                $('#sms-message-date').text($('#calendar').val());
-                $('#sms-message-club').text(club_option.data('short-name'));
-                $('#sms-message-bar').text(sum_for_bar.toFixed(2));
-                $('#sms-message-agency').text(sum_for_agency.toFixed(2));
-                $('#sms-message-beakers-count').text(total_beakers_count);
-                $('#sms-message-time').text($('#time-from').val() + '-' + $('#time-to').val());
-                $('#sms-message-drinks').text(drinks.join(', '));
+                $('#sms-message-date').text(data['date']);
+                $('#sms-message-club').text(data['club_option'].data('short-name'));
+                $('#sms-message-bar').text(data['sum_for_bar'].toFixed(2));
+                $('#sms-message-agency').text(data['sum_for_agency'].toFixed(2));
+                $('#sms-message-beakers-count').text(data['total_beakers_count']);
+                $('#sms-message-time').text(data['time_from'] + '-' + data['time_to']);
+                $('#sms-message-drinks').text(data['drinks_sms'].join(', '));
                 $('#sms-message').show();
+
+                $.ajax({
+                    url: '{% url 'calc:check_report' %}',
+                    data: {
+                        club: data['club_option'].val(),
+                        date: reformat_date(data['date'])
+                    },
+                    type: 'GET',
+                    success: function(response) {
+                        if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                            $('#import-to-report').show();
+                            $('#import-to-report-error').hide();
+                        } else {
+                            $('#import-to-report').hide();
+                            $('#import-to-report-error').show();
+                        }
+                    }
+                });
             });
 
             // сохранение текущего состояния
@@ -233,9 +350,17 @@
                                 <input id="time-to" class="form-control" name="end_time" value="{% if state %}{{ state.end_time }}{% endif %}">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
+                                Сумма скидки
+                            </label>
+                            <div class="col-md-9 col-sm-6 col-xs-12">
+                                <input id="discount" class="form-control" name="discount" value="{% if state %}{{ state.discount|default_if_none:"" }}{% endif %}">
+                            </div>
+                        </div>
                     </form>
                     <hr>
-                    <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button>
+                    <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button><br>
                     <button class="btn btn-info" id="save-current-state"><i class="fa fa-save"></i> Сохранить текущее состояние</button>
                 </div>
             </div>
@@ -264,6 +389,9 @@
                             <span id="sms-message-drinks">расшифровка того что продавала, цена половины барного шота, цена продажи мензурки</span>,
                             время работы: <span id="sms-message-time"></span>.
                         </span>
+                        <hr>
+                        <button class="btn btn-warning" id="import-to-report"><i class="fa fa-copy"></i> Импорт в отчет</button>
+                        <span id="import-to-report-error">У вас нет незаполненных отчетов для выбранного клуба за выбранное число</span>
                     </div>
                 </div>
             </div>

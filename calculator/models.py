@@ -12,6 +12,7 @@ class CalculatorState(TimeStampedModel):
     date = models.DateField(blank=True, null=True)
     start_time = models.CharField(max_length=10, blank=True)
     end_time = models.CharField(max_length=10, blank=True)
+    discount = models.IntegerField(blank=True, null=True, verbose_name="Сумма скидки")
 
 
 class DrinkForState(TimeStampedModel):
