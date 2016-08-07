@@ -22,7 +22,10 @@
     <td class="col-md-2">
         <input type="text" name="drink-price-for-sale" class="form-control drink-line-price-for-sale" {% if drink %}value="{{ drink.price_for_sale }}"{% endif %}>
     </td>
+
     <td class="col-md-1">
-        <button class="btn btn-danger drink-remove-line"><i class="fa fa-remove"></i></button>
+        {% if not drink.drink.club %}
+            <button class="btn btn-danger drink-remove-line"><i class="fa fa-remove"></i></button>
+        {% endif %}
     </td>
 </tr>

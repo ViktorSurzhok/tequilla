@@ -31,6 +31,9 @@
                                 {% else %}
                                     {{ shift.employee.get_full_name }}
                                 {% endif %}
+                                {% if shift.probation %}
+                                    <span style="color: orangered;">(Стажировка)</span>
+                                {% endif %}
                             </div>
                         {% endwith %}
                     </td>
@@ -206,12 +209,14 @@
                                         <button class="btn btn-large close_drinks_not_save"
                                                 data-dismiss="modal"><i class="fa fa-remove"></i> Отмена
                                         </button>
-                                        <button class="btn btn-primary btn-large close_drinks_save"
-                                                data-dismiss="modal"
-                                                data-report-link="{% url 'reports:save_report_drinks' report.id %}"
-                                                data-report-id="{{ report.id }}">
-                                            <i class="fa fa-check"></i> Сохранить
-                                        </button>
+                                        {% if not report.old_id %}
+                                            <button class="btn btn-primary btn-large close_drinks_save"
+                                                    data-dismiss="modal"
+                                                    data-report-link="{% url 'reports:save_report_drinks' report.id %}"
+                                                    data-report-id="{{ report.id }}">
+                                                <i class="fa fa-check"></i> Сохранить
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
