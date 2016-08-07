@@ -52,9 +52,7 @@ CATALOG_DATA = {
         'form_module_name': 'club.forms',
         'filters': [
             {'name': 'id__exact', 'type': 'text', 'prop': 'id', 'label': 'ID'},
-            {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
-            {'name': 'price_in_club__exact', 'type': 'text', 'prop': 'price_in_bar', 'label': 'Цена в баре'},
-            {'name': 'price_for_sale__exact', 'type': 'text', 'prop': 'price_for_sale', 'label': 'Цена для продажи'},
+            {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'}
         ]
     },
     'attribute': {

@@ -59,11 +59,9 @@ class MetroForm(forms.ModelForm):
 class DrinkForm(forms.ModelForm):
     class Meta:
         model = Drink
-        fields = ('name', 'price_in_bar', 'price_for_sale')
+        fields = ('name',)
 
 
-DrinkFormSet = inlineformset_factory(Club, DrinkClub, fields='__all__', extra=0, widgets={
-    'drink': forms.Select(attrs={'class': 'form-control'}),
-    'price_in_bar': forms.TextInput(attrs={'class': 'form-control'}),
-    'price_for_sale': forms.TextInput(attrs={'class': 'form-control'}),
+DrinkFormSet = inlineformset_factory(Club, DrinkClub, fields=('drink',), extra=0, widgets={
+    'drink': forms.Select(attrs={'class': 'form-control'})
 })

@@ -138,8 +138,8 @@ class Drink(TimeStampedModel):
     Все напитки
     """
     name = models.CharField(max_length=255, verbose_name='Название')
-    price_in_bar = models.IntegerField(verbose_name='Цена в баре')
-    price_for_sale = models.IntegerField(verbose_name='Цена продажи')
+    price_in_bar = models.IntegerField(verbose_name='Цена в баре', default=0)
+    price_for_sale = models.IntegerField(verbose_name='Цена продажи', default=0)
     # Если есть ссылка на клуб - значит напиток заимпортирован
     club = models.ForeignKey(Club, verbose_name='Заведение', blank=True, null=True)
 
@@ -161,8 +161,8 @@ class DrinkClub(TimeStampedModel):
     Для каждого заведения цена напитка в баре и цена продажи может отличаться.
     """
     drink = models.ForeignKey(Drink, verbose_name='Название')
-    price_in_bar = models.IntegerField(verbose_name='Цена в баре')
-    price_for_sale = models.IntegerField(verbose_name='Цена продажи')
+    price_in_bar = models.IntegerField(verbose_name='Цена в баре', default=0)
+    price_for_sale = models.IntegerField(verbose_name='Цена продажи', default=0)
     club = models.ForeignKey(Club, verbose_name='Заведение', related_name='drink_club')
 
     def __str__(self):
