@@ -1,4 +1,5 @@
 {% if city %}<h4>Из города: {{ city }}</h4>{% endif %}
+{% if type == 'by_drinks' %}<h4>Для клуба: {% for item in items %}{% if forloop.first %}{{ item.club }}{% endif %}{% endfor %}</h4>{% endif %}
 <table class="table table-bordered table-striped">
     {% if type == 'by_night' %}
     <thead>
@@ -32,6 +33,23 @@
                 </tr>
             {% endfor %}
         </tbody>
+    {% elif type == 'by_drinks' %}
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Количество шотов</th>
+            <th>Напиток</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.employee }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.drink }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
     {% else %}
         <thead>
             <tr>

@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
-from club.models import City
+from club.models import City, Club
 from penalty.models import Penalty
 from reports.models import Report
 from stats.utils import get_start_and_end_dates
@@ -37,6 +37,7 @@ def stats_by_night(request):
             'end_date_f': request.GET.get('end_date', None),
             'current_stats': 'by_night',
             'cities': City.objects.all(),
+            'clubs': Club.objects.filter(is_active=True),
             'current_city': current_city
         }
     )
@@ -130,3 +131,46 @@ def send_stats_on_wall(request):
     post.text = info
     post.save()
     return JsonResponse({'complete': 1})
+
+
+@login_required
+@group_required('director', 'chief', 'coordinator')
+def stats_by_drinks(request):
+    start_date, end_date = get_start_and_end_dates(request)
+    current_club = request.GET.get('club', 0)
+    reports = Report.objects.filter(
+        work_shift__date__range=[start_date, end_date], work_shift__club=current_club)
+    current_city = int(request.GET.get('city', 0))
+    if current_city:
+        reports = reports.filter(work_shift__club__city=current_city)
+    drinks = {}
+    for report in reports:
+        employee_id = report.work_shift.employee.id
+        for report_drink in report.drinks.all():
+            key = '{}:{}'.format(report_drink.drink.id, employee_id)
+            if key not in drinks:
+                drinks[key] = {'employee': report.work_shift.employee, 'drink': report_drink.drink, 'count': 0}
+            drinks[key]['count'] += report_drink.count
+
+    drinks_list = []
+    for d in drinks.values():
+        drinks_list.append(d)
+    drinks_list = sorted(drinks_list, key=lambda t: t['count'], reverse=True)
+    data_table = render_to_string('stats/stats_by_drink.html', {'drinks': drinks_list})
+
+    return render(
+        request,
+        'stats/list.html',
+        {
+            'data_table': data_table,
+            'start_date': start_date,
+            'end_date': end_date,
+            'start_date_f': request.GET.get('start_date', None),
+            'end_date_f': request.GET.get('end_date', None),
+            'current_stats': 'by_drinks',
+            'cities': City.objects.all(),
+            'clubs': Club.objects.filter(is_active=True).order_by('name'),
+            'current_city': current_city,
+            'current_club': int(current_club)
+        }
+    )

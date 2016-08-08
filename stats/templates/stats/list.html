@@ -15,8 +15,12 @@
         // фильтры
         $('.use-filter-button').on('click', function(e) {
             e.preventDefault();
-            location = '?start_date=' + reformat_date($('#calendar-from').val()) + '&end_date=' +
+            var url = '?start_date=' + reformat_date($('#calendar-from').val()) + '&end_date=' +
                     reformat_date($('#calendar-to').val()) + '&city=' + $('#city-filter').val();
+            if ($('#club-filter').size()) {
+                url += '&club=' + $('#club-filter').val();
+            }
+            location = url;
         });
 
         $('.calendar').daterangepicker(calendar_options);
@@ -35,6 +39,13 @@
                     });
                 } else if (type == 'by_sale') {
                     items.push({
+                        employee: $(this).data('employee'),
+                        count: $(this).data('count')
+                    });
+                } else if (type == 'by_drinks') {
+                    items.push({
+                        club: $('#club-filter option:selected').text(),
+                        drink: $(this).data('drink-name'),
                         employee: $(this).data('employee'),
                         count: $(this).data('count')
                     });
@@ -106,6 +117,7 @@
                 <a href="{% url 'stats:stats_by_night' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_night" class="switch-btn btn{% if current_stats == 'by_night' %} active{% endif %} btn-success">За ночь</a>
                 <a href="{% url 'stats:stats_by_sale' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
                 <a href="{% url 'stats:stats_by_penalty' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
+                <a href="{% url 'stats:stats_by_drinks' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_drinks" class="switch-btn btn{% if current_stats == 'by_drinks' %} active{% endif %} btn-success">По напиткам</a>
                 <div class="small-margin-top">
                     <form class="form-inline">
                         <div class="form-group">
@@ -122,6 +134,15 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        {% if current_stats == 'by_drinks' %}
+                            <div class="form-group">
+                                <select class="form-control" id="club-filter">
+                                    {% for club in clubs %}
+                                        <option {% if current_club == club.id %}selected{% endif %} value="{{ club.id }}">{{ club }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
                         <button class="btn btn-info use-filter-button" style="margin-bottom: 0;">Показать</button>
                     </form>
                     <button class="btn btn-dark send-on-wall">Отправить на стену</button>

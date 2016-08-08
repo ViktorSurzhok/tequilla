@@ -1,0 +1,34 @@
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Сотрудник</th>
+            <th>Количество шотов</th>
+            <th>Напиток</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for drink in drinks %}
+        <tr>
+            <td><input
+                    class="for-wall-check"
+                    data-drink-name="{{ drink.drink.name }}"
+                    data-employee="{{ drink.employee.get_full_name }}"
+                    data-count="{{ drink.count }}"
+                    type="checkbox">
+            </td>
+            <td>{{ drink.employee.get_full_name }}</td>
+            <td>{{ drink.count }}</td>
+            <td>{{ drink.drink.name }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">
+                Нет статистики за данный период.
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
