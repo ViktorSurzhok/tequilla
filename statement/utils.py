@@ -150,7 +150,7 @@ def get_statement_data(week, start_date, enabled_filters=[]):
         admins_salary['director'] += item['director']
         admins_salary['coordinator'] += item['coordinator']
 
-    print(coordninators)
+    admins_salary['coordinators'] = coordninators
 
     return {
         'start_week': start_week,

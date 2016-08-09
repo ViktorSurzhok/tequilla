@@ -263,7 +263,9 @@
             </tbody>
         </table>
         <div class="admins-salary">
-            <p style="background-color:#FF65A3;font-weight:bold;">Координатор(за все клубы и за всех tequila girls): {{ admins_salary.coordinator|floatformat:2 }} руб.</p>
+            {% for coordinator, salary in admins_salary.coordinators.items %}
+                <p style="background-color:#FF65A3;font-weight:bold;">Координатор {{ coordinator.get_full_name }} (за все клубы и за всех tequila girls): {{ salary|floatformat:2 }} руб.</p>
+            {% endfor %}
             <p style="background-color:#FF4747;font-weight:bold;">Ермакова(за все клубы и за всех tequila girls): {{ admins_salary.director|floatformat:2 }} руб.</p>
         </div>
     </body>
