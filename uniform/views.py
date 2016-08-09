@@ -2,15 +2,13 @@ import datetime
 from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.utils import formats
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
-from extuser.models import ExtUser
 from private_message.utils import send_message_about_take_uniform
 from tequilla.decorators import group_required
 from uniform.forms import CreateUniformForEmployee
@@ -19,14 +17,22 @@ from uniform.models import UniformByWeek, UniformForEmployee, UniformTransferByW
 
 @login_required
 @group_required('director', 'chief', 'coordinator')
-def uniform_list_by_week(request):
+def uniform_list_by_week(request, who=None):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
     date = start_date + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
-    uniform_by_week = UniformByWeek.get_uniform_by_week(start_week)
+    # фильтрация объектов по названию группы админа
+    if who is None:
+        who = request.user.groups.first().name
+    else:
+        # только директор может явно запрашивать группу
+        if not request.user.groups.filter(name='director').exists():
+            raise Http404
+
+    uniform_by_week = UniformByWeek.get_uniform_by_week(start_week, who)
     uniform_by_week_ids = []
     # оставшийся баланс вещей
     uniform_balance = []
@@ -35,7 +41,7 @@ def uniform_list_by_week(request):
         # изначально на балансе есть все доступные вещи
         uniform_balance.append(ubw.count)
 
-    uniform_for_employee = UniformForEmployee.objects.filter(date__range=[start_week, end_week])\
+    uniform_for_employee = UniformForEmployee.objects.filter(date__range=[start_week, end_week], who=who)\
         .order_by('employee__surname', 'uniform__num')
 
     # ЗАКОМЕНТИРОВАН КОД С ГРУППИРОВКОЙ ПО СОТРУДНИКАМ
@@ -97,7 +103,9 @@ def uniform_list_by_week(request):
             'structed_employee': uniform_for_employee,
             'uniform_balance': uniform_balance,
             'transfer_price': transfer_price,
-            'current_date': date
+            'current_date': date,
+            'who': who,
+            'user_groups': request.user.groups.all().values_list('name', flat=True),
         }
     )
 
@@ -143,14 +151,17 @@ def uniform_for_employee_form(request, object_id=None):
 @login_required
 @group_required('director', 'chief', 'coordinator')
 def save_uniform_for_employee(request):
+    who = request.POST.get('who', 'chief')
     try:
         uniform_id = request.POST.get('id_uniform_for_employee', 0)
         uniform_for_employee = UniformForEmployee.objects.get(id=uniform_id)
         form = CreateUniformForEmployee(data=request.POST, instance=uniform_for_employee)
     except UniformForEmployee.DoesNotExist:
-        form = CreateUniformForEmployee(data=request.POST)
+        form = CreateUniformForEmployee(data=request.POST, initial={'who': who})
     if form.is_valid():
         obj = form.save()
+        obj.who = who
+        obj.save()
         send_message_about_take_uniform(request.user, obj)
         return JsonResponse({'complete': 1})
     return JsonResponse({'complete': 0})
@@ -175,7 +186,10 @@ def save_uniform_for_employee(request):
 @group_required('director', 'chief', 'coordinator')
 def remove_for_employee(request, object_id):
     try:
-        UniformForEmployee.objects.get(id=object_id).delete()
+        ufe = UniformForEmployee.objects.get(id=object_id)
+        ufe.delete()
+        if request.user.groups.filter(name='director').exists():
+            return redirect('uniform:uniform_by_week_director', ufe.who)
         return redirect('uniform:uniform_by_week')
     except Exception as e:
         print(e)
@@ -201,13 +215,21 @@ def change_transfer(request, transfer_id):
 @login_required
 @group_required('director', 'chief', 'coordinator')
 @require_POST
-def copy_to_next_week(request, date):
+def copy_to_next_week(request, date, who=None):
+    # фильтрация объектов по названию группы админа
+    if who is None:
+        who = request.user.groups.first().name
+    else:
+        # только директор может явно запрашивать группу
+        if not request.user.groups.filter(name='director').exists():
+            raise Http404
+
     current_date = parse_date(date)
     start_current_week = current_date - datetime.timedelta(current_date.weekday())
-    uniform_for_current_week = UniformByWeek.get_uniform_by_week(start_current_week)
+    uniform_for_current_week = UniformByWeek.get_uniform_by_week(start_current_week, who)
 
     start_next_week = start_current_week + datetime.timedelta(7)
-    uniform_for_next_week = UniformByWeek.get_uniform_by_week(start_next_week)
+    uniform_for_next_week = UniformByWeek.get_uniform_by_week(start_next_week, who)
 
     data = {}
     for ufw in uniform_for_current_week:

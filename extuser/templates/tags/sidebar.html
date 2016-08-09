@@ -98,9 +98,19 @@
                         <a href="{% url 'week_plan:plan_by_week' %}"><i class="fa fa-calendar"></i> Недельный план </a>
                     </li>
                 {% endif %}
-                <li>
-                    <a href="{% url 'uniform:uniform_by_week' %}"><i class="fa fa-sort-amount-desc"></i> Остатки формы </a>
-                </li>
+                {% if 'director' in user_groups %}
+                    <li>
+                        <a href="{% url 'uniform:uniform_by_week_director' 'chief' %}"><i class="fa fa-sort-amount-desc"></i> Остатки формы (руководитель) </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'uniform:uniform_by_week_director' 'coordinator' %}"><i class="fa fa-sort-amount-desc"></i> Остатки формы (координатор) </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url 'uniform:uniform_by_week' %}"><i class="fa fa-sort-amount-desc"></i> Остатки формы </a>
+                    </li>
+                {% endif %}
+
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
                 </li>

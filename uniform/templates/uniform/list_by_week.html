@@ -82,7 +82,8 @@
                 openTestModal({
                     href: $(this).attr('href'),
                     employee: $(this).data('employee-id'),
-                    uniform: $(this).data('uniform-id')
+                    uniform: $(this).data('uniform-id'),
+                    who: '{{ who }}'
                 });
             });
 
@@ -141,7 +142,8 @@
                         break;
                     }
                 }
-                data.push({'name': 'csrfmiddlewaretoken', 'value':'{{ csrf_token }}'});
+                data.push({name: 'csrfmiddlewaretoken', value:'{{ csrf_token }}'});
+                data.push({name: 'who', value: '{{ who }}'});
 
                 $.ajax({
                     url: url,
@@ -282,7 +284,11 @@
                 </div>
                 <div class="small-margin-top">
                     <a class="btn btn-success btn-lg button-add" data-toggle="modal">Добавить запись</a>
-                    <a id="copy-to-next-week" class="btn btn-warning btn-lg" href="{% url 'uniform:copy_to_next_week' current_date %}">Копировать на следующую неделю</a>
+                    {% if 'director' in user_groups %}
+                        <a id="copy-to-next-week" class="btn btn-warning btn-lg" href="{% url 'uniform:copy_to_next_week_director' current_date who %}">Копировать на следующую неделю</a>
+                    {% else %}
+                        <a id="copy-to-next-week" class="btn btn-warning btn-lg" href="{% url 'uniform:copy_to_next_week' current_date %}">Копировать на следующую неделю</a>
+                    {% endif %}
                 </div>
                 <!-- buttons end -->
                 <div id="uniform-container">
