@@ -218,11 +218,13 @@ def export_xls(request, week, start_date):
 
     writer.new_row()
     writer.new_row()
-    writer.write(
-        'Координатор(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['coordinator']),
-        pink_style
-    )
-    writer.new_row()
+    for coordinator, salary in data['admins_salary']['coordinators'].items():
+        writer.write(
+            'Координатор {}(за все клубы и за всех tequila girls): {:.2f}'.format(coordinator.get_full_name(), salary),
+            pink_style
+        )
+        writer.new_row()
+
     writer.write(
         'Ермакова(за все клубы и за всех tequila girls): {:.2f}'.format(data['admins_salary']['director']),
         red_style
