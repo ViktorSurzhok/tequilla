@@ -19,7 +19,11 @@ def calculate_prices(formula, report_drink, club_coordinator, employee_coordinat
     if formula == Club.SHOT_CHOICE:
         # формула для шотов
         price_for_club = report_drink.count * price_in_bar * Decimal(0.2)
-        price_for_coordinator = report_drink.count * price_in_bar * Decimal(0.05) if employee_coordinator else 0
+        if employee_coordinator:
+            factor = Decimal(0.1) if club_coordinator == employee_coordinator else Decimal(0.05)
+            price_for_coordinator = report_drink.count * price_in_bar * factor
+        else:
+            price_for_coordinator = 0
     else:
         # формула для мензурок
         price_for_club = (price_for_sale - price_in_bar) / Decimal(2) * report_drink.count
@@ -97,7 +101,6 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                         price_for_club, price_for_coordinator = calculate_prices(
                             formula, report_drink, club_coordinator, employee.coordinator
                         )
-                        print(price_for_club, price_for_coordinator)
                         sum_for_club += price_for_club
                         sum_for_coordinator += price_for_coordinator
 

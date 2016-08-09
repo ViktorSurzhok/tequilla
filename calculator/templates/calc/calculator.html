@@ -87,6 +87,7 @@
                     sum_for_bar = 0,
                     sum_for_agency = 0,
                     total_beakers_count = 0,
+                    total_shots_count = 0,
                     drinks = [],
                     drinks_sms = [];
                 $('.containers .drink-container').each(function() {
@@ -107,6 +108,7 @@
                     sum_for_bar += shots_count * price_in_bar;
                     sum_for_agency += markup / 2 * beakers_count;
                     total_beakers_count += beakers_count;
+                    total_shots_count += shots_count;
                     var text = selected_option.text() + ' (цена половины барного шота:' + (price_in_bar / 2) + ',' +
                         ' цена продажи:' + sale_price + ')';
                     drinks_sms.push(text);
@@ -122,6 +124,7 @@
                     sum_for_bar: sum_for_bar,
                     sum_for_agency: sum_for_agency,
                     total_beakers_count: total_beakers_count,
+                    total_shots_count: total_shots_count,
                     drinks_sms: drinks_sms,
                     drinks: drinks,
                     time_from: $('#time-from').val(),
@@ -212,6 +215,7 @@
                 $('#sms-message-bar').text(data['sum_for_bar'].toFixed(2));
                 $('#sms-message-agency').text(data['sum_for_agency'].toFixed(2));
                 $('#sms-message-beakers-count').text(data['total_beakers_count']);
+                $('#sms-message-shots-count').text(data['total_shots_count']);
                 $('#sms-message-time').text(data['time_from'] + '-' + data['time_to']);
                 $('#sms-message-drinks').text(data['drinks_sms'].join(', '));
                 $('#sms-message').show();
@@ -385,7 +389,7 @@
                         <span>
                             <span id="sms-message-date">число</span>, <span id="sms-message-club">название заведения</span>,
                             в бар: <span id="sms-message-bar">сумма</span>, перевод: <span id="sms-message-agency">сумма</span>,
-                            мензурок: <span id="sms-message-beakers-count">кол-во</span>,
+                            шотов: <span id="sms-message-shots-count">кол-во</span>, мензурок: <span id="sms-message-beakers-count">кол-во</span>,
                             <span id="sms-message-drinks">расшифровка того что продавала, цена половины барного шота, цена продажи мензурки</span>,
                             время работы: <span id="sms-message-time"></span>.
                         </span>
