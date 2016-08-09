@@ -6,6 +6,7 @@
             <th>Сотрудник</th>
             <th>Количество шотов</th>
             <th>Напиток</th>
+            <th>Сумма отданная в бар</th>
         </tr>
         </thead>
         <tbody>
@@ -15,16 +16,18 @@
                     class="for-wall-check"
                     data-drink-name="{{ drink.drink.name }}"
                     data-employee="{{ drink.employee.get_full_name }}"
+                    data-sum-for-bar="{{ drink.sum_for_bar }}"
                     data-count="{{ drink.count }}"
                     type="checkbox">
             </td>
             <td>{{ drink.employee.get_full_name }}</td>
             <td>{{ drink.count }}</td>
             <td>{{ drink.drink.name }}</td>
+            <td>{{ drink.sum_for_bar }}</td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4">
+            <td colspan="5">
                 Нет статистики за данный период.
             </td>
         </tr>

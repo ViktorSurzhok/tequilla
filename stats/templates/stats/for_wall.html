@@ -39,6 +39,7 @@
             <th>Сотрудник</th>
             <th>Количество шотов</th>
             <th>Напиток</th>
+            <th>Сумма в бар</th>
         </tr>
     </thead>
     <tbody>
@@ -47,6 +48,7 @@
                 <td>{{ item.employee }}</td>
                 <td>{{ item.count }}</td>
                 <td>{{ item.drink }}</td>
+                <td>{{ item.sum_for_bar }}</td>
             </tr>
         {% endfor %}
     </tbody>

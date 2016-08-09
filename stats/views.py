@@ -149,8 +149,14 @@ def stats_by_drinks(request):
         for report_drink in report.drinks.all():
             key = '{}:{}'.format(report_drink.drink.id, employee_id)
             if key not in drinks:
-                drinks[key] = {'employee': report.work_shift.employee, 'drink': report_drink.drink, 'count': 0}
+                drinks[key] = {
+                    'employee': report.work_shift.employee,
+                    'drink': report_drink.drink,
+                    'count': 0,
+                    'sum_for_bar': 0
+                }
             drinks[key]['count'] += report_drink.count
+            drinks[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
 
     drinks_list = []
     for d in drinks.values():
