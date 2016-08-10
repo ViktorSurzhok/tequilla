@@ -1,32 +1,34 @@
 {% if penalties %}
-<table class="table table-striped">
-    <thead>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
         <tr>
-        <th>Дата</th>
-        <th>Тип штрафа</th>
-        <th>Количество</th>
-        <th>Сумма</th>
-    </tr>
-    </thead>
-    <tbody>
+            <th>Дата</th>
+            <th>Тип штрафа</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+        </tr>
+        </thead>
+        <tbody>
         {% for penalty in penalties %}
-            <tr>
-                <td>
-                    {{ penalty.date }}
-                </td>
-                <td>
-                    {{ penalty.type.description }}
-                </td>
-                <td>
-                    {{ penalty.count }}
-                </td>
-                <td>
-                    {{ penalty.get_sum }}
-                </td>
-            </tr>
+        <tr>
+            <td>
+                {{ penalty.date }}
+            </td>
+            <td>
+                {{ penalty.type.description }}
+            </td>
+            <td>
+                {{ penalty.count }}
+            </td>
+            <td>
+                {{ penalty.get_sum }}
+            </td>
+        </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 {% else %}
-    Нет штрафов.
+Нет штрафов.
 {% endif %}
