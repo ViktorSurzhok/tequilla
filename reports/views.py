@@ -26,19 +26,19 @@ from work_calendar.models import WorkShift
 def reports_by_week(request, user_id=None):
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
+    date = start_date + datetime.timedelta(week_offset * 7)
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(6)
 
     if request.user.has_perm('extuser.can_manage_reports'):
         employee = None
-        start_week = parse_date(request.GET.get('start_date', str(datetime.date.today())))
-        end_week = parse_date(request.GET.get('end_date', str(datetime.date.today() + datetime.timedelta(6))))
+        start_week = parse_date(request.GET.get('start_date', str(start_week)))
+        end_week = parse_date(request.GET.get('end_date', str(end_week)))
     elif user_id is None or int(user_id) != request.user.id:
         raise Http404
     else:
         try:
             employee = ExtUser.objects.get(id=request.user.id)
-            date = start_date + datetime.timedelta(week_offset * 7)
-            start_week = date - datetime.timedelta(date.weekday())
-            end_week = start_week + datetime.timedelta(6)
         except ExtUser.DoesNotExist:
             raise Http404
 
