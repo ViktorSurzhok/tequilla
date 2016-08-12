@@ -97,6 +97,7 @@ class Club(TimeStampedModel):
     description = models.TextField('Описание', blank=True, null=True)
     features = models.TextField('Особенности', blank=True, null=True)
     discount_conditions = models.TextField('Условия скидки', blank=True, null=True)
+    discount_percent = models.FloatField('Размер скидки в % (используется в калькуляторе)', blank=True, null=True)
     drinks = models.TextField('Напитки', blank=True, null=True)
     count_shots = models.CharField('Норма шотов', max_length=255, blank=True, null=True)
     start_time = models.CharField('Время начала работы', max_length=6, default='00:00')

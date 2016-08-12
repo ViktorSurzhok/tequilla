@@ -14,13 +14,13 @@
         </select>
     </td>
     <td class="col-md-2">
-        <input type="text" name="drink-count" class="form-control drink-line-count" {% if drink %}value="{{ drink.count }}"{% endif %}>
-    </td>
-    <td class="col-md-2">
         <input type="text" name="drink-price-in-bar" class="form-control drink-line-price-in-bar" {% if drink %}value="{{ drink.price_in_bar }}"{% endif %}>
     </td>
     <td class="col-md-2">
         <input type="text" name="drink-price-for-sale" class="form-control drink-line-price-for-sale" {% if drink %}value="{{ drink.price_for_sale }}"{% endif %}>
+    </td>
+    <td class="col-md-2">
+        <input type="text" name="drink-count" class="form-control drink-line-count" {% if drink %}value="{{ drink.count }}"{% endif %}>
     </td>
 
     <td class="col-md-1">
