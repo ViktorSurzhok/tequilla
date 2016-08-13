@@ -158,10 +158,7 @@ def stats_by_drinks(request):
             drinks[key]['count'] += report_drink.count
             drinks[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
 
-    drinks_list = []
-    for d in drinks.values():
-        drinks_list.append(d)
-    drinks_list = sorted(drinks_list, key=lambda t: t['count'], reverse=True)
+    drinks_list = sorted([d for d in drinks.values()], key=lambda t: t['count'], reverse=True)
     data_table = render_to_string('stats/stats_by_drink.html', {'drinks': drinks_list})
 
     return render(
@@ -178,5 +175,49 @@ def stats_by_drinks(request):
             'clubs': Club.objects.filter(is_active=True).order_by('name'),
             'current_city': current_city,
             'current_club': int(current_club)
+        }
+    )
+
+
+@login_required
+@group_required('director')
+def stats_by_discount(request):
+    start_date, end_date = get_start_and_end_dates(request)
+    reports = Report.objects.filter(
+        work_shift__date__range=[start_date, end_date])
+    current_city = int(request.GET.get('city', 0))
+    if current_city:
+        reports = reports.filter(work_shift__club__city=current_city)
+    clubs = {}
+    for report in reports:
+        key = report.work_shift.club
+        if key not in clubs:
+            clubs[key] = {
+                'discount': 0,
+                'count': 0,
+                'sum_for_bar': 0,
+                'club': report.work_shift.club
+            }
+            for report_drink in report.drinks.all():
+                clubs[key]['count'] += report_drink.count
+                clubs[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
+            clubs[key]['discount'] += 0 if report.discount is None else report.discount
+
+    clubs_list = sorted([val for val in clubs.values()], key=lambda t: t['sum_for_bar'], reverse=True)
+    data_table = render_to_string('stats/stats_by_discount.html', {'clubs': clubs_list})
+
+    return render(
+        request,
+        'stats/list.html',
+        {
+            'data_table': data_table,
+            'start_date': start_date,
+            'end_date': end_date,
+            'start_date_f': request.GET.get('start_date', None),
+            'end_date_f': request.GET.get('end_date', None),
+            'current_stats': 'by_discount',
+            'cities': City.objects.all(),
+            'clubs': Club.objects.filter(is_active=True).order_by('name'),
+            'current_city': current_city
         }
     )

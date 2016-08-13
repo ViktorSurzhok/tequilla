@@ -1,0 +1,37 @@
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Клуб</th>
+            <th>Количество шотов</th>
+            <th>Сумма отданная в бар</th>
+            <th>Сумма скидки</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for club in clubs %}
+        <tr>
+            <td><input
+                    class="for-wall-check"
+                    data-discount="{{ club.discount }}"
+                    data-club="{{ club.club.name }} {{ club.club.get_address }} {% if club.club.city %}({{ club.club.city }}){% endif %}"
+                    data-sum-for-bar="{{ club.sum_for_bar }}"
+                    data-count="{{ club.count }}"
+                    type="checkbox">
+            </td>
+            <td>{{ club.club.name }} {{ club.club.get_address }} {% if club.club.city %}({{ club.club.city }}){% endif %}</td>
+            <td>{{ club.count }}</td>
+            <td>{{ club.sum_for_bar }}</td>
+            <td>{{ club.discount }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">
+                Нет статистики за данный период.
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

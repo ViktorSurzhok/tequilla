@@ -119,6 +119,9 @@
                 <a href="{% url 'stats:stats_by_sale' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_sale" class="switch-btn btn{% if current_stats == 'by_sale' %} active{% endif %} btn-success">По продажам</a>
                 <a href="{% url 'stats:stats_by_penalty' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_penalty" class="switch-btn btn{% if current_stats == 'by_penalty' %} active{% endif %} btn-success">По штрафам</a>
                 <a href="{% url 'stats:stats_by_drinks' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_drinks" class="switch-btn btn{% if current_stats == 'by_drinks' %} active{% endif %} btn-success">По напиткам</a>
+                {% if perms.extuser.can_see_special_stats %}
+                    <a href="{% url 'stats:stats_by_discount' %}?{% if start_date_f %}start_date={{ start_date_f }}&{% endif %}{% if end_date_f %}end_date={{ end_date_f }}{% endif %}{% if current_city %}&city={{ current_city }}{% endif %}" id="by_discount" class="switch-btn btn{% if current_stats == 'by_discount' %} active{% endif %} btn-success">По сумме в бар</a>
+                {% endif %}
                 <div class="small-margin-top">
                     <form class="form-inline">
                         <div class="form-group">
