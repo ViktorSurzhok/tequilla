@@ -30,4 +30,7 @@ class DrinkForState(TimeStampedModel):
     count = models.FloatField(blank=True, null=True, verbose_name="Количество шотов")
 
     def get_sale_price(self):
-        return math.ceil((self.price_in_bar / 2.0 + 75.0) / 50.0) * 50.0
+        if self.state.club.equal_prices:
+            return self.price_in_bar
+        factor = 30.0 if self.type == DrinkForState.SHOT_CHOICE else 75.0
+        return math.ceil((self.price_in_bar / 2.0 + factor) / 50.0) * 50.0
