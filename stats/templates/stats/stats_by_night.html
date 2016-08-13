@@ -15,12 +15,12 @@
             {% with ws=report.work_shift co=report.get_shots_count %}
             <td><input
                     class="for-wall-check"
-                    data-club-name="{{ ws.club.name }}"
+                    data-club-name="{{ ws.club.name }} {% if ws.club.city %}({{ ws.club.city }}){% endif %}"
                     data-employee="{{ ws.employee.get_full_name }}"
                     data-count="{{ co }}"
                     type="checkbox">
             </td>
-            <td>{{ ws.club.name }} {{ ws.club.get_address }}</td>
+            <td>{{ ws.club.name }} {{ ws.club.get_address }} {% if ws.club.city %}({{ ws.club.city }}){% endif %}</td>
             <td>{{ ws.employee.get_full_name }}</td>
             <td>{{ co }}</td>
             <td>{{ report.discount|default_if_none:"0" }}</td>
