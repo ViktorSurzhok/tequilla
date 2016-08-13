@@ -12,7 +12,7 @@ class ClubImportForm(forms.ModelForm):
     """
     class Meta:
         model = Club
-        exclude = ('photo', 'formula', 'discount_percent')
+        exclude = ('photo', 'formula', 'discount_percent', 'equal_prices')
 
 
 class ClubEditAdminForm(forms.ModelForm):

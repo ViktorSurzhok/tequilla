@@ -43,7 +43,9 @@ def get_drinks_for_club(request, club_id):
         club = Club.objects.get(id=club_id)
     except Club.DoesNotExist:
         return JsonResponse({'complete': ''})
-    data_for_render = render_to_string('calc/_drinks_options.html', {'club': club})
+    data_for_render = render_to_string(
+        'calc/_drinks_options.html', {'club': club, 'all_drinks': Drink.actual_objects.all()}
+    )
     return JsonResponse({'complete': data_for_render})
 
 

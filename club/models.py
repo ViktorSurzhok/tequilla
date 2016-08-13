@@ -97,7 +97,6 @@ class Club(TimeStampedModel):
     description = models.TextField('Описание', blank=True, null=True)
     features = models.TextField('Особенности', blank=True, null=True)
     discount_conditions = models.TextField('Условия скидки', blank=True, null=True)
-    discount_percent = models.FloatField('Размер скидки в % (используется в калькуляторе)', blank=True, null=True)
     drinks = models.TextField('Напитки', blank=True, null=True)
     count_shots = models.CharField('Норма шотов', max_length=255, blank=True, null=True)
     start_time = models.CharField('Время начала работы', max_length=6, default='00:00')
@@ -105,6 +104,8 @@ class Club(TimeStampedModel):
     w_start_time = models.CharField('Время начала работы на выходных', max_length=6, default='00:00')
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
+    discount_percent = models.FloatField('Размер скидки в % (используется в калькуляторе)', blank=True, null=True)
+    equal_prices = models.BooleanField('Цена продажи равна цене в баре', default=False)
     formula = models.CharField('Формула рассчета', max_length=10, choices=FORMULA_CHOICES, default=SHOT_CHOICE)
     size_for_calc = models.PositiveSmallIntegerField(
         'Размер мензурок (для калькулятора)', choices=SIZE_CHOICES, blank=True, null=True)

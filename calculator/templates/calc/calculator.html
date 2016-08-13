@@ -23,8 +23,12 @@
     <script>
         $(function() {
 
-            function calc_sale_price(price_in_bar) {
-                return Math.ceil((parseInt(price_in_bar) / 2 + 75) / 50) * 50;
+            function calc_sale_price(price_in_bar, type) {
+                if ($('#club option:selected').data('equal-prices') == 1) {
+                    return price_in_bar;
+                }
+                var factor = type == 'shot' ? 30 : 75;
+                return Math.ceil((parseInt(price_in_bar) / 2 + factor) / 50) * 50;
             }
 
             $('#calendar').daterangepicker(calendar_options);
@@ -55,7 +59,7 @@
                 var price = $(this).find('option:selected').data('price'),
                     form = $(this).closest('form');
                 form.find('.drink-price').val(price);
-                var sale_price = calc_sale_price(price);
+                var sale_price = calc_sale_price(price, form.find('.drink-type-select').val());
                 form.find('.sale-price').text(sale_price);
             });
 
@@ -64,7 +68,7 @@
                 var price = $(this).val(),
                     form = $(this).closest('form');
 
-                var sale_price = !isNaN(parseInt(price)) ? calc_sale_price(price) : '';
+                var sale_price = !isNaN(parseInt(price)) ? calc_sale_price(price, form.find('.drink-type-select').val()) : '';
                 form.find('.sale-price').text(sale_price);
             });
 
@@ -89,15 +93,20 @@
                     total_beakers_count = 0,
                     total_shots_count = 0,
                     drinks = [],
-                    drinks_sms = [];
+                    drinks_sms = [],
+                    only_shots = true,
+                    only_beakers = true;
                 $('.containers .drink-container').each(function() {
                     var volume = 0,
-                        shots_count = 0;
-                    if ($(this).find('.drink-type-select').val() == 'shot') {
+                        shots_count = 0,
+                        type = $(this).find('.drink-type-select').val();
+                    if (type  == 'shot') {
                         shots_count =  parseFloat($(this).find('.drink-count').val())
+                        only_beakers = false;
                     } else {
                         volume = parseFloat($(this).find('.drink-val').val());
                         shots_count = volume / size_for_calc;
+                        only_shots = false;
                     }
 
                     var beakers_count = shots_count * 2,
@@ -130,7 +139,9 @@
                     time_from: $('#time-from').val(),
                     time_to: $('#time-to').val(),
                     date: $('#calendar').val(),
-                    discount: $('#discount').val()
+                    discount: $('#discount').val(),
+                    only_shots: only_shots,
+                    only_beakers: only_beakers
                 }
             }
 
@@ -218,6 +229,16 @@
                 $('#sms-message-shots-count').text(data['total_shots_count']);
                 $('#sms-message-time').text(data['time_from'] + '-' + data['time_to']);
                 $('#sms-message-drinks').text(data['drinks_sms'].join(', '));
+                if (data['only_shots']) {
+                    $('#sms-message-beakers-count-container').hide();
+                    $('#sms-message-shots-count-container').show();
+                } else if (data['only_beakers']) {
+                    $('#sms-message-beakers-count-container').show();
+                    $('#sms-message-shots-count-container').hide();
+                } else {
+                    $('#sms-message-beakers-count-container').show();
+                    $('#sms-message-shots-count-container').show();
+                }
                 $('#sms-message').show();
 
                 $.ajax({
@@ -297,6 +318,7 @@
                     beakers.show();
                     shots.hide();
                 }
+                form.find('.drink-price').trigger('keyup');
             });
         });
     </script>
@@ -323,7 +345,7 @@
                             <div class="col-md-9 col-sm-6 col-xs-12">
                                 <select class="form-control" id="club" name="club">
                                     {% for club in clubs %}
-                                        <option {% if state and state.club.id == club.id %}selected{% endif %} data-short-name="{{ club.name }}" data-volume="{{ club.size_for_calc }}" data-href="{% url 'calc:get_drinks_for_club' club.id %}" value="{{ club.id }}">
+                                        <option {% if state and state.club.id == club.id %}selected{% endif %} data-equal-prices="{% if club.equal_prices %}1{% else %}0{% endif %}" data-short-name="{{ club.name }}" data-volume="{{ club.size_for_calc }}" data-href="{% url 'calc:get_drinks_for_club' club.id %}" value="{{ club.id }}">
                                             {{ club }}
                                         </option>
                                     {% endfor %}
@@ -389,7 +411,8 @@
                         <span>
                             <span id="sms-message-date">число</span>, <span id="sms-message-club">название заведения</span>,
                             в бар: <span id="sms-message-bar">сумма</span>, перевод: <span id="sms-message-agency">сумма</span>,
-                            шотов: <span id="sms-message-shots-count">кол-во</span>, мензурок: <span id="sms-message-beakers-count">кол-во</span>,
+                            <span id="sms-message-shots-count-container">шотов: <span id="sms-message-shots-count">кол-во</span>,</span>
+                            <span id="sms-message-beakers-count-container">мензурок: <span id="sms-message-beakers-count">кол-во</span>,</span>
                             <span id="sms-message-drinks">расшифровка того что продавала, цена половины барного шота, цена продажи мензурки</span>,
                             время работы: <span id="sms-message-time"></span>.
                         </span>
