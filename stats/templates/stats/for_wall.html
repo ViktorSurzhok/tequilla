@@ -52,6 +52,25 @@
             </tr>
         {% endfor %}
     </tbody>
+    {% elif type == 'by_discount' %}
+    <thead>
+        <tr>
+            <th>Клуб</th>
+            <th>Количество шотов</th>
+            <th>Сумма в бар</th>
+            <th>Сумма скидки</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr>
+                <td>{{ item.club }}</td>
+                <td>{{ item.count }}</td>
+                <td>{{ item.sum_for_bar }}</td>
+                <td>{{ item.discount }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
     {% else %}
         <thead>
             <tr>

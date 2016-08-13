@@ -50,6 +50,13 @@
                         count: $(this).data('count'),
                         sum_for_bar: $(this).data('sum-for-bar')
                     });
+                } else if (type == 'by_discount') {
+                    items.push({
+                        club: $(this).data('club'),
+                        count: $(this).data('count'),
+                        sum_for_bar: $(this).data('sum-for-bar'),
+                        discount: $(this).data('discount')
+                    });
                 } else {
                     items.push({
                         employee: $(this).data('employee'),
