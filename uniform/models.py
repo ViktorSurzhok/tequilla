@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.db.models import Max
 from model_utils.models import TimeStampedModel
 
 from extuser.models import ExtUser
@@ -60,24 +61,25 @@ class UniformForEmployee(TimeStampedModel):
     date = models.DateField('Дата')
     is_probation = models.BooleanField('Стажировка', default=False)
     who = models.CharField('Кто выдал форму', max_length=15, default=CHIEF_CHOICES, choices=WHO_CHOICES)
+    group = models.PositiveIntegerField('Группировка')
+
+    @staticmethod
+    def get_next_group_id():
+        data = UniformForEmployee.objects.filter().aggregate(max_group=Max('group'))
+        max_group = data.get('max_group', 0)
+        return int(max_group if max_group else 0) + 1
 
     def __str__(self):
         return '{}: {}, {}({}шт)'.format(self.date, self.employee.get_full_name(), self.uniform.name, self.count)
 
 
 class UniformTransferByWeek(TimeStampedModel):
-    """Перевод за форму за неделю"""
-    employee = models.ForeignKey(ExtUser, verbose_name='Tequilla girl')
-    uniform_for_employee = models.ForeignKey(UniformForEmployee, related_name='transfer')
-    #start_week = models.DateField('Дата начала недели за которую проставляется перевод')
+    """Перевод за форму для группы"""
     was_paid = models.BooleanField('Перевод', default=False)
     cash = models.BooleanField('Наличными', default=False)
     comment = models.TextField('Комментарий', blank=True)
-
-    # def get_sum(self):
-    #     end_week = self.start_week + datetime.timedelta(6)
-    #     uniforms = UniformForEmployee.objects.filter(date__range=[self.start_week, end_week], employee=self.employee)
-    #     return sum([i.count * i.uniform.price for i in uniforms])
+    group = models.PositiveIntegerField('Группировка')
 
     def get_sum(self):
-        return self.uniform_for_employee.count * self.uniform_for_employee.uniform.price
+        uniforms = UniformForEmployee.objects.filter(group=self.group)
+        return sum([i.count * i.uniform.price for i in uniforms])

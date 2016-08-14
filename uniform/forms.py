@@ -17,4 +17,4 @@ class CreateUniformForEmployee(forms.ModelForm):
 
     class Meta:
         model = UniformForEmployee
-        fields = ('employee', 'uniform', 'count', 'date', 'is_probation')
+        fields = ('employee', 'uniform', 'count', 'date', 'is_probation', 'group')

@@ -44,7 +44,6 @@ def uniform_list_by_week(request, who=None):
     uniform_for_employee = UniformForEmployee.objects.filter(date__range=[start_week, end_week], who=who)\
         .order_by('employee__surname', 'uniform__num')
 
-    # ЗАКОМЕНТИРОВАН КОД С ГРУППИРОВКОЙ ПО СОТРУДНИКАМ
     # структурирование данных по сотрудникам
     # structed_employee = {}
     # transfer_price = 0
@@ -70,24 +69,59 @@ def uniform_list_by_week(request, who=None):
     #         index += 1
 
     # код без группировки по сотрудникам
+    # transfer_price = 0
+    # for item in uniform_for_employee:
+    #     transfer, new = UniformTransferByWeek.objects.get_or_create(employee=item.employee, uniform_for_employee=item)
+    #     if not transfer.was_paid:
+    #         transfer_price += transfer.get_sum()
+    #     values = OrderedDict()
+    #     index = 0
+    #     for ubw in uniform_by_week_ids:
+    #         if ubw == item.uniform.id:
+    #             minus_balance = item.count
+    #             values[ubw] = {'has_value': True, 'value': item}
+    #         else:
+    #             minus_balance = 0
+    #             values[ubw] = {'has_value': False, 'value': ubw}
+    #         uniform_balance[index] -= minus_balance
+    #         index += 1
+    #     item.grid = values
+    #     item.trans = transfer
+
+    # код с группировкой по группам
+    structed_group = {}
     transfer_price = 0
-    for item in uniform_for_employee:
-        transfer, new = UniformTransferByWeek.objects.get_or_create(employee=item.employee, uniform_for_employee=item)
-        if not transfer.was_paid:
-            transfer_price += transfer.get_sum()
-        values = OrderedDict()
+    for ufe in uniform_for_employee:
+        if ufe.group not in structed_group:
+            transfer, new = UniformTransferByWeek.objects.get_or_create(group=ufe.group)
+            structed_group[ufe.group] = {
+                'uniforms': OrderedDict(),
+                'transfer': transfer,
+                'employee': ufe.employee,
+                'ufe_id': ufe.id,
+                'temp_uniforms': {},
+                'is_probation': False
+            }
+            if not transfer.was_paid:
+                transfer_price += transfer.get_sum()
+        structed_group[ufe.group]['temp_uniforms'][ufe.uniform.id] = ufe
+        if ufe.is_probation:
+            structed_group[ufe.group]['is_probation'] = True
+
+    for item in structed_group.values():
+        values = item['uniforms']
+        temp_values = item['temp_uniforms']
         index = 0
         for ubw in uniform_by_week_ids:
-            if ubw == item.uniform.id:
-                minus_balance = item.count
-                values[ubw] = {'has_value': True, 'value': item}
+            if ubw in temp_values:
+                values[ubw] = {'has_value': True, 'value': temp_values[ubw]}
+                minus_balance = values[ubw]['value'].count
             else:
-                minus_balance = 0
                 values[ubw] = {'has_value': False, 'value': ubw}
+                minus_balance = 0
+            # вычитаем из баланса использованные вещи
             uniform_balance[index] -= minus_balance
             index += 1
-        item.grid = values
-        item.trans = transfer
 
     return render(
         request,
@@ -100,7 +134,8 @@ def uniform_list_by_week(request, who=None):
             'end_week': end_week,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
         #    'structed_employee': structed_employee,
-            'structed_employee': uniform_for_employee,
+        #    'structed_employee': uniform_for_employee,
+            'structed_employee': structed_group,
             'uniform_balance': uniform_balance,
             'transfer_price': transfer_price,
             'current_date': date,
@@ -134,11 +169,12 @@ def uniform_for_employee_form(request, object_id=None):
         initial = {}
         uniform_id = request.GET.get('uniform', None)
         employee_id = request.GET.get('employee', None)
+        group_id = request.GET.get('group', None)
         if uniform_id:
             initial['uniform'] = uniform_id
         if employee_id:
             initial['employee'] = employee_id
-
+        initial['group'] = group_id if group_id else UniformForEmployee.get_next_group_id()
         form = CreateUniformForEmployee(initial=initial)
     content = render_to_string(
         'uniform/_uniform_for_employee_form.html',

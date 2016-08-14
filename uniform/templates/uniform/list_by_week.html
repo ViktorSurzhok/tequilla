@@ -83,7 +83,8 @@
                     href: $(this).attr('href'),
                     employee: $(this).data('employee-id'),
                     uniform: $(this).data('uniform-id'),
-                    who: '{{ who }}'
+                    who: '{{ who }}',
+                    group: $(this).data('group-id')
                 });
             });
 
@@ -369,110 +370,13 @@
                                 <td></td>
                                 <td></td>
                             </tr>
-                            {% for data in structed_employee %}
+
+                            {% for group, data in structed_employee.items %}
                                 <tr>
                                     <td>
                                         {{ data.employee.get_full_name }}
                                         {% if data.is_probation %}<br><span style="color:orangered;">(Стажировка)</span>{% endif %}
                                     </td>
-                                    {% for item in data.grid.values %}
-                                        <td>
-                                            {% if item.has_value %}
-                                                <a class="btn btn-info change-current-item"
-                                                   data-toggle="modal"
-                                                   href="{% url 'uniform:get_form_uniform_for_employee' item.value.id %}">
-                                                    {{ item.value.count }}
-                                                </a>
-                                            {% else %}
-                                                <a class="btn btn-info add-new-item"
-                                                   data-toggle="modal"
-                                                   href="{% url 'uniform:get_empty_form_uniform_for_employee' %}"
-                                                   data-uniform-id="{{ item.value }}"
-                                                   data-employee-id="{{ employee.id }}">
-                                                    0
-                                                </a>
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                    <td>
-                                        <a class="btn btn-dark" href="#transfer-form-{{ data.trans.id }}" data-toggle="modal">
-                                            {% if data.trans.was_paid %}
-                                                Перевод
-                                            {% else %}
-                                                {{ data.trans.get_sum }} руб.
-                                            {% endif %}
-                                        </a>
-                                        <!-- start modal transfer -->
-                                        <div class="modal in transfer-modal-container" id="transfer-form-{{ data.trans.id }}" style="display: none;">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-body">
-                                                        <form class="form-horizontal" action="#" method="post">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="id_employee" value="{{ data.employee.id }}">
-                                                            <div class="form-group">
-                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
-                                                                    Tequilla girl
-                                                                </label>
-                                                                <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 3px;">
-                                                                    <span>{{ data.employee.get_full_name }}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
-                                                                    Перевод
-                                                                </label>
-                                                                <div class="col-md-8 col-sm-6 col-xs-12">
-                                                                    <input name="was_paid" type="checkbox" {% if data.trans.was_paid %}checked{% endif %} value="1">
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
-                                                                    Наличными
-                                                                </label>
-                                                                <div class="col-md-8 col-sm-6 col-xs-12">
-                                                                    <input name="cash" type="checkbox" {% if data.trans.cash %}checked{% endif %} value="1">
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
-                                                                    Комментарий
-                                                                </label>
-                                                                <div class="col-md-8 col-sm-6 col-xs-12">
-                                                                    <textarea name="comment">{{ data.trans.comment|default:"" }}</textarea>
-                                                                </div>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button class="btn btn-large" data-dismiss="modal" style="margin-bottom: 0;">
-                                                            <i class="fa fa-remove"></i> Закрыть
-                                                        </button>
-                                                        <a class="btn btn-primary btn-large change-transfer-button"
-                                                           href="{% url 'uniform:change_transfer' data.trans.id %}"
-                                                           data-uniform-id="{{ uniform.uniform.id }}"
-                                                           data-dismiss="modal">
-                                                            <i class="fa fa-check"></i> Сохранить
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- end modal transfer -->
-                                    </td>
-                                    <td>
-                                       <a class="btn btn-danger remove-uniforms-for-employee" href="{% url 'uniform:remove_for_employee' data.id %}">
-                                            <i class="fa fa-remove"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            {% comment %}{% for employee, data in structed_employee.items %}
-                                <tr>
-                                    <td>{{ employee.get_full_name }}</td>
                                     {% for item in data.uniforms.values %}
                                         <td>
                                             {% if item.has_value %}
@@ -486,7 +390,8 @@
                                                    data-toggle="modal"
                                                    href="{% url 'uniform:get_empty_form_uniform_for_employee' %}"
                                                    data-uniform-id="{{ item.value }}"
-                                                   data-employee-id="{{ employee.id }}">
+                                                   data-employee-id="{{ data.employee.id }}"
+                                                   data-group-id="{{ group }}">
                                                     0
                                                 </a>
                                             {% endif %}
@@ -507,13 +412,13 @@
                                                     <div class="modal-body">
                                                         <form class="form-horizontal" action="#" method="post">
                                                             {% csrf_token %}
-                                                            <input type="hidden" name="id_employee" value="{{ employee.id }}">
+                                                            <input type="hidden" name="id_employee" value="{{ data.employee.id }}">
                                                             <div class="form-group">
                                                                 <label class="control-label col-md-4 col-sm-4 col-xs-12">
                                                                     Tequilla girl
                                                                 </label>
                                                                 <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 3px;">
-                                                                    <span>{{ employee.get_full_name }}</span>
+                                                                    <span>{{ data.employee.get_full_name }}</span>
                                                                 </div>
                                                             </div>
 
@@ -544,12 +449,12 @@
                                         <!-- end modal transfer -->
                                     </td>
                                     <td>
-                                        <a class="btn btn-danger remove-uniforms-for-employee" href="{% url 'uniform:remove_for_employee' employee.id start_week %}">
+                                        <a class="btn btn-danger remove-uniforms-for-employee" href="{% url 'uniform:remove_for_employee' data.ufe_id %}">
                                             <i class="fa fa-remove"></i>
                                         </a>
                                     </td>
                                 </tr>
-                            {% endfor %}{% endcomment %}
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
