@@ -1,10 +1,10 @@
 <optgroup label="Популярные напитки для этого заведения">
     {% for drink in club.drink_club.all %}
-        <option data-price="{{ drink.price_in_bar }}" value="_{{ drink.drink.id }}" {% if selected_drink == drink.drink.id %}selected{% endif %}>{{ drink.drink.name }}</option>
+        <option data-price="" value="_{{ drink.drink.id }}" {% if selected_drink == drink.drink.id %}selected{% endif %}>{{ drink.drink.name }}</option>
     {% endfor %}
 </optgroup>
 <optgroup label="Все напитки">
     {% for drink in all_drinks %}
-        <option data-price="{{ drink.price_in_bar }}" value="{{ drink.id }}" {% if selected_drink == drink.id %}selected{% endif %}>{{ drink.name }}</option>
+        <option data-price="" value="{{ drink.id }}" {% if selected_drink == drink.id %}selected{% endif %}>{{ drink.name }}</option>
     {% endfor %}
 </optgroup>
