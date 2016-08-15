@@ -27,8 +27,21 @@
                 if ($('#club option:selected').data('equal-prices') == 1) {
                     return price_in_bar;
                 }
-                var factor = type == 'shot' ? 30 : 75;
-                return Math.ceil((parseInt(price_in_bar) / 2 + factor) / 50) * 50;
+                var factor = parseInt(price_in_bar);
+                if (type == 'shot') {
+                    factor += 30;
+                } else {
+                    factor = factor / 2 + 75;
+                }
+                return Math.ceil(factor / 50) * 50;
+            }
+
+            function calc_discount(city, discount_percent, sum_for_bar, markup) {
+                if (city == 'Москва') {
+                    return sum_for_bar * parseFloat(discount_percent) / 100;
+                } else {
+                    return markup;
+                }
             }
 
             $('#calendar').daterangepicker(calendar_options);
@@ -94,32 +107,39 @@
                     total_shots_count = 0,
                     drinks = [],
                     drinks_sms = [],
-                    only_shots = true,
-                    only_beakers = true;
+                    total_discount = 0;
                 $('.containers .drink-container').each(function() {
                     var volume = 0,
                         shots_count = 0,
                         type = $(this).find('.drink-type-select').val();
                     if (type  == 'shot') {
-                        shots_count =  parseFloat($(this).find('.drink-count').val())
-                        only_beakers = false;
+                        shots_count =  parseFloat($(this).find('.drink-count').val());
                     } else {
                         volume = parseFloat($(this).find('.drink-val').val());
                         shots_count = volume / size_for_calc;
-                        only_shots = false;
                     }
 
                     var beakers_count = shots_count * 2,
                         sale_price = parseFloat($(this).find('.sale-price').text()),
                         price_in_bar = parseFloat($(this).find('.drink-price').val()),
-                        markup = sale_price - price_in_bar / 2,
-                        selected_option = $(this).find('.drink-select option:selected');
-                    sum_for_bar += shots_count * price_in_bar;
+                        markup = sale_price - (type == 'shot' ? price_in_bar : (price_in_bar / 2)),
+                        selected_option = $(this).find('.drink-select option:selected'),
+                        current_sum_for_bar = shots_count * price_in_bar;
+                    if (club_option.data('equal-prices') == 1) {
+                        markup = 0;
+                    }
+                    var discount = calc_discount(club_option.data('city'), club_option.data('discount'), current_sum_for_bar, markup);
+
+                    sum_for_bar += current_sum_for_bar;
                     sum_for_agency += markup / 2 * beakers_count;
-                    total_beakers_count += beakers_count;
-                    total_shots_count += shots_count;
-                    var text = selected_option.text() + ' (цена половины барного шота:' + (price_in_bar / 2) + ',' +
-                        ' цена продажи:' + sale_price + ')';
+                    total_discount += discount;
+
+                    var text = [
+                        current_sum_for_bar,
+                        discount,
+                        type == 'shot' ? shots_count : beakers_count,
+                        selected_option.text()
+                    ].join('/') + ', ' + price_in_bar + '-' + sale_price;
                     drinks_sms.push(text);
                     drinks.push({
                         'price_for_sale': sale_price,
@@ -128,6 +148,7 @@
                         'count': shots_count
                     });
                 });
+
                 return {
                     club_option: club_option,
                     sum_for_bar: sum_for_bar,
@@ -139,9 +160,7 @@
                     time_from: $('#time-from').val(),
                     time_to: $('#time-to').val(),
                     date: $('#calendar').val(),
-                    discount: $('#discount').val(),
-                    only_shots: only_shots,
-                    only_beakers: only_beakers
+                    discount: total_discount
                 }
             }
 
@@ -151,16 +170,16 @@
                 var error = false,
                     data = get_current_data();
                 for (var i in data) {
-                    if (!data[i]) {
+                    if (data[i] == 'undefined' || data[i] === '') {
                         error = true;
-                        console.log(i);
+                        console.log(0, i, data[i]);
                         break;
                     }
                 }
                 for (var i in data['drinks']) {
                     if (!data['drinks'][i]) {
                         error = true;
-                        console.log(i);
+                        console.log(1, i);
                         break;
                     }
                 }
@@ -221,7 +240,17 @@
                 $('#price-for-agency').text(data['sum_for_agency'].toFixed(2));
 
                 // заполнение смс отчета
-                $('#sms-message-date').text(data['date']);
+                var city_name = data['club_option'].data('city');
+                city_name = city_name == 'Москва' ? 'Мск' : 'Питер';
+                var text = [
+                    data['date'],
+                    data['club_option'].data('short-name'),
+                    data['drinks_sms'].join(', ')
+                ];
+                text.push(data['time_from'] + '-' + data['time_to']);
+                text = (city_name ? (city_name + ': ') : '') + text.join(', ');
+                $('#sms-message .text-sms').text(text);
+                {% comment "old sms report" %}$('#sms-message-date').text(data['date']);
                 $('#sms-message-club').text(data['club_option'].data('short-name'));
                 $('#sms-message-bar').text(data['sum_for_bar'].toFixed(2));
                 $('#sms-message-agency').text(data['sum_for_agency'].toFixed(2));
@@ -238,7 +267,7 @@
                 } else {
                     $('#sms-message-beakers-count-container').show();
                     $('#sms-message-shots-count-container').show();
-                }
+                }{% endcomment %}
                 $('#sms-message').show();
 
                 $.ajax({
@@ -345,7 +374,14 @@
                             <div class="col-md-9 col-sm-6 col-xs-12">
                                 <select class="form-control" id="club" name="club">
                                     {% for club in clubs %}
-                                        <option {% if state and state.club.id == club.id %}selected{% endif %} data-equal-prices="{% if club.equal_prices %}1{% else %}0{% endif %}" data-short-name="{{ club.name }}" data-volume="{{ club.size_for_calc }}" data-href="{% url 'calc:get_drinks_for_club' club.id %}" value="{{ club.id }}">
+                                        <option {% if state and state.club.id == club.id %}selected{% endif %}
+                                                data-equal-prices="{% if club.equal_prices %}1{% else %}0{% endif %}"
+                                                data-short-name="{{ club.name }}"
+                                                data-volume="{{ club.size_for_calc }}"
+                                                data-city="{{ club.city|default_if_none:"" }}"
+                                                data-href="{% url 'calc:get_drinks_for_club' club.id %}"
+                                                data-discount="{{ club.discount_percent|default_if_none:"0" }}"
+                                                value="{{ club.id }}">
                                             {{ club }}
                                         </option>
                                     {% endfor %}
@@ -376,14 +412,14 @@
                                 <input id="time-to" class="form-control" name="end_time" value="{% if state %}{{ state.end_time }}{% endif %}">
                             </div>
                         </div>
-                        <div class="form-group">
+                        {% comment %}<div class="form-group">
                             <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
                                 Сумма скидки
                             </label>
                             <div class="col-md-9 col-sm-6 col-xs-12">
                                 <input id="discount" class="form-control" name="discount" value="{% if state %}{{ state.discount|default_if_none:"" }}{% endif %}">
                             </div>
-                        </div>
+                        </div>{% endcomment %}
                     </form>
                     <hr>
                     <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button><br>
@@ -408,13 +444,13 @@
                     <p>Сумма в агентство: <span id="price-for-agency"></span></p>
                     <div class="small-margin-top"  id="sms-message">
                         <h2>СМС отчет:</h2>
-                        <span>
-                            <span id="sms-message-date">число</span>, <span id="sms-message-club">название заведения</span>,
+                        <span class="text-sms">
+                           {% comment %} <span id="sms-message-date">число</span>, <span id="sms-message-club">название заведения</span>,
                             в бар: <span id="sms-message-bar">сумма</span>, перевод: <span id="sms-message-agency">сумма</span>,
                             <span id="sms-message-shots-count-container">шотов: <span id="sms-message-shots-count">кол-во</span>,</span>
                             <span id="sms-message-beakers-count-container">мензурок: <span id="sms-message-beakers-count">кол-во</span>,</span>
                             <span id="sms-message-drinks">расшифровка того что продавала, цена половины барного шота, цена продажи мензурки</span>,
-                            время работы: <span id="sms-message-time"></span>.
+                            время работы: <span id="sms-message-time"></span>.{% endcomment %}
                         </span>
                         <hr>
                         <button class="btn btn-warning" id="import-to-report"><i class="fa fa-copy"></i> Импорт в отчет</button>

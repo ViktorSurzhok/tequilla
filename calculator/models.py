@@ -32,5 +32,9 @@ class DrinkForState(TimeStampedModel):
     def get_sale_price(self):
         if self.state.club.equal_prices:
             return self.price_in_bar
-        factor = 30.0 if self.type == DrinkForState.SHOT_CHOICE else 75.0
-        return math.ceil((self.price_in_bar / 2.0 + factor) / 50.0) * 50.0
+        factor = self.price_in_bar
+        if self.type == DrinkForState.SHOT_CHOICE:
+            factor += 30.0
+        else:
+            factor = factor / 2.0 + 75.0
+        return math.ceil(factor / 50.0) * 50.0
