@@ -35,9 +35,8 @@
                     calendar_to = $('#calendar_to').val(),
                     is_active = $('#filter-active').val();
 
-
                 var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +
-                         reformat_date(calendar_from);
+                         reformat_date(calendar_from) + '&page={{ albums.number }}';
                 if (is_active) {
                     filters += '&user__is_active=' + is_active;
                 }
