@@ -578,7 +578,10 @@ class Command(BaseCommand):
                                 price_in_bar=bar_price,
                                 price_for_sale=sell_price
                             )
-                        ReportDrink.objects.get_or_create(drink=drink_obj, report=report_obj, count=drink_count)
+                        ReportDrink.objects.get_or_create(
+                            drink=drink_obj, report=report_obj, count=drink_count,
+                            defaults={'price_in_bar': bar_price, 'price_for_sale': sell_price}
+                        )
                     self.stdout.write(self.style.SUCCESS('Drinks for this report "%s" ' % drink_count_stats))
         self.stdout.write(self.style.SUCCESS('Total reports added "%s" ' % reports_count))
 
