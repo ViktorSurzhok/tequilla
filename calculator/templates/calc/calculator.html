@@ -135,8 +135,8 @@
                     total_discount += discount;
 
                     var text = [
-                        current_sum_for_bar,
-                        discount,
+                        current_sum_for_bar.toFixed(2),
+                        discount.toFixed(2),
                         type == 'shot' ? shots_count : beakers_count,
                         selected_option.text()
                     ].join('/') + ', ' + price_in_bar + '-' + sale_price;
