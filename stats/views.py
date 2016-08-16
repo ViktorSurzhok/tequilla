@@ -198,10 +198,11 @@ def stats_by_discount(request):
                 'sum_for_bar': 0,
                 'club': report.work_shift.club
             }
-            for report_drink in report.drinks.all():
-                clubs[key]['count'] += report_drink.count
-                clubs[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
-            clubs[key]['discount'] += 0 if report.discount is None else report.discount
+        for report_drink in report.drinks.all():
+            print(report.work_shift.club.name, report_drink.drink.name, report_drink.count)
+            clubs[key]['count'] += report_drink.count
+            clubs[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
+        clubs[key]['discount'] += 0 if report.discount is None else report.discount
 
     clubs_list = sorted([val for val in clubs.values()], key=lambda t: t['sum_for_bar'], reverse=True)
     data_table = render_to_string('stats/stats_by_discount.html', {'clubs': clubs_list})
