@@ -5156,7 +5156,8 @@ body {
   margin-right: 10px;
 }
 .thumbnails .thumbnail-wrap {
-  display: table-cell;
+  /*display: table-cell;*/
+  display: inline-block;
 }
 .img-container, .img-preview {
   background-color: #f7f7f7;
