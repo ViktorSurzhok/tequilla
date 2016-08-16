@@ -107,12 +107,12 @@ def import_to_report(request):
                 if raw_drink['id'].startswith('_'):
                     drink = Drink.actual_objects.get(id=raw_drink['id'][1:])
                     # добавление напитка в популярные напитки клуба если он не был добавлен ранее
-                    if not DrinkClub.objects.filter(drink=drink, club=club).exists():
+                    if not DrinkClub.objects.filter(drink=drink, club=club_obj).exists():
                         DrinkClub.objects.create(
                             drink=drink,
                             price_in_bar=raw_drink['price_in_bar'],
                             price_for_sale=raw_drink['price_for_sale'],
-                            club=club
+                            club=club_obj
                         )
                 else:
                     drink = Drink.actual_objects.get(id=raw_drink['id'])
