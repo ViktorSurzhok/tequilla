@@ -81,14 +81,19 @@ def save_current_state(request):
 def import_to_report(request):
     try:
         date = request.POST['date']
-        club = request.POST['club']
+        club = int(request.POST['club'])
         drinks = json.loads(request.POST['drinks'])
     except KeyError:
         return JsonResponse({'complete': 0})
     try:
+        club_obj = Club.objects.get(id=club)
         report = Report.objects.get(
-            work_shift__date=date, work_shift__club=club, work_shift__employee=request.user, filled_date__isnull=True)
-    except Report.DoesNotExist:
+            work_shift__date=date,
+            work_shift__club=club_obj,
+            work_shift__employee=request.user,
+            filled_date__isnull=True
+        )
+    except (Club.DoesNotExist, Report.DoesNotExist):
         return JsonResponse({'complete': 0})
     form = ImportToReport(data=request.POST, instance=report)
     old_report = model_to_dict(report, exclude=['id'])
