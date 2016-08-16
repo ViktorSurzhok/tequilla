@@ -128,7 +128,13 @@
                     if (club_option.data('equal-prices') == 1) {
                         markup = 0;
                     }
-                    var discount = calc_discount(club_option.data('city'), club_option.data('discount'), current_sum_for_bar, markup);
+                    var discount = calc_discount(
+                            club_option.data('city'),
+                            club_option.data('discount'),
+                            current_sum_for_bar,
+                            markup
+                    );
+                    discount *= type == 'shot' ? shots_count : beakers_count;
 
                     sum_for_bar += current_sum_for_bar;
                     var discount_for_agency = parseFloat(club_option.data('discount'));
