@@ -131,7 +131,7 @@
                     var discount = calc_discount(club_option.data('city'), club_option.data('discount'), current_sum_for_bar, markup);
 
                     sum_for_bar += current_sum_for_bar;
-                    sum_for_agency += type == 'shot' ? (sum_for_bar * parseFloat(club_option.data('discount'))) : (markup / 2 * beakers_count);
+                    sum_for_agency += type == 'shot' ? (sum_for_bar * parseFloat(club_option.data('discount')) / 100) : (markup / 2 * beakers_count);
                     total_discount += discount;
 
                     var text = [

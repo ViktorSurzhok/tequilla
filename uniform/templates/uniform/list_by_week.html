@@ -430,6 +430,22 @@
                                                                     <input name="was_paid" type="checkbox" {% if data.transfer.was_paid %}checked{% endif %} value="1">
                                                                 </div>
                                                             </div>
+                                                             <div class="form-group">
+                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
+                                                                    Наличными
+                                                                </label>
+                                                                <div class="col-md-8 col-sm-6 col-xs-12">
+                                                                    <input name="cash" type="checkbox" {% if data.transfer.cash %}checked{% endif %} value="1">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
+                                                                    Комментарий
+                                                                </label>
+                                                                <div class="col-md-8 col-sm-6 col-xs-12">
+                                                                    <textarea name="comment">{{ data.transfer.comment|default:"" }}</textarea>
+                                                                </div>
+                                                            </div>
                                                         </form>
                                                     </div>
                                                     <div class="modal-footer">
