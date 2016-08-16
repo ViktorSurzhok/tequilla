@@ -199,7 +199,6 @@ def stats_by_discount(request):
                 'club': report.work_shift.club
             }
         for report_drink in report.drinks.all():
-            print(report.work_shift.club.name, report_drink.drink.name, report_drink.count)
             clubs[key]['count'] += report_drink.count
             clubs[key]['sum_for_bar'] += report_drink.count * (report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
         clubs[key]['discount'] += 0 if report.discount is None else report.discount

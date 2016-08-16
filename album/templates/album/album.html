@@ -3,6 +3,9 @@
 {% block content %}
     <div class="row album-row">
         <a href="{% url 'album:add' %}"><button class="btn btn-success"><i class="fa fa-plus"></i> Добавить новый фотоотчет</button></a>
-        {% include 'album/_album_part.html' with albums=user.albums.all admin_mode=False %}
+        {% include 'album/_album_part.html' with albums=albums admin_mode=False %}
+    </div>
+    <div id="paginator-container">
+        {% include 'pagination.html' with page=albums %}
     </div>
 {% endblock %}

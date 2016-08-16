@@ -16,9 +16,20 @@ from .models import Album, Photo
 
 @login_required
 def album(request):
+    object_list = request.user.albums.all()
+    is_director = request.user.groups.filter(name='director').exists()
+    paginator = Paginator(object_list, (settings.ALBUMS_COUNT_ON_WALL - 1) if is_director else settings.ALBUMS_COUNT_ON_WALL)
+    page = request.GET.get('page')
+    try:
+        albums = paginator.page(page)
+    except PageNotAnInteger:
+        albums = paginator.page(1)
+    except EmptyPage:
+        albums = paginator.page(paginator.num_pages)
     return render(
         request,
-        'album/album.html'
+        'album/album.html',
+        {'albums': albums}
     )
 
 
