@@ -159,7 +159,7 @@
                         'price_for_sale': sale_price,
                         'price_in_bar': price_in_bar,
                         'id': selected_option.attr('value'),
-                        'count': shots_count
+                        'count': type == 'shot' ? shots_count : beakers_count
                     });
                 });
 
