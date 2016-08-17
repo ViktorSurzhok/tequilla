@@ -125,6 +125,11 @@
                         markup = sale_price - (type == 'shot' ? price_in_bar : (price_in_bar / 2)),
                         selected_option = $(this).find('.drink-select option:selected'),
                         current_sum_for_bar = shots_count * price_in_bar;
+
+                    if (type != 'shot') {
+                        price_in_bar /= 2;
+                    }
+
                     if (club_option.data('equal-prices') == 1) {
                         markup = 0;
                     }
@@ -258,24 +263,6 @@
                 text.push(data['time_from'] + '-' + data['time_to']);
                 text = (city_name ? (city_name + ': ') : '') + text.join(', ');
                 $('#sms-message .text-sms').text(text);
-                {% comment "old sms report" %}$('#sms-message-date').text(data['date']);
-                $('#sms-message-club').text(data['club_option'].data('short-name'));
-                $('#sms-message-bar').text(data['sum_for_bar'].toFixed(2));
-                $('#sms-message-agency').text(data['sum_for_agency'].toFixed(2));
-                $('#sms-message-beakers-count').text(data['total_beakers_count']);
-                $('#sms-message-shots-count').text(data['total_shots_count']);
-                $('#sms-message-time').text(data['time_from'] + '-' + data['time_to']);
-                $('#sms-message-drinks').text(data['drinks_sms'].join(', '));
-                if (data['only_shots']) {
-                    $('#sms-message-beakers-count-container').hide();
-                    $('#sms-message-shots-count-container').show();
-                } else if (data['only_beakers']) {
-                    $('#sms-message-beakers-count-container').show();
-                    $('#sms-message-shots-count-container').hide();
-                } else {
-                    $('#sms-message-beakers-count-container').show();
-                    $('#sms-message-shots-count-container').show();
-                }{% endcomment %}
                 $('#sms-message').show();
 
                 $.ajax({
@@ -353,9 +340,29 @@
                     beakers.hide();
                 } else {
                     beakers.show();
-                    shots.hide();
+                    shots.show();
                 }
                 form.find('.drink-price').trigger('keyup');
+            });
+
+            // изменение кол-ва шотов - пересчитывать кол-во мл
+            $('.containers').on('keyup', '.drink-count', function() {
+                var form = $(this).closest('form'),
+                    val = $(this).val(),
+                    size_for_calc = $('#club option:selected').data('volume'),
+                    beakers_input = form.find('.beakers-volume input');
+                var result = parseFloat(val) * parseFloat(size_for_calc);
+                beakers_input.val(isNaN(result) ? '' : result);
+            });
+
+            // изменение кол-ва мл - пересчитать кол-во шотов
+            $('.containers').on('keyup', '.drink-val', function() {
+                var form = $(this).closest('form'),
+                    val = $(this).val(),
+                    size_for_calc = $('#club option:selected').data('volume'),
+                    shots_input = form.find('.shots-count input');
+                var result = parseFloat(val) / parseFloat(size_for_calc);
+                shots_input.val(isNaN(result) ? '' : result);
             });
         });
     </script>
@@ -453,12 +460,6 @@
                     <div class="small-margin-top"  id="sms-message">
                         <h2>СМС отчет:</h2>
                         <span class="text-sms">
-                           {% comment %} <span id="sms-message-date">число</span>, <span id="sms-message-club">название заведения</span>,
-                            в бар: <span id="sms-message-bar">сумма</span>, перевод: <span id="sms-message-agency">сумма</span>,
-                            <span id="sms-message-shots-count-container">шотов: <span id="sms-message-shots-count">кол-во</span>,</span>
-                            <span id="sms-message-beakers-count-container">мензурок: <span id="sms-message-beakers-count">кол-во</span>,</span>
-                            <span id="sms-message-drinks">расшифровка того что продавала, цена половины барного шота, цена продажи мензурки</span>,
-                            время работы: <span id="sms-message-time"></span>.{% endcomment %}
                         </span>
                         <hr>
                         <button class="btn btn-warning" id="import-to-report"><i class="fa fa-copy"></i> Импорт в отчет</button>
