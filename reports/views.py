@@ -73,6 +73,7 @@ def reports_by_week(request, user_id=None):
             transfer_accepted = 1 if report_transfer.is_accepted else 2
             transfer_form = ReportTransferFormForAdmin(instance=report_transfer)
         except ReportTransfer.DoesNotExist:
+            report_transfer = None
             transfer_form = ReportTransferFormForAdmin(
                 initial={'employee': report.work_shift.employee, 'start_week': start_week}
             )
@@ -90,6 +91,7 @@ def reports_by_week(request, user_id=None):
         report.paid_penalties = paid_penalties
         report.unpaid_penalties = unpaid_penalties
         report.transfer_form = transfer_form
+        report.transfer_created_date = report_transfer.created if report_transfer else None
         report.transfer_accepted = transfer_accepted
         reports_struct[date].append(report)
 
