@@ -22,6 +22,9 @@
             vertical-align: top;
             border-bottom: 1px dashed #ccc;
         }
+    .cant_work {
+        display: none;
+    }
     </style>
 {% endblock %}
 
@@ -42,6 +45,12 @@
                             if (typeof response['complete'] != 'undefined' && typeof response['complete']['info'] != 'undefined') {
                                 $('#work-shift-info').html(response['complete']['info']);
                                 $('.work-shift-info-modal .modal-title').html(response['complete']['title']);
+
+                                if (response['complete']['show_cant_work_button']) {
+                                    $('.cant_work').show();
+                                } else {
+                                    $('.cant_work').hide();
+                                }
                             } else {
                                 $('#work-shift-info').text('Произошла ошибка');
                             }
@@ -155,6 +164,9 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
                         Закрыть
+                    </button>
+                    <button type="button" class="btn btn-danger cant_work" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Отказаться
                     </button>
                 </div>
 

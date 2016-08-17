@@ -83,6 +83,13 @@ class Club(TimeStampedModel):
         (SIZE_50_CHOICE, '50 мл.')
     )
 
+    MARKUP_30_CHOICE = 30
+    MARKUP_75_CHOICE = 75
+    MARKUP_CHOICES = (
+        (MARKUP_30_CHOICE, '30 - 70'),
+        (MARKUP_75_CHOICE, '75 - 125')
+    )
+
     is_active = models.BooleanField('Активен', default=False)
     name = models.CharField('Название', max_length=255)
     old_id = models.PositiveIntegerField('ID из старой системы', blank=True, null=True)
@@ -105,8 +112,16 @@ class Club(TimeStampedModel):
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
     discount_percent = models.FloatField('Размер скидки в % (используется в калькуляторе)', blank=True, null=True)
-    equal_prices = models.BooleanField('Цена продажи равна цене в баре', default=False)
-    formula = models.CharField('Формула рассчета', max_length=10, choices=FORMULA_CHOICES, default=SHOT_CHOICE)
+    additional_discount_percent = models.FloatField(
+        'Если заведение дает дополнительно скидку, помимо наценки, то % скидки =', blank=True, null=True
+    )
+    equal_prices = models.BooleanField('Цена продажи равна цене в баре (для калькулятора)', default=False)
+    markup = models.PositiveSmallIntegerField(
+        'Наценка (используется в калькуляторе)', choices=MARKUP_CHOICES, default=MARKUP_75_CHOICE
+    )
+    formula = models.CharField(
+        'Формула рассчета (для ведомости)', max_length=10, choices=FORMULA_CHOICES, default=SHOT_CHOICE
+    )
     size_for_calc = models.PositiveSmallIntegerField(
         'Размер мензурок (для калькулятора)', choices=SIZE_CHOICES, blank=True, null=True)
     coordinator = models.ForeignKey(

@@ -236,9 +236,11 @@ def get_my_work_week(request):
 def get_work_shift_info(request, work_shift_id):
     try:
         work_shift = WorkShift.objects.get(id=work_shift_id)
+        print(datetime.date.today(), work_shift.date, datetime.date.today() > work_shift.date)
         rendered_data = {
             'info': render_to_string('calendar/work_shift_info.html', {'work_shift': work_shift}),
-            'title': 'Расписание на {} г.'.format(formats.date_format(work_shift.date, "d b Y"))
+            'title': 'Расписание на {} г.'.format(formats.date_format(work_shift.date, "d b Y")),
+            'show_cant_work_button': datetime.date.today() < work_shift.date
         }
         return JsonResponse({'complete': rendered_data})
     except Exception as e:

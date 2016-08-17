@@ -27,11 +27,12 @@
                 if ($('#club option:selected').data('equal-prices') == 1) {
                     return price_in_bar;
                 }
-                var factor = parseInt(price_in_bar);
+                var factor = parseInt(price_in_bar),
+                    markup = parseInt($('#club option:selected').data('markup'));
                 if (type == 'shot') {
-                    factor += 30;
+                    factor += markup;
                 } else {
-                    factor = factor / 2 + 75;
+                    factor = factor / 2 + markup;
                 }
                 return Math.ceil(factor / 50) * 50;
             }
@@ -161,6 +162,8 @@
                         'count': shots_count
                     });
                 });
+
+                sum_for_agency += sum_for_bar * parseFloat($('#club option:selected').data('additional-discount')) / 100;
 
                 return {
                     club_option: club_option,
@@ -395,7 +398,9 @@
                                                 data-volume="{{ club.size_for_calc }}"
                                                 data-city="{{ club.city|default_if_none:"" }}"
                                                 data-href="{% url 'calc:get_drinks_for_club' club.id %}"
+                                                data-markup="{{ club.markup }}"
                                                 data-discount="{{ club.discount_percent|default_if_none:"0" }}"
+                                                data-additional-discount="{{ club.additional_discount_percent|default_if_none:"0" }}"
                                                 value="{{ club.id }}">
                                             {{ club }}
                                         </option>

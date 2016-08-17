@@ -34,7 +34,7 @@ class DrinkForState(TimeStampedModel):
             return self.price_in_bar
         factor = self.price_in_bar
         if self.type == DrinkForState.SHOT_CHOICE:
-            factor += 30.0
+            factor += self.state.club.markup
         else:
-            factor = factor / 2.0 + 75.0
+            factor = factor / 2.0 + self.state.club.markup
         return math.ceil(factor / 50.0) * 50.0
