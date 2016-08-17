@@ -102,6 +102,7 @@
             function get_current_data() {
                 var club_option = $('#club option:selected'),
                     size_for_calc = parseFloat(club_option.data('volume')),
+                    additional_discount = parseFloat(club_option.data('additional-discount')),
                     sum_for_bar = 0,
                     sum_for_agency = 0,
                     total_beakers_count = 0,
@@ -146,8 +147,9 @@
                     var discount_for_agency = parseFloat(club_option.data('discount'));
                     discount_for_agency = discount_for_agency ? discount_for_agency : 20;
                     sum_for_agency += type == 'shot' ? (sum_for_bar * discount_for_agency / 100) : (markup / 2 * beakers_count);
+                    // надбавка доп процента
+                    discount += current_sum_for_bar * additional_discount;
                     total_discount += discount;
-
                     var text = [
                         current_sum_for_bar.toFixed(2),
                         discount.toFixed(2),
@@ -163,7 +165,7 @@
                     });
                 });
 
-                sum_for_agency += sum_for_bar * parseFloat($('#club option:selected').data('additional-discount')) / 100;
+                sum_for_agency += sum_for_bar * additional_discount / 100;
 
                 return {
                     club_option: club_option,
