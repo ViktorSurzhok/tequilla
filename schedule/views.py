@@ -135,8 +135,9 @@ def workday_delete(request, workday_id):
 @group_required('director', 'chief', 'coordinator')
 def schedule_by_week_all_users(request):
     # извлекать только пользователей с ролью сотрудники
-    group = models.Group.objects.get(Q(name='employee') | Q(name='coordinator'))
-    users = group.user_set.filter(is_active=True)
+    users = ExtUser.objects.filter(
+        Q(groups__name='coordinator') | Q(groups__name='employee')
+    ).filter(is_active=True).all()
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))
     date = start_date + datetime.timedelta(week_offset * 7)
