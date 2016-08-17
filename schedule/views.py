@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import formats
@@ -134,7 +135,7 @@ def workday_delete(request, workday_id):
 @group_required('director', 'chief', 'coordinator')
 def schedule_by_week_all_users(request):
     # извлекать только пользователей с ролью сотрудники
-    group = models.Group.objects.get(name='employee')
+    group = models.Group.objects.get(Q(name='employee') | Q(name='coordinator'))
     users = group.user_set.filter(is_active=True)
     week_offset = int(request.GET.get('week', 0))
     start_date = parse_date(request.GET.get('start_date', str(datetime.date.today())))

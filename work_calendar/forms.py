@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import Group
+from django.db.models import Q
 
 from work_calendar.models import WorkShift
 
@@ -10,7 +11,9 @@ class WorkShiftForm(forms.ModelForm):
     """
 
     employee = forms.ModelChoiceField(
-        queryset=Group.objects.get(name='employee').user_set.filter(is_active=True), required=True, label='Сотрудник'
+        queryset=Group.objects.get(Q(name='employee') | Q(name='coordinator')).user_set.filter(is_active=True),
+        required=True,
+        label='Сотрудник'
     )
 
     class Meta:

@@ -38,8 +38,13 @@
                         {% endwith %}
                     </td>
                     <td style="width:12%;" class="input_td">
-                        <span class="fons-style:italic;">{% if report.filled_date %}{{ report.filled_date }}{% else %}
-                            Нет{% endif %}</span>
+                        <span class="font-style:italic;">
+                            {% if report.filled_date %}
+                                {{ report.filled_date }}
+                            {% else %}
+                                <span style="color: orangered;">Не сохранен</span>
+                            {% endif %}
+                        </span>
                     </td>
                     <td style="width:13%;" class="input_td">
                         <div class="col-md-9 col-sm-12 col-xs-12 form-group">
@@ -195,9 +200,9 @@
                                             <thead>
                                             <tr>
                                                 <th>Напиток/блюдо</th>
-                                                <th>Цена в баре за 1 шот/1 шт</th>
-                                                <th>Цена продажи за 1 шот/1 шт</th>
-                                                <th>Количество шотов</th>
+                                                <th>Цена в баре за 1 шт</th>
+                                                <th>Цена продажи за 1 шт</th>
+                                                <th>Количество</th>
                                                 <th></th>
                                             </tr>
                                             </thead>
