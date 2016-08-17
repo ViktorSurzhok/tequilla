@@ -148,7 +148,8 @@
                     discount_for_agency = discount_for_agency ? discount_for_agency : 20;
                     sum_for_agency += type == 'shot' ? (sum_for_bar * discount_for_agency / 100) : (markup / 2 * beakers_count);
                     // надбавка доп процента
-                    discount += current_sum_for_bar * additional_discount;
+                    console.log(discount, current_sum_for_bar, additional_discount);
+                    discount += current_sum_for_bar * additional_discount / 100;
                     total_discount += discount;
                     var text = [
                         current_sum_for_bar.toFixed(2),
@@ -527,7 +528,7 @@
                                         <input type="text" class="drink-val form-control" name="volume" value="{{ drink.volume|default_if_none:"" }}">
                                     </div>
                                 </div>
-                                <div class="form-group shots-count" {% if drink.type == 'beaker' %}style="display: none;" {% endif %}>
+                                <div class="form-group shots-count">
                                     <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
                                         Кол-во шотов
                                     </label>
