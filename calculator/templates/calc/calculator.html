@@ -128,6 +128,8 @@
                         selected_option = $(this).find('.drink-select option:selected'),
                         current_sum_for_bar = shots_count * price_in_bar;
 
+                    current_sum_for_bar -= current_sum_for_bar * additional_discount / 100;
+
                     if (type != 'shot') {
                         price_in_bar /= 2;
                     }
@@ -148,7 +150,6 @@
                     discount_for_agency = discount_for_agency ? discount_for_agency : 20;
                     sum_for_agency += type == 'shot' ? (sum_for_bar * discount_for_agency / 100) : (markup / 2 * beakers_count);
                     // надбавка доп процента
-                    console.log(discount, current_sum_for_bar, additional_discount);
                     discount += current_sum_for_bar * additional_discount / 100;
                     total_discount += discount;
                     var text = [
