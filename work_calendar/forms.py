@@ -21,3 +21,11 @@ class WorkShiftForm(forms.ModelForm):
     class Meta:
         model = WorkShift
         fields = ('club', 'date', 'special_config', 'employee', 'start_time', 'end_time', 'comment', 'probation')
+
+
+class CantWorkForm(forms.Form):
+    """
+    Форма когда сотрудник нажимает "не могу работать"
+    """
+    id_work_shift = forms.ModelChoiceField(queryset=WorkShift.objects.all())
+    reason = forms.CharField(widget=forms.Textarea)

@@ -102,7 +102,11 @@ def check_penalties(start_week):
 
 def set_report_penalty(start_week, end_week, user, penalty_type):
     # проверка заполнил ли сотрудник отчеты
-    if Report.objects.filter(work_shift__employee=user, work_shift__date__range=[start_week, end_week], filled_date__isnull=True).count():
+    if Report.objects.filter(
+            work_shift__employee=user,
+            work_shift__date__range=[start_week, end_week],
+            filled_date__isnull=True
+    ).exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK).count():
         # назначение штрафа
         penalty = Penalty.objects.create(employee=user, date=datetime.datetime.now(), count=1, type=penalty_type)
         # отправка уведомления
@@ -111,7 +115,9 @@ def set_report_penalty(start_week, end_week, user, penalty_type):
 
 def set_transfer_penalty(start_week, end_week, user, penalty_type):
     # проверка заполнил ли сотрудник перевод при этом у него должны быть рабочие смены
-    work_shift_count = WorkShift.objects.filter(employee=user, date__range=[start_week, end_week]).count()
+    work_shift_count = WorkShift.objects.filter(
+        employee=user, date__range=[start_week, end_week]
+    ).exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK).count()
     if work_shift_count and not ReportTransfer.objects.filter(employee=user, start_week=start_week).exists():
         # назначение штрафа
         penalty = Penalty.objects.create(employee=user, date=datetime.datetime.now(), count=1, type=penalty_type)

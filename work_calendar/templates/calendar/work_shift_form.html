@@ -1,3 +1,6 @@
+{% if work_shift and work_shift.special_config == 'cant_work' and work_shift.cant_work_reason %}
+    <b style="color: red;">Внимание! Сотрудник отказался от мероприятия!</b>
+{% endif %}
 <form method="POST" id="work-shift-form" data-parsley-validate="" class="form-horizontal form-label-left" action="">
     <input id="id_work_shift" type="hidden" value="{{ shift_id }}">
     {% for field in form %}
@@ -21,3 +24,6 @@
         </div>
     {% endfor %}
 </form>
+{% if work_shift and work_shift.special_config == 'cant_work' and work_shift.cant_work_reason %}
+    <span style="color: red;">Причина отказа: {{ work_shift.cant_work_reason }}</span>
+{% endif %}

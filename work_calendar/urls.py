@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^get_work_shift_form/(?P<work_shift_id>\d+)/$', views.get_work_shift_form, name='get_work_shift_form'),
     url(r'^get_employee_bisy/(?P<employee_id>\d+)/$', views.get_employee_bisy, name='get_employee_bisy'),
     url(r'^get_work_shift_form/$', views.get_work_shift_form, name='get_empty_work_shift_form'),
+    url(r'^cant_work/$', views.cant_work, name='cant_work'),
     url(r'^delete_work_shift/(?P<work_shift_id>\d+)/$', views.delete_work_shift, name='delete_work_shift'),
 ]

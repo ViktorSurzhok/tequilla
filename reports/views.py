@@ -42,7 +42,9 @@ def reports_by_week(request, user_id=None):
         except ExtUser.DoesNotExist:
             raise Http404
 
-    reports = Report.objects.filter(work_shift__date__range=[start_week, end_week])
+    reports = Report.objects.filter(
+        work_shift__date__range=[start_week, end_week]
+    ).exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)
     if employee:
         reports = reports.filter(work_shift__employee=employee)
         try:
@@ -123,7 +125,9 @@ def reports_filter(request):
     if 'callback' in request.GET:
         start_week = request.GET['start_week']
         end_week = request.GET['end_week']
-        object_list = Report.objects.filter(work_shift__date__range=[start_week, end_week])
+        object_list = Report.objects.filter(
+            work_shift__date__range=[start_week, end_week]
+        ).exclude(work_shift__special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)
         filters = ['work_shift__employee', 'work_shift__club', 'filled_date__isnull', 'work_shift__club__city']
         for filter_name in filters:
             filter_value = request.GET.get(filter_name, '')

@@ -284,6 +284,10 @@
                                                             Стажер
                                                             <br>
                                                             {{ work_shift.start_time }} - {{ work_shift.end_time }}
+                                                        {% elif work_shift.cant_work_reason %}
+                                                            {{ work_shift.employee.get_full_name }}
+                                                            <br>
+                                                            {{ work_shift.start_time }} - {{ work_shift.end_time }}
                                                         {% else %}
                                                             Не работаем
                                                         {% endif %}

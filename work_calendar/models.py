@@ -28,6 +28,7 @@ class WorkShift(TimeStampedModel):
     special_config = models.CharField(
         'Кто работает', max_length=12, choices=SPECIAL_CONFIG_CHOICES, default=SPECIAL_CONFIG_EMPLOYEE
     )
+    cant_work_reason = models.TextField('Причина почему не может работать', blank=True, null=True)
 
     def __str__(self):
         return '{} {} ({}-{})'.format(self.club.name, self.employee.get_full_name(), self.start_time, self.end_time)

@@ -12,7 +12,7 @@ from club.models import Club
 from private_message.utils import send_message_about_new_work_shift
 from reports.models import Report
 from tequilla.decorators import group_required
-from work_calendar.forms import WorkShiftForm
+from work_calendar.forms import WorkShiftForm, CantWorkForm
 from work_calendar.models import WorkShift
 
 
@@ -102,6 +102,7 @@ def get_work_shift_form(request, work_shift_id=None):
             club = Club.objects.get(id=club_id)
             date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
             work_shift_id = 0
+            work_shift = None
 
         if date.isoweekday() in [6, 7]:
             start_time, end_time = club.w_start_time, club.w_end_time
@@ -120,7 +121,14 @@ def get_work_shift_form(request, work_shift_id=None):
 
         form_render = render_to_string(
             'calendar/work_shift_form.html',
-            {'form': form, 'shift_id': work_shift_id, 'start_time': start_time, 'end_time': end_time, 'date': date}
+            {
+                'form': form,
+                'shift_id': work_shift_id,
+                'work_shift': work_shift if work_shift else None,
+                'start_time': start_time,
+                'end_time': end_time,
+                'date': date
+            }
         )
         return JsonResponse({'complete': form_render})
     except Exception as e:
@@ -197,7 +205,9 @@ def get_my_work_week(request):
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
-    work_shifts = WorkShift.objects.filter(date__range=[start_week, end_week], employee=request.user)
+    work_shifts = WorkShift.objects.filter(
+        date__range=[start_week, end_week], employee=request.user
+    ).exclude(special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)
     work_shifts_struct = {}
     for work_shift in work_shifts:
         date_format = formats.date_format(work_shift.date, "d.m.Y")
@@ -236,13 +246,30 @@ def get_my_work_week(request):
 def get_work_shift_info(request, work_shift_id):
     try:
         work_shift = WorkShift.objects.get(id=work_shift_id)
-        print(datetime.date.today(), work_shift.date, datetime.date.today() > work_shift.date)
         rendered_data = {
             'info': render_to_string('calendar/work_shift_info.html', {'work_shift': work_shift}),
             'title': 'Расписание на {} г.'.format(formats.date_format(work_shift.date, "d b Y")),
-            'show_cant_work_button': datetime.date.today() < work_shift.date
+            'show_cant_work_button': datetime.date.today() < work_shift.date,
+            'work_shift_id': work_shift.id
         }
         return JsonResponse({'complete': rendered_data})
     except Exception as e:
         return JsonResponse({'complete': 0})
 
+
+@login_required
+def cant_work(request):
+    form = CantWorkForm(data=request.POST)
+    if form.is_valid():
+        cd = form.cleaned_data
+        try:
+            work_shift = WorkShift.objects.get(id=cd['id_work_shift'].id, employee=request.user)
+            work_shift.special_config = WorkShift.SPECIAL_CONFIG_CANT_WORK
+            work_shift.cant_work_reason = cd['reason']
+            work_shift.save()
+        except WorkShift.DoesNotExist:
+            return JsonResponse({'complete': 0})
+        return JsonResponse({'complete': 1})
+    else:
+        print(form.errors)
+        return JsonResponse({'complete': 0})

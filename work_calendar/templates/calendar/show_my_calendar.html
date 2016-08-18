@@ -48,6 +48,7 @@
 
                                 if (response['complete']['show_cant_work_button']) {
                                     $('.cant_work').show();
+                                    $('#id_work_shift').val(response['complete']['work_shift_id']);
                                 } else {
                                     $('.cant_work').hide();
                                 }
@@ -61,10 +62,58 @@
                 });
             }
 
+            $('.cant_work').on('click', function(e) {
+                e.preventDefault();
+                $('#work-shift-info').hide();
+                $('#cant-work-form-container').show();
+                $('.cant_work_submit').show();
+                $('.cant_work').hide();
+            });
+
+            $('.cant_work_submit').on('click', function(e) {
+                e.preventDefault();
+                var form = $('#cant-work-form'),
+                    data = form.serializeArray();
+                data.push({'name': 'csrfmiddlewaretoken', value: '{{ csrf_token }}'});
+                 $.ajax({
+                     url: form.attr('action'),
+                     data: data,
+                     type: 'POST',
+                     success: function (response) {
+                         if (typeof response['complete'] != 'undefined' && response['complete'] == 1) {
+                             new PNotify({
+                                 title: 'Ура!',
+                                 text: 'Вы успешно отказались от мероприятия',
+                                 type: 'success',
+                                 styling: 'bootstrap3'
+                             });
+                             $('.ui-pnotify').fadeIn('slow');
+                             setTimeout(function () {
+                                 location = '' + window.location.search;
+                             }, 1000);
+
+                         } else {
+                             new PNotify({
+                                 title: 'О нет!',
+                                 text: 'Произошла ошибка при отказе от мероприятия.',
+                                 type: 'error',
+                                 styling: 'bootstrap3'
+                             });
+                             $('.ui-pnotify').fadeIn('slow');
+                             setTimeout(function () {
+                                 $('.ui-pnotify').fadeOut('fast');
+                             }, 2000);
+                         }
+                     }
+                 });
+            });
+
             // нажатие на кнопку "Добавить" в календаре
             $('.work-shift-item').on('click', function(e){
                 e.preventDefault();
                 $('#work-shift-info').hide();
+                $('#cant-work-form-container').hide();
+                $('.cant_work_submit').hide();
                 $('#loader').css({display: 'block'});
                 openTestModal({
                     href: $(this).data('url')
@@ -160,12 +209,29 @@
                 <div class="modal-body">
                     <img src="{% static 'img/heart.gif' %}" id="loader">
                     <div id="work-shift-info"></div>
+                    <div id="cant-work-form-container">
+                        <form class="form-horizontal" action="{% url 'calendar:cant_work' %}" method="post" id="cant-work-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="id_work_shift" value="" id="id_work_shift">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12">
+                                    Причина отказа *
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12" style="padding-top: 3px;">
+                                    <textarea name="reason" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
                         Закрыть
                     </button>
-                    <button type="button" class="btn btn-danger cant_work" data-dismiss="modal"><i class="fa fa-close"></i>
+                    <button type="button" class="btn btn-danger cant_work">
+                        Отказаться
+                    </button>
+                    <button type="button" class="btn btn-danger cant_work_submit">
                         Отказаться
                     </button>
                 </div>
