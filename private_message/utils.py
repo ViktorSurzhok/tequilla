@@ -79,6 +79,12 @@ def send_message_about_new_password(from_user, to_user, new_password):
         send_message_for_user(from_user, to_user, text)
 
 
+def send_message_about_cant_work(from_user, work_shift):
+    # отправка личного сообщения админу о том что сотрудник не может выйти работать в назначенную смену
+    text = render_to_string('notify/_cant_work.html', {'work_shift': work_shift})
+    send_message_for_admins(from_user, text, ['director'])
+
+
 # функции которые отправляют сообщения
 def send_message_for_admins(from_user, text, groups=None):
     if groups is None:

@@ -9,7 +9,7 @@ from django.utils import formats
 from django.views.decorators.http import require_POST
 
 from club.models import Club
-from private_message.utils import send_message_about_new_work_shift
+from private_message.utils import send_message_about_new_work_shift, send_message_about_cant_work
 from reports.models import Report
 from tequilla.decorators import group_required
 from work_calendar.forms import WorkShiftForm, CantWorkForm
@@ -201,7 +201,8 @@ def get_employee_bisy(request, employee_id):
 @login_required
 def get_my_work_week(request):
     week_offset = int(request.GET.get('week', 0))
-    date = datetime.date.today() + datetime.timedelta(week_offset * 7)
+    now = datetime.date.today()
+    date = now + datetime.timedelta(week_offset * 7)
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
@@ -221,9 +222,9 @@ def get_my_work_week(request):
         date_cursor = formats.date_format(week_cursor, "d.m.Y")
         shifts = work_shifts_struct[date_cursor] if date_cursor in work_shifts_struct else None
         color_class = 'btn-default'
-        if week_cursor == date:
+        if week_cursor == now:
             color_class = 'btn-success'
-        elif week_cursor > date:
+        elif week_cursor > now:
             color_class = 'btn-danger'
         grid.append({'date': week_cursor, 'work_shifts': shifts, 'color_class': color_class})
         week_cursor += datetime.timedelta(1)
@@ -267,6 +268,7 @@ def cant_work(request):
             work_shift.special_config = WorkShift.SPECIAL_CONFIG_CANT_WORK
             work_shift.cant_work_reason = cd['reason']
             work_shift.save()
+            send_message_about_cant_work(request.user, work_shift)
         except WorkShift.DoesNotExist:
             return JsonResponse({'complete': 0})
         return JsonResponse({'complete': 1})
