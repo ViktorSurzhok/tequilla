@@ -376,242 +376,246 @@
 {% endblock %}
 
 {% block content %}
-    <div class="containers">
-        <div class="col-md-6 col-xs-12 panel-container">
-            <div class="x_panel x_panel_height">
-                <div class="x_title">
-                    <h2>Калькулятор</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                        </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <form class="form-horizontal form-label-left" id="settings-form">
-                        <div class="form-group">
-                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="club">
-                                Заведение
-                            </label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <select class="form-control" id="club" name="club">
-                                    {% for club in clubs %}
-                                        <option {% if state and state.club.id == club.id %}selected{% endif %}
-                                                data-equal-prices="{% if club.equal_prices %}1{% else %}0{% endif %}"
-                                                data-short-name="{{ club.name }}"
-                                                data-volume="{{ club.size_for_calc }}"
-                                                data-city="{{ club.city|default_if_none:"" }}"
-                                                data-href="{% url 'calc:get_drinks_for_club' club.id %}"
-                                                data-markup="{{ club.markup }}"
-                                                data-discount="{{ club.discount_percent|default_if_none:"0" }}"
-                                                data-additional-discount="{{ club.additional_discount_percent|default_if_none:"0" }}"
-                                                value="{{ club.id }}">
-                                            {{ club }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
+    {% if clubs %}
+        <div class="containers">
+            <div class="col-md-6 col-xs-12 panel-container">
+                <div class="x_panel x_panel_height">
+                    <div class="x_title">
+                        <h2>Калькулятор</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <form class="form-horizontal form-label-left" id="settings-form">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="club">
+                                    Заведение
+                                </label>
+                                <div class="col-md-9 col-sm-6 col-xs-12">
+                                    <select class="form-control" id="club" name="club">
+                                        {% for club in clubs %}
+                                            <option {% if state and state.club.id == club.id %}selected{% endif %}
+                                                    data-equal-prices="{% if club.equal_prices %}1{% else %}0{% endif %}"
+                                                    data-short-name="{{ club.name }}"
+                                                    data-volume="{{ club.size_for_calc }}"
+                                                    data-city="{{ club.city|default_if_none:"" }}"
+                                                    data-href="{% url 'calc:get_drinks_for_club' club.id %}"
+                                                    data-markup="{{ club.markup }}"
+                                                    data-discount="{{ club.discount_percent|default_if_none:"0" }}"
+                                                    data-additional-discount="{{ club.additional_discount_percent|default_if_none:"0" }}"
+                                                    value="{{ club.id }}">
+                                                {{ club }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="calendar">
-                                Дата
-                            </label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <input id="calendar" class="form-control" name="date" value="{% if state %}{{ state.date|default_if_none:""|date:"d.m.Y" }}{% endif %}">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="calendar">
+                                    Дата
+                                </label>
+                                <div class="col-md-9 col-sm-6 col-xs-12">
+                                    <input id="calendar" class="form-control" name="date" value="{% if state %}{{ state.date|default_if_none:""|date:"d.m.Y" }}{% endif %}">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-from">
-                                Время от
-                            </label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <input id="time-from" class="form-control" name="start_time" value="{% if state %}{{ state.start_time }}{% endif %}">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-from">
+                                    Время от
+                                </label>
+                                <div class="col-md-9 col-sm-6 col-xs-12">
+                                    <input id="time-from" class="form-control" name="start_time" value="{% if state %}{{ state.start_time }}{% endif %}">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
-                                Время до
-                            </label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <input id="time-to" class="form-control" name="end_time" value="{% if state %}{{ state.end_time }}{% endif %}">
+                            <div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
+                                    Время до
+                                </label>
+                                <div class="col-md-9 col-sm-6 col-xs-12">
+                                    <input id="time-to" class="form-control" name="end_time" value="{% if state %}{{ state.end_time }}{% endif %}">
+                                </div>
                             </div>
-                        </div>
-                        {% comment %}<div class="form-group">
-                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
-                                Сумма скидки
-                            </label>
-                            <div class="col-md-9 col-sm-6 col-xs-12">
-                                <input id="discount" class="form-control" name="discount" value="{% if state %}{{ state.discount|default_if_none:"" }}{% endif %}">
-                            </div>
-                        </div>{% endcomment %}
-                    </form>
-                    <hr>
-                    <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button><br>
-                    <button class="btn btn-info" id="save-current-state"><i class="fa fa-save"></i> Сохранить текущее состояние</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xs-12 panel-container">
-            <div class="x_panel x_panel_height">
-                <div class="x_title">
-                    <h2>Инфо</h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                        <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                        </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <button class="btn btn-success" id="start-calc">Я ВСЁ заполнила - рассчитать</button>
-                    <p>Сумма в бар: <span id="price-for-bar"></span></p>
-                    <p>Сумма в агентство: <span id="price-for-agency"></span></p>
-                    <div class="small-margin-top"  id="sms-message">
-                        <h2>СМС отчет:</h2>
-                        <span class="text-sms">
-                        </span>
+                            {% comment %}<div class="form-group">
+                                <label class="control-label col-md-3 col-sm-3 col-xs-12" for="time-to">
+                                    Сумма скидки
+                                </label>
+                                <div class="col-md-9 col-sm-6 col-xs-12">
+                                    <input id="discount" class="form-control" name="discount" value="{% if state %}{{ state.discount|default_if_none:"" }}{% endif %}">
+                                </div>
+                            </div>{% endcomment %}
+                        </form>
                         <hr>
-                        <button class="btn btn-warning" id="import-to-report"><i class="fa fa-copy"></i> Импорт в отчет</button>
-                        <span id="import-to-report-error">У вас нет незаполненных отчетов для выбранного клуба за выбранное число</span>
+                        <button class="btn btn-info" id="add-drink"><i class="fa fa-plus"></i> Добавить напиток</button><br>
+                        <button class="btn btn-info" id="save-current-state"><i class="fa fa-save"></i> Сохранить текущее состояние</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xs-12 panel-container">
+                <div class="x_panel x_panel_height">
+                    <div class="x_title">
+                        <h2>Инфо</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <button class="btn btn-success" id="start-calc">Я ВСЁ заполнила - рассчитать</button>
+                        <p>Сумма в бар: <span id="price-for-bar"></span></p>
+                        <p>Сумма в агентство: <span id="price-for-agency"></span></p>
+                        <div class="small-margin-top"  id="sms-message">
+                            <h2>СМС отчет:</h2>
+                            <span class="text-sms">
+                            </span>
+                            <hr>
+                            <button class="btn btn-warning" id="import-to-report"><i class="fa fa-copy"></i> Импорт в отчет</button>
+                            <span id="import-to-report-error">У вас нет незаполненных отчетов для выбранного клуба за выбранное число</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if state %}
+                {% for drink in state.drinks.all %}
+                    <div class="col-md-6 col-xs-12 drink-container panel-container">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Напиток <small># {{ forloop.counter }}</small></h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li class="pull-right"><a class="close-link"><i class="fa fa-close"></i></a></li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <form class="form-horizontal form-label-left">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-select">
+                                            Напиток
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <select class="form-control drink-select" name="drink">
+                                                {% include 'calc/_drinks_options.html' with selected_drink=drink.drink.id club=state.club all_drinks=all_drinks %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                            Продавала в
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <select class="form-control drink-type-select" name="type">
+                                                {% for type in drink_types %}
+                                                    <option {% if drink.type == type.0 %}selected{% endif %} value="{{ type.0 }}">{{ type.1 }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                            Цена напитка в баре
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" class="drink-price form-control" name="price_in_bar" value="{{ drink.price_in_bar }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group beakers-volume" {% if drink.type == 'shot' %}style="display: none;" {% endif %}>
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                            Кол-во мл
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" class="drink-val form-control" name="volume" value="{{ drink.volume|default_if_none:"" }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group shots-count">
+                                        <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                            Кол-во шотов
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="text" class="drink-count form-control" name="count" value="{{ drink.count|default_if_none:"" }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <h4>Цена продажи: <span class="sale-price">{{ drink.get_sale_price|floatformat:0 }}</span></h4>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div id="empty-form">
+            <div class="col-md-6 col-xs-12 drink-container">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Напиток <small></small></h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="pull-right"><a class="close-link"><i class="fa fa-close"></i></a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <form class="form-horizontal form-label-left">
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-select">
+                                    Напиток
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <select class="form-control drink-select" name="drink">
+                                        {{ drinks_options }}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                    Продавала в
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <select class="form-control drink-type-select" name="type">
+                                        {% for type in drink_types %}
+                                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
+                                    Цена напитка в баре
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="drink-price form-control" name="price_in_bar">
+                                </div>
+                            </div>
+                            <div class="form-group beakers-volume">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                    Кол-во мл
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="drink-val form-control" name="volume">
+                                </div>
+                            </div>
+                            <div class="form-group shots-count">
+                                <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
+                                    Кол-во шотов
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" class="drink-count form-control" name="count">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <h4>Цена продажи: <span class="sale-price"></span></h4>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-
-        {% if state %}
-            {% for drink in state.drinks.all %}
-                <div class="col-md-6 col-xs-12 drink-container panel-container">
-                    <div class="x_panel">
-                        <div class="x_title">
-                            <h2>Напиток <small># {{ forloop.counter }}</small></h2>
-                            <ul class="nav navbar-right panel_toolbox">
-                                <li class="pull-right"><a class="close-link"><i class="fa fa-close"></i></a></li>
-                            </ul>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="x_content">
-                            <form class="form-horizontal form-label-left">
-                                <div class="form-group">
-                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-select">
-                                        Напиток
-                                    </label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <select class="form-control drink-select" name="drink">
-                                            {% include 'calc/_drinks_options.html' with selected_drink=drink.drink.id club=state.club all_drinks=all_drinks %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
-                                        Продавала в
-                                    </label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <select class="form-control drink-type-select" name="type">
-                                            {% for type in drink_types %}
-                                                <option {% if drink.type == type.0 %}selected{% endif %} value="{{ type.0 }}">{{ type.1 }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
-                                        Цена напитка в баре
-                                    </label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <input type="text" class="drink-price form-control" name="price_in_bar" value="{{ drink.price_in_bar }}">
-                                    </div>
-                                </div>
-                                <div class="form-group beakers-volume" {% if drink.type == 'shot' %}style="display: none;" {% endif %}>
-                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
-                                        Кол-во мл
-                                    </label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <input type="text" class="drink-val form-control" name="volume" value="{{ drink.volume|default_if_none:"" }}">
-                                    </div>
-                                </div>
-                                <div class="form-group shots-count">
-                                    <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
-                                        Кол-во шотов
-                                    </label>
-                                    <div class="col-md-6 col-sm-6 col-xs-12">
-                                        <input type="text" class="drink-count form-control" name="count" value="{{ drink.count|default_if_none:"" }}">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <h4>Цена продажи: <span class="sale-price">{{ drink.get_sale_price|floatformat:0 }}</span></h4>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
-
-    <div id="empty-form">
-        <div class="col-md-6 col-xs-12 drink-container">
-            <div class="x_panel">
-                <div class="x_title">
-                    <h2>Напиток <small></small></h2>
-                    <ul class="nav navbar-right panel_toolbox">
-                        <li class="pull-right"><a class="close-link"><i class="fa fa-close"></i></a></li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="x_content">
-                    <form class="form-horizontal form-label-left">
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-select">
-                                Напиток
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <select class="form-control drink-select" name="drink">
-                                    {{ drinks_options }}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
-                                Продавала в
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <select class="form-control drink-type-select" name="type">
-                                    {% for type in drink_types %}
-                                        <option value="{{ type.0 }}">{{ type.1 }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-price">
-                                Цена напитка в баре
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="text" class="drink-price form-control" name="price_in_bar">
-                            </div>
-                        </div>
-                        <div class="form-group beakers-volume">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
-                                Кол-во мл
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="text" class="drink-val form-control" name="volume">
-                            </div>
-                        </div>
-                        <div class="form-group shots-count">
-                            <label class="control-label col-md-4 col-sm-4 col-xs-12" for="drink-val">
-                                Кол-во шотов
-                            </label>
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-                                <input type="text" class="drink-count form-control" name="count">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <h4>Цена продажи: <span class="sale-price"></span></h4>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% else %}
+        Вам не назначены мероприятия на эту неделю
+    {% endif %}
 {% endblock %}

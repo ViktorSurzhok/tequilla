@@ -13,11 +13,21 @@ from calculator.models import CalculatorState, DrinkForState
 from club.models import Club, Drink, DrinkClub
 from private_message.utils import send_message_about_fill_report
 from reports.models import Report, ReportDrink
+from work_calendar.models import WorkShift
 
 
 @login_required
 def calculator(request):
-    clubs = Club.objects.filter(is_active=True, size_for_calc__isnull=False)
+    date = datetime.date.today()
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(6)
+    work_shifts = WorkShift.objects.filter(
+        employee=request.user,
+        date__range=[start_week, end_week],
+        club__is_active=True,
+        club__size_for_calc__isnull=False,
+    ).exclude(special_config=WorkShift.SPECIAL_CONFIG_CANT_WORK)
+    clubs = list({work_shift.club for work_shift in work_shifts})
     try:
         state = CalculatorState.objects.get(employee=request.user)
     except CalculatorState.DoesNotExist:
