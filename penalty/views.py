@@ -3,6 +3,7 @@ import datetime
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
@@ -49,7 +50,9 @@ def show_calendar(request):
         week_cursor += datetime.timedelta(1)
 
     # наполнение сетки
-    employees = Group.objects.get(name='employee').user_set.filter(is_active=True)
+    groups = Group.objects.filter(Q(name='employee') | Q(name='coordinator'))
+    employees = [group.user_set.filter(is_active=True) for group in groups]
+    employees = list(employees[0]) + list(employees[1])
     grid = []
     for employee in employees:
         week_cursor = start_week

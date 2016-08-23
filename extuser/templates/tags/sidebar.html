@@ -80,9 +80,21 @@
                 <li>
                     <a href="{% url 'reports:reports_by_week' %}"><i class="fa fa-flag-checkered"></i> Отчеты </a>
                 </li>
+                {% if 'coordinator' in user_groups %}
+                     <li>
+                        <a href="{% url 'reports:myreports' user.id %}">
+                            <i class="fa fa-flag-checkered"></i> МОИ отчеты и перевод
+                        </a>
+                    </li>
+                {% endif %}
                 <li>
                     <a href="{% url 'calendar:show_calendar' %}"><i class="fa fa-calendar"></i> Расписание </a>
                 </li>
+                {% if 'coordinator' in user_groups %}
+                    <li>
+                        <a href="{% url 'calendar:get_my_work_week' %}"><i class="fa fa-calendar"></i>МОЁ Расписание </a>
+                    </li>
+                {% endif %}
                 <li>
                     <a href="{% url 'schedule:schedule_by_week_all_users' %}"><i class="fa fa-line-chart"></i> График </a>
                 </li>
@@ -114,9 +126,16 @@
                 <li>
                     <a href="{% url 'album:wall' %}"><i class="fa fa-camera-retro"></i> Фотолента </a>
                 </li>
+                <li>
+                    <a href="{% url 'penalty:show_calendar' %}"><i class="fa fa-frown-o"></i> Штрафы </a>
+                </li>
+                {% if 'coordinator' in user_groups %}
                     <li>
-                        <a href="{% url 'penalty:show_calendar' %}"><i class="fa fa-frown-o"></i> Штрафы </a>
+                        <a {% if have_unpaid_penalty %}class="has-penalty" {% endif %} href="{% url 'penalty:my_penalties' %}">
+                            <i class="fa fa-frown-o"></i> МОИ Штрафы
+                        </a>
                     </li>
+                {% endif %}
                 <li>
                     <a href="{% url 'stats:stats_by_night' %}"><i class="fa fa-area-chart"></i> Статистика </a>
                 </li>

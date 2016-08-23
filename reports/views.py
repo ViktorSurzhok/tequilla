@@ -30,7 +30,7 @@ def reports_by_week(request, user_id=None):
     start_week = date - datetime.timedelta(date.weekday())
     end_week = start_week + datetime.timedelta(6)
 
-    if request.user.has_perm('extuser.can_manage_reports'):
+    if user_id is None and request.user.has_perm('extuser.can_manage_reports'):
         employee = None
         start_week = parse_date(request.GET.get('start_date', str(start_week)))
         end_week = parse_date(request.GET.get('end_date', str(end_week)))
@@ -114,7 +114,8 @@ def reports_by_week(request, user_id=None):
             'can_edit_report_transfer': request.user.has_perm('extuser.can_edit_report_transfer'),
             'cities': City.objects.all(),
             'paid_penalties': paid_penalties,
-            'unpaid_penalties': unpaid_penalties
+            'unpaid_penalties': unpaid_penalties,
+            'user_id': user_id
         }
     )
 
