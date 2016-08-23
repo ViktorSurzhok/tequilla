@@ -112,6 +112,7 @@ class Club(TimeStampedModel):
     w_end_time = models.CharField('Время окончания работы на выходных', max_length=6, default='00:00')
     contact_person = models.TextField('Контактное лицо', blank=True, null=True)
     discount_percent = models.FloatField('Размер скидки в % (используется в калькуляторе)', blank=True, null=True)
+    without_discount = models.BooleanField('Скидку не делают (наценка/2 * кол. шотов)', default=False)
     additional_discount_percent = models.FloatField(
         'Если заведение дает дополнительно скидку, помимо наценки, то % скидки =', blank=True, null=True
     )

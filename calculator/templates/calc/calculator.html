@@ -134,16 +134,22 @@
                         price_in_bar /= 2;
                     }
 
+                    var discount = 0;
                     if (club_option.data('equal-prices') == 1) {
                         markup = 0;
                     }
-                    var discount = calc_discount(
-                            club_option.data('city'),
-                            club_option.data('discount'),
-                            current_sum_for_bar,
-                            markup
-                    );
-                    discount *= type == 'shot' ? shots_count : beakers_count;
+                    // если стоит очередная галочка в настройках клуба то для шота в Мск скидка высчитывается иначе
+                    if (parseInt(club_option.data('without-discount')) == 1 && type == 'shot' && club_option.data('city') == 'Москва') {
+                        discount = markup / 2 * shots_count;
+                    } else {
+                        discount = calc_discount(
+                                club_option.data('city'),
+                                club_option.data('discount'),
+                                current_sum_for_bar,
+                                markup
+                        );
+                        discount *= type == 'shot' ? shots_count : beakers_count;
+                    }
 
                     sum_for_bar += current_sum_for_bar;
                     var discount_for_agency = parseFloat(club_option.data('discount'));
@@ -406,6 +412,7 @@
                                                     data-markup="{{ club.markup }}"
                                                     data-discount="{{ club.discount_percent|default_if_none:"0" }}"
                                                     data-additional-discount="{{ club.additional_discount_percent|default_if_none:"0" }}"
+                                                    data-without-discount="{% if club.without_discount %}1{% else %}0{% endif %}"
                                                     value="{{ club.id }}">
                                                 {{ club }}
                                             </option>
