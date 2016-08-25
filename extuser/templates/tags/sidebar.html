@@ -109,8 +109,17 @@
                         <a href="{% url 'week_plan:plan_by_week_director' 'coordinator' %}"><i class="fa fa-calendar"></i> Недельный план (координатор)</a>
                     </li>
                 {% else %}
+                    {% if 'coordinator' in user_groups %}
+                        <li>
+                            <a href="{% url 'week_plan:plan_by_week_director' 'chief' %}"><i class="fa fa-calendar"></i> Недельный план (руководитель)</a>
+                        </li>
+                    {% elif 'chief' in user_groups %}
+                        <li>
+                            <a href="{% url 'week_plan:plan_by_week_director' 'coordinator' %}"><i class="fa fa-calendar"></i> Недельный план (координатор)</a>
+                        </li>
+                    {% endif %}
                     <li>
-                        <a href="{% url 'week_plan:plan_by_week' %}"><i class="fa fa-calendar"></i> Недельный план </a>
+                        <a href="{% url 'week_plan:plan_by_week' %}"><i class="fa fa-calendar"></i> МОЙ недельный план </a>
                     </li>
                 {% endif %}
                 {% if 'director' in user_groups %}

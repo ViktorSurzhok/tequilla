@@ -90,7 +90,7 @@
                         {name: 'csrfmiddlewaretoken', value:'{{ csrf_token }}'},
                         {name: 'date', value: $('#form-container #id_date').val()},
                         {name: 'id_week_plan', value: $('#form-container #id_week_plan').val()},
-                        {name: 'who', value: '{{ who }}'}
+                        {name: 'who', value: '{{ who_filter }}'}
                     ];
                     for (var i in data_from_form) {
                         if (data_from_form[i].name != 'employee') {
@@ -218,12 +218,23 @@
                                             </td>
                                             <td class="comment-part">{{ plan.comment|linebreaksbr }}</td>
                                             <td>
-                                                <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
-                                                <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
-                                                    <i class="fa fa-close"></i>
-                                                </a>
+                                                {% if who %}
+                                                    {% if is_director %}
+                                                        <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
+                                                            <i class="fa fa-edit"></i>
+                                                        </button>
+                                                        <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
+                                                            <i class="fa fa-close"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <button class="btn btn-warning edit-plan-button" data-href="{% url 'week_plan:get_plan_form' plan.id %}">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                    <a href="{% url 'week_plan:delete_plan_for_day' plan.id %}" class="btn btn-danger delete-plan-link">
+                                                        <i class="fa fa-close"></i>
+                                                    </a>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                     {% empty %}
@@ -231,13 +242,25 @@
                                             <td colspan="6">Нет результатов</td>
                                         </tr>
                                     {% endfor %}
-                                        <tr>
-                                            <td colspan="6">
-                                                <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
-                                                    <i class="fa fa-check"></i> Добавить
-                                                </button>
-                                            </td>
-                                        </tr>
+                                    {% if who %}
+                                        {% if is_director %}
+                                            <tr>
+                                                <td colspan="6">
+                                                    <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
+                                                        <i class="fa fa-check"></i> Добавить
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% else %}
+                                         <tr>
+                                                <td colspan="6">
+                                                    <button class="btn btn-success button-add" data-date="{{ item.date|date:"Y-m-d" }}">
+                                                        <i class="fa fa-check"></i> Добавить
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>

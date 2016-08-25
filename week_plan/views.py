@@ -24,16 +24,16 @@ def plan_by_week(request, who=None):
     end_week = start_week + datetime.timedelta(6)
 
     # фильтрация объектов по названию группы админа
-    if who is None:
-        who = request.user.groups.first().name
-    else:
-        # только директор может явно запрашивать группу
-        if not request.user.groups.filter(name='director').exists():
-            raise Http404
+    who_filter = request.user.groups.first().name if who is None else who
+
+    # else:
+    #     # только директор может явно запрашивать группу
+    #     if not request.user.groups.filter(name='director').exists():
+    #         raise Http404
     grid = []
     week_cursor = start_week
     while week_cursor <= end_week:
-        plans_for_day = PlanForDay.objects.filter(date=week_cursor, who=who)
+        plans_for_day = PlanForDay.objects.filter(date=week_cursor, who=who_filter)
         grid.append({'date': week_cursor, 'plans': plans_for_day})
         week_cursor += datetime.timedelta(1)
 
@@ -47,7 +47,9 @@ def plan_by_week(request, who=None):
             'start_week': start_week,
             'end_week': end_week,
             'start_date': formats.date_format(start_date, 'Y-m-d'),
-            'who': who
+            'who': who,
+            'who_filter': who_filter,
+            'is_director': request.user.groups.filter(name='director').exists()
         }
     )
 
