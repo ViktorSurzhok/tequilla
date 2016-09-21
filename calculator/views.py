@@ -74,6 +74,8 @@ def save_current_state(request):
             if not drink:
                 continue
             drink_data = {d['name']: d['value'] for d in drink}
+            if not drink_data['price_in_bar']:
+                continue
             drink_data['state'] = state
             if drink_data['drink'].startswith('_'):
                 drink_data['drink'] = Drink.objects.get(id=drink_data['drink'][1:])
