@@ -1,6 +1,6 @@
 {% load club_tags %}
 {% for club in clubs %}
-    <tr>
+    <tr id="club-{{ club.id }}">
         <td class="vert-align" scope="row">
             {% if club.is_active %}
                 {{ forloop.counter }}

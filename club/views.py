@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.views.generic import UpdateView
@@ -84,7 +85,8 @@ def club_edit(request, club_id=0):
             for club in form['employee'].value():
                 club_obj.employee.add(club)
             messages.add_message(request, messages.INFO, 'Информация о заведении успешно обновлена')
-            return redirect('club:club_edit', club_id=club_obj.id)
+            url = reverse('club:club_list')
+            return HttpResponseRedirect('{}#club-{}'.format(url, club_obj.id))
     else:
         form = ClubEditAdminForm(instance=club)
     return render(
