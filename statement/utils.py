@@ -16,7 +16,7 @@ def calculate_prices(formula, report_drink, club_coordinator, employee_coordinat
     price_in_bar = report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar
     price_for_sale = report_drink.price_for_sale if report_drink.price_for_sale else report_drink.drink.price_for_sale
 
-    additional_discount = (price_in_bar * additional_discount / 100)
+    additional_discount = (price_in_bar * additional_discount / Decimal(100))
     if formula == Club.SHOT_CHOICE:
         # формула для шотов
         price_for_club = report_drink.count * (price_in_bar + additional_discount) * Decimal(0.2)
