@@ -8,3 +8,7 @@ class MainEmployees(models.Model):
     def get_file():
         obj, created = MainEmployees.objects.get_or_create(pk=1)
         return obj
+
+
+class FakeCity(models.Model):
+    name = models.CharField('Название', max_length=255)

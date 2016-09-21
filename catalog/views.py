@@ -43,6 +43,18 @@ CATALOG_DATA = {
             {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
         ]
     },
+    'city': {
+        'title': 'Города',
+        'new_item_text': 'Добавить новый город',
+        'class_name': 'FakeCity',
+        'module_name': 'catalog.models',
+        'form_class_name': 'FakeCityForm',
+        'form_module_name': 'catalog.forms',
+        'filters': [
+            {'name': 'id__exact', 'type': 'text', 'prop': 'id', 'label': 'ID'},
+            {'name': 'name__icontains', 'type': 'text', 'prop': 'name', 'label': 'Название'},
+        ]
+    },
     'drink': {
         'title': 'Напитки',
         'new_item_text': 'Добавить новый напиток',
