@@ -248,6 +248,7 @@ class Command(BaseCommand):
             'option', attrs={'selected': 'selected'})
         data['w_end_time'] = w_end_time_hour.text + ':' + w_end_time_min.text
 
+        data['markup'] = Club.MARKUP_75_CHOICE
         form = ClubImportForm(data=data)
         if form.is_valid():
             form.save()
