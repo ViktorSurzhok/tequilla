@@ -148,7 +148,11 @@
                                 current_sum_for_bar,
                                 markup
                         );
-                        discount *= type == 'shot' ? shots_count : beakers_count;
+                        if (type == 'shot') {
+                          discount *= shots_count;
+                        } else {
+                          discount = discount / 2 * beakers_count;
+                        }
                     }
 
                     sum_for_bar += current_sum_for_bar;
