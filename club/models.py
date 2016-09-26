@@ -84,9 +84,11 @@ class Club(TimeStampedModel):
     )
 
     MARKUP_30_CHOICE = 30
+    MARKUP_50_CHOICE = 50
     MARKUP_75_CHOICE = 75
     MARKUP_CHOICES = (
         (MARKUP_30_CHOICE, '30 - 70'),
+        (MARKUP_50_CHOICE, '50 - 100'),
         (MARKUP_75_CHOICE, '75 - 125')
     )
 
