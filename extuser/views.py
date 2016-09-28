@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -215,8 +216,9 @@ def user_edit(request, user_id):
     if request.method == 'POST':
         form = UserEditAdminForm(instance=user, data=request.POST)
         if form.is_valid():
-            form.save()
-            messages.add_message(request, messages.INFO, 'Информация о пользователе успешно обновлена')
+            user_obj = form.save()
+            url = reverse('user_list')
+            return HttpResponseRedirect('{}#user-{}'.format(url, user_obj.id))
     else:
         form = UserEditAdminForm(instance=user)
     return render(

@@ -1,5 +1,5 @@
  {% for usr in users %}
-    <tr>
+    <tr id="user-{{ club.id }}">
         <td class="vert-align" scope="row">
             {% if usr.is_active %}
                 {{ forloop.counter }}

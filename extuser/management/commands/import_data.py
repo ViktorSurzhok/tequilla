@@ -617,6 +617,10 @@ class Command(BaseCommand):
                 break
         self.stdout.write(self.style.SUCCESS('Added "%s" drinks' % counter))
 
+    def reset_passwords(self):
+        for user in ExtUser.objects.all():
+            user.set_password('12345')
+            user.save()
 
     def handle(self, *args, **options):
         try:
@@ -630,8 +634,8 @@ class Command(BaseCommand):
                 self.get_wall()
             elif options['type'][0] == 'popular_drinks':
                 self.popular_drinks()
-            # elif options['type'][0] == 'faq':
-            #     self.get_faq()
+            elif options['type'][0] == 'reset_passwords':
+                self.reset_passwords()
             elif options['type'][0] == 'photos':
                 self.get_photos(int(options['last_page']), int(options['count_page']))
             elif options['type'][0] == 'reports':
