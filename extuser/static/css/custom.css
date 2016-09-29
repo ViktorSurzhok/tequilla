@@ -156,7 +156,8 @@ body.nav-sm span.fa, body.nav-sm .menu_section h3 {
   border-bottom: 1px solid #D9DEE4;
   margin-bottom: 10px;
   width: 100%;
-  position: relative;
+  position: fixed;
+  z-index: 10;
 }
 @media (min-width: 480px) {
   .nav_menu {
@@ -540,7 +541,7 @@ body.nav-md ul.nav.child_menu li:after {
 .nav>li>a {
   position: relative;
   display: block;
-  padding: 13px 15px 12px;
+  padding: 13px 13px 12px;
 }
 .nav.side-menu> li.current-page, .nav.side-menu> li.active {
   border-right: 5px solid #1ABB9C;
