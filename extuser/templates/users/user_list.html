@@ -54,16 +54,20 @@
             <div class="x_title">
                 <h2>Сотрудники
                     <small>Всего активных сотрудников: {{ users.count }}</small>
-                    <span style="border-right: 1px solid gray;"></span>
-                    <small>
-                        <input type="checkbox" id="filter-show-deleted">
-                        Показывать удаленых сотрудников
-                    </small>
+                    {% if perms.extuser.can_edit_users %}
+                      <span style="border-right: 1px solid gray;"></span>
+                      <small>
+                          <input type="checkbox" id="filter-show-deleted">
+                          Показывать удаленых сотрудников
+                      </small>
+                    {% endif %}
                 </h2>
-                <ul class="nav navbar-right panel_toolbox">
-                    <li title="Добавить сотрудника"><a href="{% url 'profile:user_create' %}"><i class="fa fa-plus"></i></a></li>
-                    <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-                </ul>
+                {% if perms.extuser.can_edit_users %}
+                  <ul class="nav navbar-right panel_toolbox">
+                      <li title="Добавить сотрудника"><a href="{% url 'profile:user_create' %}"><i class="fa fa-plus"></i></a></li>
+                      <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+                  </ul>
+                {% endif %}
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
@@ -76,6 +80,7 @@
                             <div>
                                 Аватар
                             </div>
+                            {% if perms.extuser.can_edit_users %}
                             <div class="col-md-7">
                                   <select class="form-control" id="filter-avatar">
                                     <option value=""></option>
@@ -83,6 +88,7 @@
                                     <option value="0">Нет</option>
                                   </select>
                             </div>
+                            {% endif %}
                         </th>
                         <th>
                             <div>
@@ -100,7 +106,9 @@
                               <input type="text" class="form-control" id="filter-name">
                             </div>
                         </th>
-                        <th>Операции</th>
+                        {% if perms.extuser.can_edit_users %}
+                          <th>Операции</th>
+                        {% endif %}
                     </tr>
                     </thead>
                     <tbody id="user-list">

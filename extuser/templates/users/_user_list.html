@@ -12,21 +12,21 @@
         </td>
         <td class="vert-align">{{ usr.surname }}</td>
         <td class="vert-align">{{ usr.name }}</td>
-        <td class="vert-align">
-            <a href="{% url 'user_detail' usr.id %}">
-                <button title="Посмотреть" class="btn btn-info"><i class="fa fa-search"></i></button>
-            </a>
-            {% if perms.extuser.can_edit_users or edit_users_perm %}
-                <a href="{% url 'user_edit' usr.id %}">
-                    <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
-                </a>
-                {% if usr.is_active %}
-                    <a href="{% url 'profile:user_delete' usr.id %}" class="remove-link">
-                        <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
-                    </a>
-                {% endif %}
-            {% endif %}
-        </td>
+        {% if perms.extuser.can_edit_users or edit_users_perm %}
+          <td class="vert-align">
+              <a href="{% url 'user_detail' usr.id %}">
+                  <button title="Посмотреть" class="btn btn-info"><i class="fa fa-search"></i></button>
+              </a>
+                  <a href="{% url 'user_edit' usr.id %}">
+                      <button title="Редактировать" class="btn btn-warning"><i class="fa fa-edit"></i></button>
+                  </a>
+                  {% if usr.is_active %}
+                      <a href="{% url 'profile:user_delete' usr.id %}" class="remove-link">
+                          <button title="Удалить" class="btn btn-danger"><i class="fa fa-remove"></i></button>
+                      </a>
+                  {% endif %}
+          </td>
+        {% endif %}
     </tr>
 {% empty %}
     <tr>
