@@ -24,6 +24,9 @@ class Comment(TimeStampedModel):
     def __str__(self):
         return self.content[:50]
 
+    class Meta:
+        ordering = ('-created',)
+
 
 class Menu(TimeStampedModel):
     name = models.CharField('Название', max_length=255)
