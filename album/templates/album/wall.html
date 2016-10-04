@@ -110,7 +110,7 @@
                             <select class="form-control" id="filter-user">
                                 <option value=""></option>
                                 {% for usr in users %}
-                                    <option class="{% if user.is_active %}active-user{% else %}removed-user{% endif %}" value="{{ usr.id }}">
+                                    <option class="{% if usr.is_active %}active-user{% else %}removed-user{% endif %}" value="{{ usr.id }}">
                                       {{ usr.get_full_name }}
                                     </option>
                                 {% endfor %}
