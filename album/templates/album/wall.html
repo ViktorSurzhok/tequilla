@@ -7,6 +7,9 @@
         .has-feedback .form-control  {
             padding-right: 0;
         }
+        #page {
+          display: none;
+        }
     </style>
 {% endblock %}
 
@@ -33,12 +36,19 @@
                 var user = $('#filter-user').val(),
                     calendar_from = $('#calendar_from').val(),
                     calendar_to = $('#calendar_to').val(),
+                    page = $('#page').text(),
                     is_active = $('#filter-active').val();
 
                 var filters = '?user=' + user + '&created__lte=' + reformat_date(calendar_to) + '&created__gte=' +
-                         reformat_date(calendar_from) + '&page={{ albums.number }}';
+                         reformat_date(calendar_from);
                 if (is_active) {
                     filters += '&user__is_active=' + is_active;
+                }
+
+                if (page) {
+                  filters += '&page=' + page;
+                } else {
+                  filters += '&page={{ albums.number }}';
                 }
                 // запрос нового контента
                 $.ajax({
@@ -57,8 +67,12 @@
                 });
             }
 
-            $('#get-new-content').on('click', function(e) {
+            $('body').on('click', '.get-new-content', function(e) {
                 e.preventDefault();
+                if (typeof $(this).attr('data-page-num') != 'undefined') {
+                  var data = $(this).data('page-num');
+                  $('#page').text(data);
+                }
                 getNewContent();
             });
 
@@ -67,6 +81,7 @@
 
 {% endblock %}
 {% block content %}
+    <div id="page"></div>
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
@@ -121,7 +136,7 @@
                             </select>
                         </div>
                         {% endif %}
-                        <button style="margin-bottom: 0px;" type="submit" class="btn btn-default" id="get-new-content">Показать</button>
+                        <button style="margin-bottom: 0px;" type="submit" class="btn btn-default get-new-content">Показать</button>
                     </form>
                 </div>
             </div>

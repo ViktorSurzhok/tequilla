@@ -2,7 +2,7 @@
     <ul class="pagination">
         {% if page.has_previous %}
             <li class="paginate_button previous" id="datatable-keytable_previous">
-                <a href="?page={{ page.previous_page_number }}" aria-controls="datatable-keytable" data-dt-idx="0" tabindex="0">Предыдущая</a>
+                <a href="?page={{ page.previous_page_number }}" aria-controls="datatable-keytable" data-page-num="{{ page.previous_page_number }}" class="get-new-content">Предыдущая</a>
             </li>
         {% endif %}
         <li class="paginate_button">
@@ -10,7 +10,7 @@
         </li>
         {% if page.has_next %}
             <li class="paginate_button next" id="datatable-keytable_next">
-                <a href="?page={{ page.next_page_number }}" aria-controls="datatable-keytable" data-dt-idx="7" tabindex="0">Следующая</a>
+                <a href="?page={{ page.next_page_number }}" aria-controls="datatable-keytable" data-page-num="{{ page.next_page_number }}" class="get-new-content">Следующая</a>
             </li>
         {% endif %}
     </ul>
