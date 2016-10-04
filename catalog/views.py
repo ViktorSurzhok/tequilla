@@ -269,7 +269,7 @@ def catalog_edit(request, item_type, item_id=None):
         if form.is_valid():
             item = form.save()
             messages.add_message(request, messages.INFO, 'Информация успешно сохранена')
-            return redirect('catalog:catalog_edit', item_type=item_type, item_id=item.id)
+            return redirect('catalog:catalog_list', item_type=item_type)
     else:
         form = Form(instance=item)
 
