@@ -67,6 +67,17 @@
                 });
             }
 
+            $('#filter-active').on('change', function () {
+                $('#filter-user option').prop('selected', false);
+                $('#filter-user option').show();
+                $('#filter-user option:first').prop('selected', true);
+                if ($(this).val() == 'True') {
+                  $('#filter-user option.removed-user').hide()
+                } else if ($(this).val() == 'False') {
+                  $('#filter-user option.active-user').hide()
+                }
+            });
+
             $('body').on('click', '.get-new-content', function(e) {
                 e.preventDefault();
                 if (typeof $(this).attr('data-page-num') != 'undefined') {
@@ -99,7 +110,9 @@
                             <select class="form-control" id="filter-user">
                                 <option value=""></option>
                                 {% for usr in users %}
-                                    <option value="{{ usr.id }}">{{ usr.get_full_name }}</option>
+                                    <option class="{% if user.is_active %}active-user{% else %}removed-user{% endif %}" value="{{ usr.id }}">
+                                      {{ usr.get_full_name }}
+                                    </option>
                                 {% endfor %}
                             </select>
                         </div>

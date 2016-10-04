@@ -125,7 +125,7 @@ def wall(request):
         'album/wall.html',
         {
             'albums': albums,
-            'users': ExtUser.objects.filter(is_active=True).order_by('surname'),
+            'users': ExtUser.objects.order_by('surname'),
             'filter_link': reverse('album:wall')
         }
     )
