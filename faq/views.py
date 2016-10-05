@@ -1,9 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from faq.forms import PostEditForm, CommentAddForm, MenuEditForm
-from faq.models import Post, Comment, Menu
+from faq.models import Post, Comment, Menu, CommentPhoto
 from tequilla.decorators import group_required
 
 
@@ -50,11 +52,16 @@ def post_detail(request, post_id):
 def send_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     form = CommentAddForm(data=request.POST)
+    images = request.FILES.getlist('images[]', [])
     if form.is_valid():
         cd = form.cleaned_data
         data = {'post': post, 'employee': request.user}
         data.update(cd)
-        Comment.objects.create(**data)
+        comment = Comment.objects.create(**data)
+
+        for image in images:
+            photo_object = CommentPhoto(file=image, post=comment)
+            photo_object.save()
     else:
         print(form.errors)
     return redirect('faq:post_detail', post_id=post.id)
@@ -69,6 +76,7 @@ def post_remove(request, post_id):
 
 
 @login_required
+@group_required('director', 'chief', 'coordinator')
 def comment_remove(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.employee == request.user or request.user.groups.filter(name='director').exists():
@@ -113,3 +121,20 @@ def menu_remove(request, menu_id):
     menu = get_object_or_404(Menu, id=menu_id)
     menu.delete()
     return redirect('faq:menu_list')
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def comment_update(request):
+    post = get_object_or_404(Comment, id=request.POST.get('id', 0))
+    if post.employee == request.user or request.user.groups.filter(name__in=['director', 'chief', 'coordinator']).exists():
+        post.content = request.POST.get('text', '')
+        post.save()
+    return redirect('faq:post_detail', post_id=request.POST.get('faq_id', 0))
+
+
+@login_required
+def get_comment_text(request):
+    post = get_object_or_404(Comment, id=request.GET.get('id', 0))
+    return JsonResponse({'text': post.content})

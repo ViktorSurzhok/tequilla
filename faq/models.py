@@ -1,5 +1,9 @@
+import os
+import random
+
 from django.db import models
 from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from extuser.models import ExtUser
 
@@ -26,6 +30,15 @@ class Comment(TimeStampedModel):
 
     class Meta:
         ordering = ('-created',)
+
+
+class CommentPhoto(TimeStampedModel):
+    def get_upload_path(self, filename):
+        slug = str(self.post.id)
+        return os.path.join('faq_comment_img', '%s' % slug, str(random.randint(1, 1000000)) + '_' + filename)
+
+    file = ImageField(upload_to=get_upload_path, verbose_name='Изображение')
+    post = models.ForeignKey(Comment, related_name='images')
 
 
 class Menu(TimeStampedModel):

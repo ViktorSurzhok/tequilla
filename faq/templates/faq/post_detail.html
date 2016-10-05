@@ -31,6 +31,41 @@
             $('.remove-link').on('click', function() {
                 return confirm('Подтвердите удаление');
             });
+
+          // редактирование текста записи
+            function openTestModal(options){
+                $('#edit-wall-text').modal({
+                    keyboard: false,
+                    backdrop: 'static'
+                });
+                $('#edit-wall-text').one('shown.bs.modal', function (e) {
+                    $('#edit-wall-text textarea').text('');
+                    var post_id = options.id;
+                    $.ajax({
+                        url: '{% url 'faq:get_comment_text' %}',
+                        data: {id: post_id},
+                        type: 'GET',
+                        success: function (response) {
+                            if (response && typeof response['text'] != 'undefined') {
+                              {% comment %}  {% if 'director' in user_groups or 'chief' in user_groups or 'coordinator' in user_groups %}
+                                    $("#edit-wall-text .summernote").summernote("code", response.text);
+                                {% else %}{% endcomment %}
+                                    $('#edit-wall-text textarea').val(response.text);
+                                {% comment %}{% endif %}{% endcomment %}
+                                $('#edit-wall-text input[name=id]').val(post_id);
+                            }
+                        }
+                    });
+                });
+            }
+            $('.edit-link').on('click', function(){
+                openTestModal({ id: $(this).data('post-id')});
+            });
+
+          $('#edit-wall-post').on('click', function() {
+                    console.log($(this).find('form'));
+                    $('#update-post-form').submit();
+                });
         });
     </script>
 {% endblock %}
@@ -75,19 +110,43 @@
                                         <div class="byline">
                                             <span>{{ comment.created }}</span>
                                         </div>
-                                        {% if perms.extuser.can_edit_comments or comment.employee == user %}
+                                        {% if perms.extuser.can_edit_users or comment.employee == user %}
                                             <ul class="panel_toolbox wall-panel">
+                                                <li>
+                                                    <a class="edit-link" data-post-id="{{ comment.id }}">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                </li>
+                                                {% if perms.extuser.can_edit_users %}
                                                 <li><a class="remove-link" href="{% url 'faq:comment_remove' comment.id %}"><i
                                                         class="fa fa-remove"></i></a></li>
+                                                  {% endif %}
                                             </ul>
                                         {% endif %}
-                                            <p class="excerpt">{{ comment.content|linebreaks }}</p>
+                                          <p class="excerpt">{{ comment.content|linebreaks }}</p>
+                                          {% if comment.images %}
+                                              <div class="thumbnails" data-post-id="{{ comment.id }}">
+                                                  {% for image in comment.images.all %}
+                                                      <div class="thumbnail">
+                                                          <div class="image">
+                                                              {% thumbnail image.file "150x120" as im %}
+                                                                  <a class="group-{{ post.id }}"
+                                                                     href="{{ image.file.url }}">
+                                                                      <img src="{{ im.url }}" width="{{ im.width }}"
+                                                                           height="{{ im.height }}">
+                                                                  </a>
+                                                              {% endthumbnail %}
+                                                          </div>
+                                                      </div>
+                                                  {% endfor %}
+                                              </div>
+                                          {% endif %}
                                         <button type="submit" data-comment-id="{{ comment.id }}"
                                                 class="btn btn-success response-comment">Ответить
                                         </button>
                                         <div class="col-md-offset-1 response-comment-form-{{ comment.id }} response-post-form">
                                             <form action="{% url 'faq:send_comment' post.id %}" data-parsley-validate=""
-                                                  class="form-horizontal form-label-left" method="POST">
+                                                  class="form-horizontal form-label-left" enctype="multipart/form-data" method="POST">
                                                 {% csrf_token %}
                                                 <div class="form-group">
                                                     <input type="hidden" value="{{ comment.id }}" name="parent">
@@ -102,6 +161,9 @@
                                                     <div class="col-md-10 col-sm-10 col-xs-12">
                                                         <button type="submit" class="btn btn-primary">Отправить
                                                         </button>
+                                                      <input style="display: inline;" type="file" name="images[]"
+                                                                   multiple
+                                                                   class="btn btn-primary" value="Отправить файлы">
                                                     </div>
                                                 </div>
 
@@ -129,17 +191,41 @@
                                                                     <div class="byline">
                                                                         <span>{{ ch_post.created }}</span>
                                                                     </div>
-                                                                    {% if perms.extuser.can_edit_posts or ch_post.employee == user %}
+                                                                    {% if perms.extuser.can_edit_users or ch_post.employee == user %}
                                                                         <ul class="panel_toolbox wall-panel">
+                                                                        <li>
+                                                                                <a class="edit-link" data-post-id="{{ ch_post.id }}">
+                                                                                    <i class="fa fa-edit"></i>
+                                                                                </a>
+                                                                            </li>
+                                                                          {% if perms.extuser.can_edit_users %}
                                                                             <li>
                                                                                 <a class="remove-link" href="{% url 'faq:comment_remove' ch_post.id %}">
                                                                                     <i class="fa fa-remove"></i>
                                                                                 </a></li>
+                                                                            {% endif %}
                                                                         </ul>
                                                                     {% endif %}
                                                                     {% autoescape off %}
                                                                         <p class="excerpt">{{ ch_post.content|linebreaks }}</p>
                                                                     {% endautoescape %}
+                                                                    {% if ch_post.images %}
+                                                                        <div class="thumbnails" data-post-id="{{ ch_post.id }}">
+                                                                            {% for image in ch_post.images.all %}
+                                                                                <div class="thumbnail">
+                                                                                    <div class="image">
+                                                                                        {% thumbnail image.file "150x120" as im %}
+                                                                                            <a class="group-{{ post.id }}"
+                                                                                               href="{{ image.file.url }}">
+                                                                                                <img src="{{ im.url }}" width="{{ im.width }}"
+                                                                                                     height="{{ im.height }}">
+                                                                                            </a>
+                                                                                        {% endthumbnail %}
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    {% endif %}
                                                                 </div>
                                                             </div>
                                                         </li>
@@ -151,7 +237,7 @@
                             </li>
                         {% endfor %}
                     </ul>
-                    <form action="{% url 'faq:send_comment' post.id %}" data-parsley-validate=""
+                    <form action="{% url 'faq:send_comment' post.id %}" data-parsley-validate="" enctype="multipart/form-data"
                           class="form-horizontal form-label-left" method="POST">
                         {% csrf_token %}
                         <div class="form-group">
@@ -164,13 +250,46 @@
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-10 col-sm-10 col-xs-12">
-                                <button type="submit" class="btn btn-primary">Отправить
-                                </button>
+                                <button type="submit" class="btn btn-primary">Отправить</button>
+                                <input style="display: inline;" type="file" name="images[]" multiple class="btn btn-primary" value="Отправить файлы">
                             </div>
                         </div>
 
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+  <div class="modal fade" id="edit-wall-text" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">Редактирование сообщения</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal form-label-left" method="POST" action="{% url 'faq:comment_update' %}" id="update-post-form">
+                        <input type="hidden" name="id">
+                        <input type="hidden" name="faq_id" value="{{ post.id }}">
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Текст</label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <textarea class="form-control summernote" cols="40" name="text"
+                                          rows="3"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i>
+                        Закрыть
+                    </button>
+                    <button type="button" style="margin-bottom: 5px;" class="btn btn-primary" id="edit-wall-post">
+                        <i class="fa fa-check"></i> Сохранить
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
