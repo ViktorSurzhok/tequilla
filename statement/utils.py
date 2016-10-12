@@ -11,7 +11,7 @@ from club.models import Club
 
 def calculate_prices(club_coordinator, employee_coordinator, sum_for_bar):
     """Высчитывает цены которые проставляются в ведомости от формулы выбранной в настройках клуба"""
-
+    sum_for_bar = sum_for_bar if sum_for_bar else 0
     if employee_coordinator:
         # если координатор привел сотрудника (и возможно привёл клуб)
         factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
