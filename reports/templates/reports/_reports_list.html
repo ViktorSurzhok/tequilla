@@ -62,13 +62,13 @@
                         <span class="number_text">шт.</span>
                     </td>
                     <td style="width:12%;" class="input_td">
-                        <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;">
                             <input type="text" value="{{ report.sum_for_bar|default_if_none:"" }}" class="form-control sum-for-bar-{{ report.id }}">
                         </div>
                         <span class="number_text">руб.</span>
                     </td>
                     <td style="width:13%;" class="input_td">
-                        <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;">
                             <input type="text" value="{{ report.discount|default_if_none:"" }}" class="form-control discount-{{ report.id }}">
                         </div>
                         <span class="number_text">руб.</span>

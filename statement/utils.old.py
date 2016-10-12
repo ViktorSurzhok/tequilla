@@ -17,17 +17,22 @@ def calculate_prices(formula, report_drink, club_coordinator, employee_coordinat
     price_for_sale = Decimal(report_drink.price_for_sale if report_drink.price_for_sale else report_drink.drink.price_for_sale)
 
     additional_discount = Decimal((price_in_bar * Decimal(additional_discount) / Decimal(100)))
-    price_for_club = ((price_for_sale - price_in_bar) / Decimal(2) + additional_discount) * report_drink.count
-    if employee_coordinator:
-        # если координатор привел сотрудника (и возможно привёл клуб)
-        factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
-    elif club_coordinator:
-        # если координатор привёл только клуб
-        factor = Decimal(0.25)
+    if formula == Club.SHOT_CHOICE:
+        # формула для шотов
+        price_for_club = report_drink.count * (price_in_bar + additional_discount) * Decimal(0.2)
+        if employee_coordinator:
+            factor = Decimal(0.1) if club_coordinator == employee_coordinator else Decimal(0.05)
+            price_for_coordinator = report_drink.count * price_in_bar * factor
+        else:
+            price_for_coordinator = 0
     else:
-        # если координатор никого не привёл
-        factor = 0
-    price_for_coordinator = price_for_club * factor
+        # формула для мензурок
+        price_for_club = ((price_for_sale - price_in_bar) / Decimal(2) + additional_discount) * report_drink.count
+        if employee_coordinator:
+            factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
+            price_for_coordinator = price_for_club * factor
+        else:
+            price_for_coordinator = 0
     return price_for_club, price_for_coordinator
 
 
