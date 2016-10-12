@@ -9,15 +9,9 @@ from statement import arial10
 from club.models import Club
 
 
-def calculate_prices(formula, report_drink, club_coordinator, employee_coordinator, additional_discount):
+def calculate_prices(club_coordinator, employee_coordinator, sum_for_bar):
     """Высчитывает цены которые проставляются в ведомости от формулы выбранной в настройках клуба"""
 
-    # для импортированных отчетов цена берется из объекта напитка
-    price_in_bar = Decimal(report_drink.price_in_bar if report_drink.price_in_bar else report_drink.drink.price_in_bar)
-    price_for_sale = Decimal(report_drink.price_for_sale if report_drink.price_for_sale else report_drink.drink.price_for_sale)
-
-    additional_discount = Decimal((price_in_bar * Decimal(additional_discount) / Decimal(100)))
-    price_for_club = ((price_for_sale - price_in_bar) / Decimal(2) + additional_discount) * report_drink.count
     if employee_coordinator:
         # если координатор привел сотрудника (и возможно привёл клуб)
         factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
@@ -27,8 +21,8 @@ def calculate_prices(formula, report_drink, club_coordinator, employee_coordinat
     else:
         # если координатор никого не привёл
         factor = 0
-    price_for_coordinator = price_for_club * factor
-    return price_for_club, price_for_coordinator
+    price_for_coordinator = sum_for_bar * factor
+    return price_for_coordinator
 
 
 def get_statement_data(week, start_date, enabled_filters=[]):
@@ -79,9 +73,7 @@ def get_statement_data(week, start_date, enabled_filters=[]):
     for club in clubs:
         # сотрудники
         employees_info = []
-        formula = club.formula
         club_coordinator = club.coordinator
-        club_additional_discount = club.additional_discount_percent if club.additional_discount_percent else 0
         for employee in employees_table_header:
             drinks_for_employee = {
                 'employee': employee, 'drinks_dict': {}, 'sum_for_coordinator': 0, 'sum_for_club': 0, 'drinks_list': []
@@ -94,13 +86,6 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                     for report_drink in report.drinks.all():
                         drink_name = report_drink.drink.name
 
-                        # цена за напитки
-                        price_for_club, price_for_coordinator = calculate_prices(
-                            formula, report_drink, club_coordinator, employee.coordinator, club_additional_discount
-                        )
-                        sum_for_club += price_for_club
-                        sum_for_coordinator += price_for_coordinator
-
                         # добавление каждого напитка для подсчета кол-ва
                         if drink_name not in drinks_dict:
                             drinks_dict[drink_name] = 0
@@ -108,6 +93,12 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                         # добавление напитка в header
                         if drink_name not in header_drinks_for_employee[employee]:
                             header_drinks_for_employee[employee].append(drink_name)
+                    # цена за напитки
+                    price_for_coordinator = calculate_prices(
+                        club_coordinator, employee.coordinator, report.discount
+                    )
+                    sum_for_club += report.discount
+                    sum_for_coordinator += price_for_coordinator
             drinks_for_employee['drinks_dict'] = drinks_dict
             drinks_for_employee['sum_for_coordinator'] = sum_for_coordinator
             drinks_for_employee['sum_for_club'] = sum_for_club
