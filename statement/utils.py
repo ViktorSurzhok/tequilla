@@ -10,8 +10,6 @@ from club.models import Club
 
 
 def calculate_prices(club_coordinator, employee_coordinator, sum_for_bar):
-    """Высчитывает цены которые проставляются в ведомости от формулы выбранной в настройках клуба"""
-    sum_for_bar = sum_for_bar if sum_for_bar else 0
     if employee_coordinator:
         # если координатор привел сотрудника (и возможно привёл клуб)
         factor = Decimal(0.5) if club_coordinator == employee_coordinator else Decimal(0.25)
@@ -94,10 +92,11 @@ def get_statement_data(week, start_date, enabled_filters=[]):
                         if drink_name not in header_drinks_for_employee[employee]:
                             header_drinks_for_employee[employee].append(drink_name)
                     # цена за напитки
+                    sum_for_bar = report.discount if report.discount else 0
                     price_for_coordinator = calculate_prices(
-                        club_coordinator, employee.coordinator, report.discount
+                        club_coordinator, employee.coordinator, sum_for_bar
                     )
-                    sum_for_club += report.discount
+                    sum_for_club += sum_for_bar
                     sum_for_coordinator += price_for_coordinator
             drinks_for_employee['drinks_dict'] = drinks_dict
             drinks_for_employee['sum_for_coordinator'] = sum_for_coordinator
