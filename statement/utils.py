@@ -20,8 +20,8 @@ def calculate_prices(club_coordinator, employee_coordinator, sum_for_bar):
         factor = Decimal(0.25)
     else:
         # если координатор никого не привёл
-        factor = 0
-    price_for_coordinator = sum_for_bar * factor
+        factor = Decimal(0)
+    price_for_coordinator = Decimal(sum_for_bar) * factor
     return price_for_coordinator
 
 
